@@ -1,0 +1,33 @@
+Package: eigvaldisp
+Title: Statistics of Eigenvalue Dispersion Indices
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Junya", "Watanabe", email = "jw2098@cam.ac.uk", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9810-5286")),
+    person("Niels", "Waller", "G.", role = c("ctb"),
+           comment = "Author of two adopted blocks in GenCov()")
+           )
+Description: Statistics of eigenvalue dispersion indices of
+    covariance and correlation matrices---common measures of
+    phenotypic integration in biometrics.
+    The primary feature is to calculate expectation and variance
+    (i.e., sampling bias and error) of eigenvalue dispersion indices
+    for arbitrary population covariance structures under multivariate normality.
+License: GPL (>= 3)
+BugReports: https://github.com/watanabe-j/eigvaldisp/issues
+Imports:
+    stats,
+    hypergeo,
+    Rcpp
+Suggests:
+    testthat (>= 3.0.0),
+    parallel,
+    knitr,
+    rmarkdown
+LinkingTo:
+    Rcpp
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Config/testthat/edition: 3
+VignetteBuilder: knitr

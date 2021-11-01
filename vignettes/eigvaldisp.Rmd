@@ -1,0 +1,547 @@
+---
+title: "eigvaldisp: R package for statistics of eigenvalue dispersion indices"
+author: "Junya Watanabe"
+date: "November 2021"
+bibliography: ref_integ.bib
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{eigvaldisp}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(rmarkdown.html_vignette.check_title = FALSE)
+```
+
+$$
+\DeclareMathOperator{\E}{E}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator*{\diag}{diag}
+\DeclareMathOperator{\V}{\mathit{V}}
+\DeclareMathOperator{\Vr}{\mathit{V}_\mathrm{rel}}
+\DeclareMathOperator{\F}{{}_2\mathit{F}_1}
+\newcommand{\m}[1]{\mathbf{#1}}
+$$
+This document is to describe the R package `eigvaldisp`, which is at present available on GitHub [watanabe-j/eigvaldisp](https://github.com/watanabe-j/eigvaldisp). The package is to facilitate statistical analyses of eigenvalue dispersion indices, which are common measures of phenotypic integration (covariation) in biometrics.
+
+```{r setup, include = FALSE}
+library(stats)
+library(eigvaldisp)
+```
+
+
+# Eigenvalue dispersion indices
+
+## Definition
+
+Quantification of the magnitude of phenotypic integration (covariation) plays a central role in the study of complex traits. One of the most common classes of statistics used for this purpose is the eigenvalue dispersion indices [@Cheverud1983; @Wagner1984; @Pavlicev2009evdisp; @Haber2011; @Watanabe2021]. They are calculated from eigenvalues of a covariance or correlation matrix, and have either of the two general forms:
+$$
+\V = \frac{1}{p}\sum_{i=1}^p{(\lambda_i - \bar{\lambda})^2}
+= \frac{1}{p}\sum_{i=1}^p{\lambda_i^2} - \frac{1}{p^2}\left( \sum_{i=1}^p{\lambda_i} \right)^2 , \\
+\Vr = \frac{\sum_{i=1}^p{(\lambda_i - \bar{\lambda})^2}}{p(p - 1) \bar{\lambda}^2}
+= \frac{1}{(p - 1)} \left( p \frac{\sum_{i=1}^p{\lambda_i}^2}{\left(\sum_{i=1}^p{\lambda_i}\right)^2} - 1 \right) ,
+$$
+where $p$ is the number of variables (traits), $\lambda_i$ is the $i$th eigenvalue of the covariance/correlation matrix under analysis, and $\bar{\lambda}$ is the average of eigenvalues ($\bar{\lambda} = \sum_{i=1}^p{\lambda_i}/p$). Here, $\V$ is the most naive form of definition and ranges from $0$ to $(p - 1)\bar{\lambda}^2$, whereas $\Vr$ is scaled with this maximum to range from $0$ to $1$.
+
+Here, $\V$ and $\Vr$ are called the eigenvalue variance and relative eigenvalue variance, respectively.
+Some authors prefer constant multiples or square roots of these indices, but these essentially convey identical information so are not discussed here.
+Synonyms in this broad sense include the tightness [@VanValen1974; @VanValen2005], integration coefficient of variation [@ShiraiMarroig2010], and phenotypic integration index [@ToricesMunozPajares2015].
+
+As eigenvalues of a covariance/correlation matrix represent the variance along the corresponding eigenvectors (principal components), dispersion of eigenvalues has an intuitive interpretation as a measure of eccentricity of variation. As such, these indices have been used by biometricians as an indicator of the magnitude of integration. (As seen below, however, there are more rigorous theoretical justifications which had long been known to statisticians.)
+
+In what follows, we distinguish the population and sample quantities. The population covariance and correlation matrices are denoted by $\m{\Sigma}$ and $\m{P}$ (Greek rho), respectively, and the sample covariance and correlation matrices by $\m{S}$ and $\m{R}$. We also use $\m{\Lambda}$ and $\lambda$ for the eigenvalue matrix and individual eigenvalues for the population, and $\m{L}$ and $l$ for the sample. With this notation, we use, for example, $\V(\m{\Sigma})$,  $\Vr(\m{S})$, to designate eigenvalue dispersion indices of the relevant matrices.
+
+
+## Examples
+
+To get some idea, let's generate a simple population covariance matrix
+with the function `GenCov()` involved in this package, which constructs a covariance/correlation matrix with known eigenvalues/vectors, and then calculate
+eigenvalue dispersion indices of this matrix with the function `VE()`:
+```{r}
+set.seed(30)
+## Generate a population covariance matrix with known eigenvalues
+Lambda <- c(4, 2, 1, 1)
+(Sigma <- GenCov(evalues = Lambda, evectors = "random"))
+eigen(Sigma)$values
+
+## Calculate eigenvalue dispersion indices of this matrix
+EDI_pop <- VE(V = Sigma)
+
+## Eigenvalue variance ("V(Sigma)")
+EDI_pop$VE
+
+## Eigenvalue variance ("Vrel(Sigma)"):
+EDI_pop$VR
+```
+
+It is trivial to calculate these eigenvalue dispersion indices from the eigenvalues with the definitions above. Then, what is the point of having a (or another) package for this?
+
+
+## The problem
+
+The problem becomes evident when one comes to estimating population eigenvalue dispersion indices from a sample. It is well recognized that sample eigenvalues are always estimated with sampling bias and error [see, e.g., @Jolliffe2002]. Therefore, for example, even if all population eigenvalues are equal ($\V(\m{\Sigma}) = \Vr(\m{\Sigma}) = 0$, the sample estimates of these quantities are always (or almost surely) positive.
+
+To see this point, let us simulate a small multivariate normal sample from
+the population covariance matrix generated above (via the internal function `rmvn()`):
+```{r}
+## Simulate a multivariate normal sample
+N <- 20
+X <- eigvaldisp:::rmvn(N = N, V = Sigma)
+cov(X)
+## Reasonable estimate of Sigma
+
+## Calculating eigenvalue dispersion indices from the sample
+EDI_sam <- VE(X = X)
+## Same as VE(V = cov(X)) but usually faster
+
+## Sample eigenvalue variance ("V(S)")
+EDI_sam$VE
+
+## Sample relative eigenvalue variance ("Vrel(S)")
+EDI_sam$VR
+```
+
+Observe how these sample quantities overestimate the population values. The presence of this estimation bias hinders interpretation of sample quantities.
+
+
+# The package
+
+The main functionality of this package is to calculate the amount of estimation bias as well as error, based on the theoretical results of @Watanabe2021, who derived the first two moments (or approximation thereof) of $\V(\m{S})$, $\Vr(\m{S})$, and $\Vr(\m{R})$ under the multivariate normality (note that, for any correlation matrix, $\bar{\lambda} = \bar{l} = 1$ so that $\V(\m{R}) = (p-1)\Vr(\m{R})$, hence $\V(\m{R})$ does not require a separate treatment).
+
+The expectation and variance of the eigenvalue dispersion indices are implemented in the `Exv.*()` and `Var.*()` families of functions, which take suffices like `*.VEv` (for $\V(\m{S})$), `*.VRv` (for $\Vr(\m{S})$), `*.VRr` (for $\Vr(\m{R})$) (more details below). These can be used as follows:
+```{r}
+## Expectation of eigenvalue variance ("E[V(S)]")
+## The argument n is for the degree of freedom, hence N - 1 in this case
+(E_V_Sigma <- Exv.VEv(V = Sigma, n = N - 1))
+
+## Expected bias
+E_V_Sigma - EDI_pop$VE
+
+## Error (sampling variance) of eigenvalue variance ("Var[V(S)]")
+Var.VEv(Sigma, N - 1)
+
+## Same for relative eigenvalue variance ("E[Vrel(S)]", "Var[Vrel(S)]")
+(E_Vrel_Sigma <- Exv.VRv(Sigma, N - 1))
+E_Vrel_Sigma - EDI_pop$VR
+Var.VRv(Sigma, N - 1)
+```
+
+Note how close the above sample estimators are to these theoretical expectations, given the sampling variance (perhaps too fortuitously close). These functions aim to facilitate correct appreciation of the amount of sampling bias/error and interpretation of empirical results.
+
+Also, "bias-corrected" estimators devised by @Watanabe2021 are also implemented, although this is not globally unbiased for $\Vr$:
+```{r}
+## Bias-corrected eigenvalue variance
+VEav(X = X)$VEav
+
+## Its expectation (equals the population value)
+Exv.VEav(Sigma, N - 1)
+
+## Its variance (smaller than that of the ordinary one)
+Var.VEav(Sigma, N - 1)
+
+
+## Adjusted relative eigenvalue variance
+VRav(X = X)$VRav
+
+## Its expectation (underestimates the population value)
+Exv.VRav(Sigma, N - 1)
+
+## Its variance
+Var.VRav(Sigma, N - 1)
+```
+
+The same functionalities are also available for correlation matrices,
+but via different functions (`Exv.VRr()`, `Var.VRr()`, `VRar()`, etc.)
+since their distributions are different.
+
+
+## Functions
+
+### `VE()`: calculate eigenvalue dispersion indices
+This function calculates eigenvalue dispersion indices from either a data matrix `X`, a covariance/correlation matrix `V`, or a vector of eigenvalues `L`. The output is a list with the following elements:
+
+* `VE`: eigenvalue variance $\V$
+* `VR`: relative eigenvalue variance $\Vr$
+* `meanL`: average eigenvalue $\bar{\lambda}$ or $\bar{l}$
+* `L`: vector of eigenvalues $(\lambda_1, \dotsc, \lambda_p)$ or $(l_1, \dotsc, l_p)$
+
+This function does not distinguish population and sample (although providing `X` implies it is about the sample). When `X` or `V` is provided, eigenvalues of the covariance matrix are extracted by default, with `svd()`. Those of the correlation matrix can be obtained by setting the argument `scale.` to `TRUE`.
+
+With the above example,
+```{r}
+## Eigenvalue dispersion indices of the population covariance matrix
+str(VE(V = Sigma))
+
+## Of the population correlation matrix
+## Same as VE(V = cov2cor(Sigma))
+str(VE(V = Sigma, scale. = TRUE))
+
+## Of the sample covariance matrix
+str(VE(X = X))
+
+## Of the sample correlation matrix
+str(VE(X = X, scale. = TRUE))
+
+## These are the same
+all.equal(VE(X = X), VE(V = cov(X)))
+all.equal(VE(X = X), VE(L = eigen(cov(X))$values))
+all.equal(VE(X = X, scale. = TRUE), VE(V = cor(X)))
+```
+
+This function can also return user-specified number of leading eigenvectors, when the argument `nv` is set to the desired number:
+```{r}
+str(VE(X = X, nv = 2))
+```
+
+Optionally, the calculation of eigenvalue dispersion can be restricted to the subspace corresponding to the nonzero eigenvalues (or indeed any arbitrary subspace can be specified). See the documentation of this function for details.
+
+
+### `VEav()`, `VRav()`, `VRar()`: "bias-corrected" dispersion indices
+These functions are similar to `VE()` (and actually call that function internally), but also returns bias-corrected or adjusted versions of eigenvalue dispersion indices: bias corrected eigenvalue variance of covariance matrix $\tilde V(\m{S})$ (`VEav()`), adjusted relative eigenvalue variance of covariance matrix $\bar V_\mathrm{rel}(\m{S})$ (`VRav()`), and adjusted relative eigenvalue variance of correlation matrix $\bar V_\mathrm{rel}(\m{R})$ (`VRar()`). The output is a similar list, but with the corresponding index appended: e.g., the output of `VRav()` has the element `$VRav`:
+```{r}
+str(VEav(X = X))
+str(VRav(X = X))
+str(VRar(X = X)) ## Automatically sets scale. = TRUE
+```
+
+### `Exv.*()` and `Var.*()` families: expectation and variance
+These families of functions calculate the expectation (mean) and variance of eigenvalue dispersion indices, given a population covariance/correlation matrix and degrees of freedom.
+
+Here is a list of the functions:
+
+Statistic                     | Expectation | Variance
+------------------------------|-------------|------------
+$\V(\m{S})$                   | `Exv.VEv()` | `Var.VEv()`
+$\Vr(\m{S})$                  | `Exv.VRv()` | `Var.VRv()`
+$\V(\m{R})$                   | `Exv.VEr()` | `Var.VEr()`
+$\Vr(\m{R})$                  | `Exv.VRr()` | `Var.VRr()`
+$\tilde{V}(\m{S})$            | `Exv.VEav()` | `Var.VEav()`
+$\bar{V}_\mathrm{rel}(\m{S})$ | `Exv.VRav()` | `Var.VRav()`
+$\bar{V}_\mathrm{rel}(\m{R})$ | `Exv.VRav()` | `Var.VRav()`
+*Note*: The functions for $\V(\m{R})$ are retained for completeness, but this statistic is almost redundant with $\Vr(\m{R})$ (above). No functions for "bias-corrected" version of this has been implemented.
+
+These functions typically take two arguments: the population covariance or correlation matrix (`V` or `R`, as appropriate), and the degrees of freedom `n`. They are (pseudo-)vectorized with respect to `n`, so that the output is a vector with the same length as `n`.
+
+They can take a vector of population eigenvalues as the argument `L`, instead of `V` or `R`. For functions pertaining to $\V(\m{S})$ and $\Vr(\m{S})$, the results are identical (and indeed leads to slight improvement of speed when `L` is already available). On the other hand, this is usually **not** recommended for those pertaining to $\Vr(\m{R})$, because the distribution of this index is also dependent on population eigenvectors as well as population eigenvalues, except in certain restrictive conditions [see @Watanabe2021]. If the latter functions are provided with `L`, a population correlation matrix is generated with random eigenvectors, which in general leads to random fluctuation in the results (see examples below).
+
+All these functions return exact moments under the null condition of sphericity or no correlation ($\m{\Sigma} = \sigma^2\m{I}_p$ and $\m{P} = \m{I}_p$, respectively, with $\m{I}_p$ being the identity matrix). Otherwise, they return exact (`Exv.VEv()`, `Var.VEv()`, `Exv.VRr()`) or asymptotic moments (`Exv.VRv()`, `Var.VRv()`); the accuracy of the latter can be suboptimal when `n` is small (though they are the best implementations to my knowledge). `Var.VRr()` is tricky; it returns the exact variance when $p = 2$ or under the null condition, but otherwise returns an asymptotic variance with one of the functions described below.
+
+Note that, throughout the package, the small `n` is used for the degrees of freedom, whereas the capital `N` is for the sample size, following the convention in some statistical literature [and @Watanabe2021]. The use of `n` is to enable flexibility, as well as to make the user aware of the distinction between these quantities. Most typically, `n` should be `N - 1`, but other choices are not uncommon in applications---e.g., when analyzing a pooled covariance matrix across different groups, analyzing regression residuals or partial correlations.
+
+Examples for covariance matrices (also see the examples above):
+```{r}
+Ns <- c(10, 20, 50, 100)
+
+## Moments for different sample sizes for the covariance matrix
+Exv.VEv(Sigma, Ns - 1)
+Var.VEv(Sigma, Ns - 1)
+EDI_pop$VE ## Population value for comparison
+
+Exv.VRv(Sigma, Ns - 1)
+Var.VRv(Sigma, Ns - 1)
+EDI_pop$VR ## Population value
+
+## For the correlation matrix
+Rho <- cov2cor(Sigma)
+Exv.VRr(Rho, Ns - 1)
+Var.VRr(Rho, Ns - 1)
+VE(V = Rho)$VR ## Population value
+
+## Comparing results the covariance matrix
+Exv.VRv(V = Sigma, n = Ns - 1)
+Exv.VRv(L = Lambda, n = Ns - 1)
+## These are equal (up to potential rounding error)
+
+## With eigenvalues of the correlation matrix
+Exv.VRr(R = Rho, n = Ns - 1)
+Exv.VRr(L = eigen(Rho)$values, n = Ns - 1)
+## These are NOT equal. Note the warning
+## Indeed, the latter's result varies from run to run
+
+
+## Profile of E[Vrel(S)] in simple conditions; p = 4 and n = 10
+xseq <- seq(0, 1, 0.01)
+plot(xseq, sapply(xseq, function(x) Exv.VRv(GenCov(p = 4, VR = x), n = 10)),
+     xlim = c(0, 1), ylim = c(0, 1), xlab = "Vrel(Sigma)", ylab = "E[Vrel(S)]",
+     type = "l", asp = 1, col = "tomato")
+abline(a = 0, b = 1, col = "gray", lty = 2)
+
+## Same, adjusted index
+plot(xseq, sapply(xseq, function(x) Exv.VRav(GenCov(p = 4, VR = x), n = 10)),
+     xlim = c(0, 1), ylim = c(0, 1), xlab = "Vrel(Sigma)", ylab = "E[Vrel_adj(S)]",
+     type = "l", asp = 1, col = "tomato")
+abline(a = 0, b = 1, col = "gray", lty = 2)
+
+```
+
+
+### `AVar.VRr_*()` families: asymptotic variance of $\Vr(\m{R})$
+There are several internal functions to calculate asymptotic variance of $\Vr(\m{R})$, which are primarily to be called by `Var.VRr()`.
+
+These are to accommodate two different approaches to obtain the asymptotic variance as described by @Watanabe2021: one based on the approach of @PanFrank2004, and the other based on the theory of @Konishi1979. Empirically, the former tends to be more accurate in various conditions but requires nontrivial computational time when there are many variables ($p>200$ or so), whereas the latter tends to be slightly inaccurate but can be instantly evaluated.
+
+At present, the approach of @PanFrank2004 is implemented with the functions `AVar.VRr_pf*()`. Of these, only `AVar.VRr_pfd()` and `AVar.VRr_pfc()` are of practical interest. The two other functions, `AVar.VRr_pf()` and `AVar.VRr_pfv()`, are equivalent but substantially slower or requires too much RAM. The latter are retained for demonstrative purposes, as they more clearly show how the algorithm is implemented. `AVar.VRr_pfc()` utilizes `C++` API via the package `Rcpp` and is by far faster (although it still takes ~1500 CPU seconds for $p=1024$ in my environment), whereas `AVar.VRr_pfd()` is a pure R implementation which should suffice for $p$ up to ~100 or so.
+
+The asymptotic variance from the theory of @Konishi1979 is also implemented in several functions, of which only `AVar.VRr_klv()` would be of practical use.
+
+By default, `Var.VRr()` internally calls `AVar.VRr_pfd()`. The function to be called can be chosen by providing the suffix of one of these functions as the argument `fun`; e.g., `Var.VRr(..., fun = "klv")` for `AVar.VRr_klv()`.
+
+
+```{r}
+## Two different approaches with slightly different outcomes (in this case)
+eigvaldisp:::AVar.VRr_pfd(Rho, Ns - 1)
+eigvaldisp:::AVar.VRr_klv(Rho, Ns - 1)
+```
+
+
+### `Exv.r*()` and the like: moments of the correlation coefficient
+Moments of $\Vr(\m{R})$ are typically calculated from those of of correlation coefficients, for which this package has >15 internal functions.
+
+These functions typically take as arguments the degrees of freedom `n` and the population correlation coefficient `x`. Asymptotic functions also takes the order of asymptotic approximation `order.` (which corresponds to the exponent $m$ in $O(n^m)$).
+
+For further details see `help(Exv.rx)`.
+
+
+
+### `Sim.VE()`: simulating eigenvalue dispersion indices
+This function is to conduct Monte Carlo simulations of eigenvalue dispersion indices with multivariate normal populations (and was used in the simulations of @Watanabe2021).
+
+This function usually takes three arguments: `b`, the number of simulations, `V`, the population covariance matrix, and `N`, sample size.
+Alternatively, parametric bootstrapping can be performed by providing a data matrix `X` (in which case `V` and `N` are not required).
+
+It returns a list of the following elements:
+
+* `VEv`: eigenvalue variance of covariance matrix $\V(\m{S})$
+* `VRv`: relative eigenvalue variance of covariance matrix $\Vr(\m{S})$
+* `Lv`: eigenvalues of covariance matrix $(l_1, \dotsc, l_p)$ of $\m{S}$
+* `VEr`: eigenvalue variance of correlation matrix $\V(\m{R})$
+* `VRr`: relative eigenvalue variance of correlation matrix $\Vr(\m{R})$
+* `Lr`: eigenvalues of correlation matrix $(l_1, \dotsc, l_p)$ of $\m{R}$
+
+Optionally, eigenvectors can be calculated and returned, at the cost of computational time and RAM.
+
+Example with rather small `b`:
+```{r}
+simres <- Sim.VE(10L, V = Sigma, N = N)
+str(simres)
+```
+
+
+### `rmvn()`: generating multivariate normal sample
+This is an internal function used to generate a multivariate normal sample with known parameters.
+
+`rmvn()` is rather similar to `mvtnorm::rmvnorm()` (by convergence, in biologists' words), but has been designed to work optimally for simple simulation studies. By default, `rmvn()` uses Cholesky factorization `chol()` to obtain a matrix square root of the covariance matrix (and this is slightly faster than `mvtnorm::rmvnorm(..., method = "chol")`). Options for different algorithms are available, as this default method fails when the covariance matrix is singular (the user is assumed to know when this happens). On the other hand, `mvtnorm::rmvnorm()` is robust in this sense, as its default algorithm can appropriately handle singular covariance matrices.
+
+In addition, `rmvn()` can directly take the matrix square root as the argument `cV`, which can be useful when numerous simulations are run with the same population covariance matrix.
+
+Quick examples:
+```{r}
+## Full-rank covariance matrix
+Sigma1 <- GenCov(evalues = c(4, 2, 1, 1), evectors = "random")
+X1 <- eigvaldisp:::rmvn(10, V = Sigma1)
+
+## Singular covariance matrix (with only 1 eigenvalue equal to zero)
+Sigma2 <- GenCov(evalues = c(4, 2, 1, 0), evectors = "random")
+## Not run: eigvaldisp:::rmvn(10, V = Sigma2) ## Fails
+X2 <- eigvaldisp:::rmvn(10, V = Sigma2, sqrt_method = "pivot")
+
+## Singular covariance matrix (with >1 eigenvalue equal to zero)
+Sigma3 <- GenCov(evalues = c(4, 2, 0, 0), evectors = "random")
+X3 <- eigvaldisp:::rmvn(10, V = Sigma3, sqrt_method = "chol_piv") ## May fail
+X3 <- eigvaldisp:::rmvn(10, V = Sigma3, sqrt_method = "matsqrt")  ## Better
+```
+
+
+
+# Outline of theoretical results
+A brief summary of the results used in this package is given here. For full theoretical details, see @Watanabe2021.
+
+
+## Interpretation and statistical justification
+It is seen from the definition above that $\Vr({\m{S}})$ is a linear function of the quantity $\sum_{i=1}^p{l_i}^2/\left(\sum_{i=1}^p{l_i}\right)^2 = \tr\m{S}^2/\left(\tr\m{S}\right)^2$. This quantity is known in the statistical literature [@John1971; @John1972; @Sugiura1972; @Nagao1973; @LedoitWolf2002] as the locally most powerful test statistic for the sphericity (the null hypothesis $\m{\Sigma} = \sigma^2\m{I}_p$ with arbitrary $\sigma^2$) under multivariate normality, among those classes of statistics that are invariant against translation, rotation, and scaling. Hence, it is a good measure for the deviation from the spherical covariance matrix.
+
+On the other hand, it is possible to show $\Vr({\m{R}}) = \frac{2}{p(p-1)} \sum_{i<j}^p{r_{ij}^2}$, where $r_{ij}$ is the $(i,j)$-th element of $\m{R}$ [@GleasonStaelin1975; @DurandLeRoux2017]. That is, this is the average squared correlation, which has a straightforward interpretation as an index of integration.
+
+
+## Moments
+The following symbols are used in the following:
+
+* $p$: number of variables
+* $n$: degrees of freedom
+* $N$: sample size (typically $n + 1$)
+* $n_*$: divisor of sample covariance matrix (typically $n$ or $N$)
+* $\m{\Sigma}$: population covariance matrix
+* $\m{P}$: population correlation matrix
+* $\m{\Lambda}$: population eigenvalue matrix (diagonal matrix with $\lambda_i$)
+* $\lambda$: population eigenvalues (diagonals of $\m{\Lambda}$)
+* $\rho$: population correlation coefficients (elements of $\m{P}$)
+* $\upsilon$: elements of population eigenvector matrix
+* $\m{A}$: cross-product matrix ($= n_*\m{S}$)
+* $\m{S}$: sample covariance matrix
+* $\m{R}$: sample correlation matrix
+* $\m{L}$: sample eigenvalue matrix (diagonal matrix with $l_i$)
+* $l$: sample eigenvalue (diagonal elements of $\m{L}$)
+* $r$: sample correlation coefficients (elements of $\m{R}$)
+* $\F(a, b; c; \cdot)$: (classic) hypergeometric function with the parameters $a$, $b$, and $c$
+* $\Gamma(\cdot)$: gamma function
+* $\delta_{ij}$: Kronecker delta
+* $\tr(\cdot)$: matrix trace (sum of diagonal elements)
+
+### $\V(\m{S})$
+The first two moments of $\V(\m{S})$ are:
+$$
+\begin{align}
+\E[\V(\m{S})] = & \frac{n}{p^2n_*^2}\left[ (p-n) (\tr\m{\Lambda})^2 + (pn + p - 2) \tr(\m{\Lambda}^2) \right]; \\
+\Var[\V(\m{S})]
+= & \frac{4n}{p^4n_*^4}\left[ 2(p-n)^2 \tr(\m{\Lambda}^2)(\tr\m{\Lambda})^2
++ (p^2n + p^2 - 4p + 2n)[\tr(\m{\Lambda}^2)]^2 \right. \\ & \quad \quad
++ 4(p-n)(pn+p-2) \tr(\m{\Lambda}^3)\tr\m{\Lambda} \\ & \quad \quad
+\left. + (2p^2n^2 + tp^2n + 5p^2 -12pn - 12p + 12)\tr(\m{\Lambda}^4) \right].
+\end{align}
+$$
+Under the null hypothesis of sphericity ($\m{\Sigma} = \sigma^2\m{I}_p$), these reduce to:
+$$
+\begin{align}
+\E_\mathrm{null}[\V(\m{S})] =& \frac{n}{pn_*^2}(p - 1) (p + 2)\sigma^4; \\
+\Var_\mathrm{null}[\V(\m{S})] =& \frac{4n}{p^3n_*^4}(p - 1)(p + 2)(2p^2 + pn + 3p - 6) \sigma^8.
+\end{align}
+$$
+These moments are exact (non-asymptotic).
+
+### $\Vr(\m{S})$
+From the definitions above, the first two moments of $\Vr(\m{S})$ are:
+$$
+\begin{align}
+\E[\Vr(\m{S})] =& \frac{1}{p-1}\left(p \E\left[\frac{\sum_{i=1}^p{l_i}^2}{\left(\sum_{i=1}^p{l_i}\right)^2}\right] - 1 \right); \\
+\Var[\Vr(\m{S})] =& \left(\frac{p}{p-1}\right)^2 \Var\left[\frac{\sum_{i=1}^p{l_i}^2}{\left(\sum_{i=1}^p{l_i}\right)^2}\right].
+\end{align}
+$$
+
+It is not straightforward to obtain moments of the ratio $\sum_{i=1}^p{l_i}^2/\left(\sum_{i=1}^p{l_i}\right)^2$, but the following approximation can be reached from the delta method:
+$$
+\begin{align}
+\E\left[\frac{ \sum_{i=1}^p{l_i}^2 }{ \left(\sum_{i=1}^p{l_i}\right)^2 }\right]
+\approx & \frac{ (\tr\m{\Lambda})^2 + (n+1)\tr(\m{\Lambda}^2) }{ n(\tr\m{\Lambda})^2 + 2\tr(\m{\Lambda}^2) } - \frac{8(n-1)(n+2) }{ n\left[ n(\tr\m{\Lambda})^2 + 2\tr(\m{\Lambda}^2)\right]^3} \\ &
+\times \left\{ n(\tr\m{\Lambda})^3\tr(\m{\Lambda}^3)
+- n(\tr\m{\Lambda})^2\big[\tr(\m{\Lambda}^2)\big]^2
+- \big[\tr(\m{\Lambda}^2)\big]^3 \right. \\ & \quad \left.{}
+- 2\tr\m{\Lambda}\tr(\m{\Lambda}^2)\tr(\m{\Lambda}^3)
++ 3(\tr\m{\Lambda})^2\tr(\m{\Lambda}^4)
+\right\}; \\
+\Var\left[\frac{\sum_{i=1}^p{l_i}^2}{\left(\sum_{i=1}^p{l_i}\right)^2}\right]
+\approx & \frac{4(n-1)(n+2)}{n\left[ n(\tr\m{\Lambda})^2 + 2\tr(\m{\Lambda}^2)\right]^4}  \\ &
+\times \left\{
+n(\tr\m{\Lambda})^4\big[\tr(\m{\Lambda}^2)\big]^2
++ 2n(n + 1)(\tr\m{\Lambda})^2\big[\tr(\m{\Lambda}^2)\big]^3
++ 2(n + 1)\big[\tr(\m{\Lambda}^2)\big]^4 \right. \\ & \quad
+- 4(n - 1)(n + 2)(\tr\m{\Lambda})^3\tr(\m{\Lambda}^2)\tr(\m{\Lambda}^3)
++ (2n^2 + 3n - 6)(\tr\m{\Lambda})^4\tr(\m{\Lambda}^4) \\ & \quad \left. {}
+- 4n(\tr\m{\Lambda})^2\tr(\m{\Lambda}^2)\tr(\m{\Lambda}^4)
+- 4(\tr\m{\Lambda})^4\big[\tr(\m{\Lambda}^2)\big]^2
+\right\}.
+\end{align}
+$$
+
+Inserting these moments into the above equation yields approximate moments of $\Vr(\m{S})$.
+
+Nevertheless, under the null hypothesis of sphericity, it is possible to obtain the exact moments of the ratio $\sum_{i=1}^p{l_i}^2/\left(\sum_{i=1}^p{l_i}\right)^2$, from which the following null moments can be obtained:
+$$
+\E_\mathrm{null}[\Vr(\m{S})] = \frac{p + 2}{pn + 2} \\
+\Var_\mathrm{null}[\Vr(\m{S})] = \frac{4p^2(p + 2)(n - 1)(n + 2)}
+{(p - 1)(pn + 2)^2(pn + 4)(pn + 6)}
+$$
+
+
+### $\Vr(\m{R})$
+The relevant moments can conveniently be obtained from the form of average squared correlation coefficients. The basic forms are:
+$$
+\E[\Vr(\m{R})] = \frac{2}{p(p-1)}\sum_{i<j}^{p}{\E(r_{ij}^2)}; \\
+\Var[\Vr(\m{R})] = \frac{4}{p^2(p-1)^2} \left[ \sum_{i<j}^{p}{\Var(r_{ij}^2)} + \sum_{i<j, k<l, \\ (i,j)<(k,l)}^{p}{2\Cov(r_{ij}^2, r_{kl}^2)} \right],
+$$
+where the last summation runs over all non-redundant pairs of squared correlation coefficients.
+
+The expectation is straightforward to obtain from the following:
+$$
+\E(r_{ij}^2) = 1 - \frac{(n-1)(1-\rho_{ij}^2)}{n} \F\left(1, 1; \frac{n+2}{2}; \rho_{ij}^2 \right), \quad i \neq j,
+$$
+where $\F$ is the hypergeometric function:
+$$
+\F(a, b; c; z) = \sum_{k=0}^{\infty}{\frac{(a)_k(b)_k}{(c)_k}\frac{z^k}{k!}}, \\
+(x)_k = x (x + 1) \dotsm (x + k - 1) = \frac{\Gamma(x + k)}{\Gamma(x)}.
+$$
+We also have
+$$
+\begin{align}
+\Var(r_{ij}^2) =& \frac{(n - 1)(n + 1)(1 - \rho_{ij}^2)}{n}
+\left[\F\left(1, 1; \frac{n+2}{2}; \rho_{ij}^2 \right)
+- \frac{n}{n+2} \F\left(1, 2; \frac{n+4}{2}; \rho_{ij}^2 \right) \right. \\ & \qquad \left.{}
+- \frac{2(n - 1)(1 - \rho_{ij}^2)}{n(n+1)} \F\left(1, 1; \frac{n+2}{2}; \rho_{ij}^2 \right)^2 \right].
+\end{align}
+$$
+
+It is seen that $\E(r_{ij}^2) = 1/n$ when $\rho_{ij} = 0$, and hence
+$$
+\E_\mathrm{null}[\Vr(\m{R})] = \frac{1}{n}.
+$$
+
+The variance is more difficult to obtain. Specifically under the null hypothesis of no correlation ($\m{P} = \m{I}_p$), it can be shown that $\Cov(r_{ij}^2, r_{kl}^2) = 0$, leading to the following exact variance:
+$$
+\Var_\mathrm{null}[\Vr(\m{R})] = \frac{4(n - 1)}{p(p - 1)n^2(n + 2)}.
+$$
+
+In general, however, $\Cov(r_{ij}^2, r_{kl}^2)$ can be nonzero, so this term cannot be ignored unless $p = 2$. To my knowledge, there is no exact expression for this quantity in the literature. @Watanabe2021 used the following approximation based on the approach of @PanFrank2004:
+$$
+ \Cov(r_{ij}^2, r_{kl}^2) \approx 4\E(r_{ij})\E(r_{kl})\Cov(r_{ij}, r_{kl}) + 2\left[\Cov(r_{ij}, r_{kl})\right]^2,
+$$
+where the following exact and asymptotic moments are used:
+$$
+\begin{align}
+\E(r_{ij}) =& \frac{2}{n} \left[ \Gamma\left(\frac{n+1}{2}\right) / \Gamma\left(\frac{n}{2}\right) \right]^2 \F\left(\frac{1}{2}, \frac{1}{2}; \frac{n +2}{2}; \rho_{ij}^2\right); \\
+\Cov(r_{ij}, r_{kl}) \approx & \frac{1}{n} \left[ \frac{1}{2} \rho_{ij}\rho_{kl}(\rho_{ik}^2 + \rho_{il}^2 + \rho_{jk}^2 + \rho_{jl}^2) + \rho_{ik}\rho_{jl} + \rho_{il}\rho_{jk} \right. \\ & \quad \left. \phantom{\frac{1}{2}}
+- \rho_{ij}\rho_{ik}\rho_{il} - \rho_{ij}\rho_{jk}\rho_{jl} - \rho_{ik}\rho_{jk}\rho_{kl} - \rho_{il}\rho_{jl}\rho_{kl} \right] .
+\end{align}
+$$
+
+However, this approach requires evaluation of $\sim p^4 / 4$ pairs of correlation coefficients, and can take nontrivial computational time. For this reason, the following asymptotic variance from the theory of @Konishi1979 might be useful when $p$ is large:
+$$
+\Var[\Vr(\m{R})] \approx \frac{8}{p^2(p-1)^2n}\sum_{\alpha, \beta = 1}^p{ \lambda_\alpha^2 \lambda_\beta^2 \left[ \delta_{ij} - (\lambda_\alpha
++ \lambda_\beta) \sum_{i=1}^p{\upsilon_{i\alpha}^2 \upsilon_{i\beta}^2}
++ \sum_{i,j=1}^p{\rho_{ij}^2 \upsilon_{i\alpha}^2 \upsilon_{i\beta}^2} \right]}.
+$$
+
+
+## "Bias-corrected" estimators
+From the above results, it is possible to obtain an unbiased estimator of $\V(\m{\Sigma})$ as follows:
+$$
+\tilde{V}(\m{S}) = \frac{1}{p^2n(n - 1)(n + 2)}\left[ (pn + 2) (\tr\m{A})^2 - (p + n + 1) \tr(\m{A}^2) \right].
+$$
+Its variance is:
+$$
+\begin{align}
+\Var[\tilde{V}(\m{S})] = & \frac{4}{p^4n(n - 1)(n + 2)}
+\left\{ 2(n - 1)(n + 2) \tr(\m{\Lambda}^2)(\tr\m{\Lambda})^2 \right. \\ & \qquad
++ (p^2n + 4p + 2n + 2) \big[\tr(\m{\Lambda}^2)\big]^2
+- 4p(n - 1)(n + 2) \tr(\m{\Lambda}^3)\tr\m{\Lambda} \\ & \qquad \left.
++ (2p^2n^2 + 3p^2n - 6p^2 - 4pn - 4) \tr(\m{\Lambda}^4) \right\},
+\end{align}
+$$
+which reduces to $4(p - 1)(p + 2)(pn + 2) / p^3n(n - 1)(n + 2)$ under the null hypothesis.
+
+The adjusted versions of $\Vr(\m{S})$ and $\Vr(\m{R})$ discussed here are:
+$$
+\bar{V}_\mathrm{rel}(\m{S}) = \frac{pn + 2}{p(n - 1)} \Vr(\m{S}) - \frac{p + 2}{p(n - 1)}; \\
+\bar{V}_\mathrm{rel}(\m{R}) = \frac{n}{n - 1} \Vr(\m{S}) - \frac{1}{n - 1}.
+$$
+Moments of these adjusted estimators can be obtained from those of the ordinary ones described above.
+
+$\bar{V}_\mathrm{rel}(\m{S})$ and $\bar{V}_\mathrm{rel}(\m{R})$ are designed to be unbiased under the null hypothesis and rescaled to take the maximum of $1$. Otherwise, these estimators tend to understimate the population value.
+
+
+# References

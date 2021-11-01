@@ -1,0 +1,25 @@
+citHeader("To cite eigvaldisp in publications use:")
+
+citEntry(entry = "Article",
+    title   = "Statistics of eigenvalue dispersion indices: quantifying the magnitude of phenotypic integration",
+    author  = personList(as.person("Junya Watanabe")),
+    year    = "2021",
+    journal = "Evolution",
+    doi     = "10.1111/evo.14382",
+    url     = "https://doi.org/10.1111/evo.14382",
+    textVersion =
+    paste("Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:",
+          "quantirying the magnitude of phenotypic integration. Evolution,",
+          "doi:10.1111/evo.14382.")
+)
+
+citEntry(entry = "Misc",
+    title   = "{eigvaldisp}: {R} package for statistics of eigenvalue dispersion",
+    author  = personList(as.person("Junya Watanabe")),
+    year    = "2021",
+    url     = "https://github.com/watanabe-j/eigvaldisp",
+    textVersion =
+    paste("Watanabe, J. (2021). eigvaldisp: R package for",
+          "statistics of eigenvalue dispersion.",
+          "URL https://github.com/watanabe-j/eigvaldisp.")
+)

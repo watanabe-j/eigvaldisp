@@ -1,0 +1,1472 @@
+##### Exv.VXx #####
+#' Moments of eigenvalue dispersion indices
+#'
+#' Functions to calculate expectation/variance of (relative) eigenvalue variance
+#' of sample covariance/correlation matrices for a given population
+#' covariance/correlation matrix and degrees of freedom \eqn{n}.
+#'
+#' \code{Exv.VEv()}, \code{Var.VEv()}, and \code{Exv.VRr()} return exact
+#' moments.
+#' \code{Exv.VRv()} and \code{Var.VRv()} return approximations based
+#' on the delta method, except under the null condition
+#' (\eqn{\Sigma} proportional to the identity matrix)
+#' where exact moments are returned.
+#'
+#' \code{Var.VRr()} returns the exact variance when \eqn{p = 2} or
+#' under the null condition (\eqn{\Rho} is the identity matrix).
+#' Otherwise, asymptotic variance is calculated with a function of choice,
+#' \code{AVar.VRr_xx}, with the suffix specified by the argument \code{fun}:
+#' \code{pfd}, \code{pfv}, \code{pfc}, \code{pf} are options for
+#' the Pan--Frank approach
+#' (usually, \code{pfd} or \code{pfc} will be the choice);
+#' \code{klv}, \code{kl}, \code{krv}, \code{kr} are equivalent variants
+#' from Konishi's asymptotic theory (usually, \code{klv} is the choice).
+#' See \link{AVar.VRr_xx} for details of these functions.
+#'
+#' Since the eigenvalue variance of a correlation matrix \eqn{V(R)} is simply
+#' \eqn{(p - 1)} times the relative eigenvalue variance \eqn{Vrel(R)} of
+#' the same matrix, their distributions are identical up to this scaling.
+#' Hence, \code{Exv.VEr()} and \code{Var.VEr()} calls \code{Exv.VRr()} and
+#' \code{Var.VRr()} (respectively), whose outputs are scaled and returned.
+#' These functions are provided for completeness, although there will be little
+#' practical demand for these functions (and \eqn{V(R)} itself).
+#'
+#' As detailed in Watanabe (2021), the distribution of \eqn{Vrel(R)} cannot be
+#' uniquely specified by eigenvalues alone. Hence, a full correlation
+#' matrix \code{R} should preferably be provided. Otherwise, a correlation
+#' matrix is constructed from the eigenvalues \code{L} provided using
+#' the function \code{GenCov()} with randomly picked eigenvectors.
+#'
+#' On the other hand, the choice of eigenvectors does not matter for
+#' covariance matrices, thus either the full covariance matrix \code{V} or
+#' vector of eigenvalues \code{L} can be provided to yield identical results.
+#'
+#' When \code{R} is provided, some simple checks are done: the matrix is
+#' scaled to have diagonals of 1; and if any of these are unequal,
+#' an error is returned.
+#'
+#' These moments are derived under the assumption of multivariate normality
+#' (Watanabe, 2021), although the distributions will remain the same in
+#' all elliptically contoured distributions (see Anderson, 2003).
+#'
+# #' For covariance matrices, the divisor of \eqn{n}
+# #' (which gives the ordinary unbiased estimator) is assumed by default.
+# #'
+# #' \code{Exv.VRr()} calls \code{Exv.r2()}, which in turn calls \code{hgf()}.
+# #' (see \link{Exv.rx}).
+# #'
+#' @name Exv.VXx
+#'
+#' @param V
+#'   Population covariance matrix; assumed to be validly constructed.
+#' @param R
+#'   Population correlation matrix; assumed to be validly constructed
+#'   (although simple checks are done).
+#' @param n
+#'   Degrees of freedom (not sample sizes); numeric of length 1 or more.
+#' @param L
+#'   Numeric vector of population eigenvalues.
+#' @param divisor
+#'   Either \code{"UB"} (default) or \code{"ML"},
+#'   to decide the default value of \code{m}.
+#' @param m
+#'   Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2021)).
+#'   By default equals \eqn{n}.
+#' @param drop_0
+#'   Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped.
+#' @param tol
+#'   For covariance-related functions, this is the tolerance/threshold
+#'   to be used with drop_0. For correlation-related functions,
+#'   this is passed to \code{Exv.r2()} along with other arguments.
+#' @param tol.hg,maxiter.hg
+#'   Passed to \code{Exv.r2()}; see description of that function.
+#' @param fun
+#'   For \code{Var.VRr()} (and \code{Var.VEr()}), determines the function
+#'   to be used to evaluate approximate variance. See Details.
+#'   Options allowed are: \code{pfd}, \code{pfv}, \code{pfc}, \code{pf},
+#'   \code{klv}, \code{kl}, \code{krv}, and \code{kr}.
+#' @param ...
+#'   In \code{Var.VRr()}, additional arguments are passed to an internal
+#'   function which it in turn calls. Otherwise ignored.
+#'
+#' @return
+#' A numeric vector of the desired moment, corresponding to \code{n}.
+#'
+#' @references
+#' Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+#'  quantifying the magnitude of phenotypic integration. *Evolution*,
+#'  doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'
+#' @seealso
+#' \link{VE} for estimation;
+#' \link{AVar.VRr_xx} for internal functions of Var.VRr;
+#' \link{Exv.rx} for internal functions for moments of correlation coefficients;
+#' \link{Exv.VXax} for moments of ``bias-corrected'' versions.
+#'
+#' @examples
+#' # Covariance matrix
+#' N <- 20
+#' Lambda <- c(4, 2, 1, 1)
+#' (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
+#' VE(V = Sigma)$VE
+#' VE(V = Sigma)$VR
+#' # Population values of V(Sigma) and Vrel(Sigma)
+#'
+#' # From population covariance matrix
+#' Exv.VEv(Sigma, N - 1)
+#' Var.VEv(Sigma, N - 1)
+#' Exv.VRv(Sigma, N - 1)
+#' Var.VRv(Sigma, N - 1)
+#' # Note the amount of bias from the population value obtained above
+#'
+#' # From population eigenvalues
+#' Exv.VEv(L = Lambda, n = N - 1)
+#' Var.VEv(L = Lambda, n = N - 1)
+#' Exv.VRv(L = Lambda, n = N - 1)
+#' Var.VRv(L = Lambda, n = N - 1)
+#' # Same, regardless of the random choice of eigenvectors
+#'
+#' # Correlation matrix
+#' (Rho <- GenCov(evalues = Lambda / sum(Lambda) * 4, evectors = "Givens"))
+#' VE(V = Rho)$VR
+#' # Population value of Vrel(Rho)
+#'
+#' Exv.VRr(Rho, N - 1)
+#' Var.VRr(Rho, N - 1)
+#' # These results vary with the choice of eigenvalues
+#' # If interested, repeat from the definition of Rho
+#'
+#' # Different choices for asymptotic variance of Vrel(R)
+#' # Variance from Pan-Frank method
+#' Var.VRr(Rho, N - 1, fun = "pfd") # Default
+#' Var.VRr(Rho, N - 1, fun = "pf")  # Slow for large p
+#' Var.VRr(Rho, N - 1, fun = "pfv") # Requires too much RAM for large p
+#' \dontrun{Var.VRr(Rho, n = N - 1, fun = "pfc")}
+#' # Try to run the last one if you have Rcpp
+#' # These are identical
+#'
+#' # Variance from Konishi's theory
+#' Var.VRr(Rho, N - 1, fun = "klv") # Best choice
+#' Var.VRr(Rho, N - 1, fun = "kl")
+#' Var.VRr(Rho, N - 1, fun = "krv")
+#' Var.VRr(Rho, N - 1, fun = "kr")
+#' # These are identical, but the first one is fast
+#' # On the other hand, these differ from that obtained with
+#' # the Pan-Frank method above
+#'
+NULL
+
+##### Exv.VEv #####
+#' Expectation of eigenvalue variance of covariance matrix
+#'
+#' \code{Exv.VEv()}: expectation of eigenvalue variance of covariance matrix
+#' \eqn{E[V(S)]}.
+#'
+#' @rdname Exv.VXx
+#'
+#' @export
+#'
+Exv.VEv <- function(V, n = 100, L, divisor = c("UB", "ML"),
+                    m = switch(divisor, UB = n, ML = n + 1), drop_0 = FALSE,
+                    tol = .Machine$double.eps * 100, ...) {
+    divisor <- match.arg(divisor)
+    if(missing(L)) {
+        L <- svd(V, nu = 0, nv = 0)$d
+    }
+    if(drop_0) {
+        L <- L[L > tol]
+    } else {
+        L[L < tol] <- 0
+    }
+    p <- length(L)
+    t1 <- sum(L)
+    t2 <- sum(L ^ 2)
+    n * ((p - n) * t1 ^ 2 + (p * n + p - 2) * t2) / (p ^ 2 * m ^ 2)
+}
+
+##### Exv.VRv #####
+#' Expectation of relative eigenvalue variance of covariance matrix
+#'
+#' \code{Exv.VRv()}: expectation of relative eigenvalue variance of
+#' covariance matrix \eqn{E[Vrel(S)]}.
+#'
+#' @rdname Exv.VXx
+#'
+#' @export
+#'
+Exv.VRv <- function(V, n = 100, L, drop_0 = FALSE,
+                    tol = .Machine$double.eps * 100, ...) {
+    if(missing(L)) {
+        L <- svd(V, nu = 0, nv = 0)$d
+    }
+    if(drop_0) {
+        L <- L[L > tol]
+    } else {
+        L[L < tol] <- 0
+    }
+    p <- length(L)
+    t1 <- sum(L)
+    t2 <- sum(L ^ 2)
+    t3 <- sum(L ^ 3)
+    t4 <- sum(L ^ 4)
+    EF <- (t1 ^ 2 + (n + 1) * t2) / (n * t1 ^ 2 + 2 * t2) -
+          8 * ((n + 2) * (n - 1) * (3 * t4 * t1 ^ 2 - 2 * t3 * t2 * t1 - t2 ^ 3
+                                    + n * t3 * t1 ^ 3 - n * t2 ^ 2 * t1 ^ 2)) /
+          (n * ((n * t1 ^ 2 + 2 * t2)) ^ 3)
+    (p * EF - 1) / (p - 1)
+}
+
+##### Exv.VEr #####
+#' Expectation of eigenvalue variance of correlation matrix
+#'
+#' \code{Exv.VEr()}: expectation of eigenvalue variance of correlation
+#' matrix \eqn{E[V(R)]}.
+#'
+#' @rdname Exv.VXx
+#'
+#' @export
+#'
+Exv.VEr <- function(R, n = 100, L, tol = .Machine$double.eps * 100,
+                    tol.hg = 0, maxiter.hg = 2000, ...) {
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    exv.VRr <- Exv.VRr(R = R, n = n, tol = tol,
+                       tol.hg = tol.hg, maxiter.hg = maxiter.hg, ...)
+    exv.VRr * (p - 1)
+}
+
+##### Exv.VRr #####
+#' Expectation of relative eigenvalue variance of correlation matrix
+#'
+#' \code{Exv.VRr()}: expectation of relative eigenvalue variance of
+#' correlation matrix \eqn{E[Vrel(R)]}.
+#'
+#' @rdname Exv.VXx
+#'
+#' @export
+#'
+Exv.VRr <- function(R, n = 100, L, tol = .Machine$double.eps * 100,
+                    tol.hg = 0, maxiter.hg = 2000, ...) {
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    R2 <- R[lower.tri(R)] ^ 2
+    exv_r2 <- matrix(sapply(n, Exv.r2, x = R2, do.square = FALSE, tol = tol,
+                            tol.hg = tol.hg, maxiter.hg = maxiter.hg),
+                     ncol = length(n))
+    2 * colSums(exv_r2) / (p * (p - 1))
+}
+
+##### Var.VEv #####
+#' Variance of eigenvalue variance of covariance matrix
+#'
+#' \code{Var.VEv()}: variance of eigenvalue variance of
+#' covariance matrix \eqn{Var[V(S)]}.
+#'
+#' @rdname Exv.VXx
+#'
+#' @export
+#'
+Var.VEv <- function(V, n = 100, L, divisor = c("UB", "ML"),
+                    m = switch(divisor, UB = n, ML = n + 1), drop_0 = FALSE,
+                    tol = .Machine$double.eps * 100, ...) {
+    divisor <- match.arg(divisor)
+    if(missing(L)) {
+        L <- svd(V, nu = 0, nv = 0)$d
+    }
+    if(drop_0) {
+        L <- L[L > tol]
+    } else {
+        L[L < tol] <- 0
+    }
+    p <- length(L)
+    t1 <- sum(L)
+    t2 <- sum(L ^ 2)
+    t3 <- sum(L ^ 3)
+    t4 <- sum(L ^ 4)
+    4 * n * ((2 * p^2 * n^2 + 5 * p^2 * n + 5 * p^2 - 12 * p * n - 12 * p + 12)
+             * t4 + 4 * (p - n) * (p * n + p - 2) * t3 * t1 +
+             (p^2 * n + p^2 - 4 * p + 2 * n) * t2^2 +
+             2 * (p - n)^2 * t2 * t1^2) / (p ^ 4 * m ^ 4)
+}
+
+##### Var.VRv #####
+#' Variance of relative eigenvalue variance of covariance matrix
+#'
+#' \code{Var.VRv()}: variance of relative eigenvalue variance of
+#' covariance matrix \eqn{Var[Vrel(S)]}.
+#'
+#' @rdname Exv.VXx
+#'
+#' @export
+#'
+Var.VRv <- function(V, n = 100, L, drop_0 = FALSE,
+                    tol = .Machine$double.eps * 100, ...) {
+    if(missing(L)) {
+        L <- svd(V, nu = 0, nv = 0)$d
+    }
+    if(drop_0) {
+        L <- L[L > tol]
+    } else {
+        L[L < tol] <- 0
+    }
+    p <- length(L)
+    t1 <- sum(L)
+    t2 <- sum(L ^ 2)
+    t3 <- sum(L ^ 3)
+    t4 <- sum(L ^ 4)
+    if(isTRUE(all.equal(L / L[1], rep.int(1, p)))) {
+        4 * p^2 * (p + 2) * (n - 1) * (n + 2) /
+             (p - 1) / (p * n + 2)^2 / (p * n + 4) / (p * n + 6)
+    } else {
+        4 * p^2 / (p - 1)^2 * (n - 1) * (n + 2) *
+            (- 4 * t4 * t2^2 - 4 * n * t4 * t2 * t1^2
+             + (2 * n^2 + 3 * n - 6) * t4 * t1^4
+             - 4 * (n - 1) * (n + 2) * t3 * t2 * t1^3
+             + 2 * (n + 1) * t2^4 + 2 * n * (n + 1) * t2^3 * t1^2
+             + n * t2^2 * t1^4) / n / (2 * t2 + n * t1^2)^4
+    }
+}
+
+##### Var.VEr #####
+#' Variance of eigenvalue variance of correlation matrix
+#'
+#' \code{Var.VEr()}: variance of eigenvalue variance of
+#' correlation matrix \eqn{Var[V(R)]}.
+#'
+#' @rdname Exv.VXx
+#'
+#' @export
+#'
+Var.VEr <- function(R, n = 100, L, ...) {
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    var.VRr <- Var.VRr(R = R, n = n, ...)
+    var.VRr * (p - 1) ^ 2
+}
+
+##### Var.VRr #####
+#' Variance of relative eigenvalue variance of correlation matrix
+#'
+#' \code{Var.VRr()}: variance of relative eigenvalue variance for a
+#' correlation matrix \eqn{Var[Vrel(R)]}.
+#'
+#' @rdname Exv.VXx
+#'
+#' @export
+#'
+Var.VRr <- function(R, n = 100, L,
+                    fun = c("pfd", "pfv", "pfc", "pf",
+                            "klv", "kl", "krv", "kr"), ...) {
+    fun <- match.arg(fun)
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    if(isTRUE(all.equal(R, diag(p)))) {
+        4 * (n - 1) / (p * (p - 1) * n^2 * (n + 2))
+    } else if(p == 2) {
+        R2 <- R[lower.tri(R)] ^ 2
+        var_r2 <- matrix(sapply(n, Var.r2, x = R2, do.square = FALSE),
+                         ncol = length(n))
+        4 * colSums(var_r2) / (p * (p - 1)) ^ 2
+    } else {
+        Fun <- switch(fun,
+                      klv = AVar.VRr_klv, kl = AVar.VRr_kl, kr = AVar.VRr_kr,
+                      krv = AVar.VRr_krv, pf = AVar.VRr_pf, pfv = AVar.VRr_pfv,
+                      pfd = AVar.VRr_pfd, pfc = AVar.VRr_pfc)
+        Fun(R = R, n = n, ...)
+    }
+}
+
+##### AVar.VRr_xx #####
+#' Approximate variance of relative eigenvalue variance of correlation matrix
+#'
+#' Functions to obtain approximate variance of relative eigenvalue variance
+#' of correlation matrix \eqn{Var[Vrel(R)]}. There are several versions
+#' for each of two different expressions: \code{pf*} and \code{k*} families.
+#'
+#' Watanabe (2021) presented two approaches to evaluate approximate variance
+#' of the relative eigenvalue variance of a correlation matrix \eqn{Vrel(R)}.
+#' One is Pan & Frank's (2004) heuristic approximation (eqs. 28 and 36--38 in
+#' Watanabe 2021). The other is based on Konishi's (1979) asymptotic
+#' theory (eq. 39 in Watanabe 2021). Simulations showed that the former tends
+#' to be more accurate, but the latter is much faster. This is mainly because
+#' the Pan--Frank approach involves evaluation of covariances in \eqn{~p^4 / 4}
+#' pairs of (squared) correlation coefficients.
+#' (That said, the speed will not be a practical concern unless \eqn{p}
+#' exceeds a few hundreds.)
+#'
+#' The Pan--Frank approach is at present implemented in several functions
+#' which yield (almost) identical results:
+#' \describe{
+#'   \item{\code{AVar.VRr_pf()}}{Prototype version. Simplest implementation.}
+#'   \item{\code{AVar.VRr_pfv()}}{Vectorized version  Much faster, but
+#'     requires a large RAM space as \code{p} grows.}
+#'   \item{\code{AVar.VRr_pfd()}}{Improvement over \code{AVar.VRr_pfv()}.
+#'     Usually the best choice if pure \code{R} implementation is favored.}
+#'   \item{\code{AVar.VRr_pfc()}}{Fast version using \code{Rcpp}.}
+#' }
+#' \code{AVar.VRr_pfc()} implements the same algorithm as the others,
+#' but makes use of \code{C++} API via the package \code{Rcpp} for evaluation of
+#' the sum of covariance across pairs of squared correlation coefficients.
+#' This version works much faster than vectorized \code{R} codes.
+#' Note that the output can slightly differ from those of pure \code{R}
+#' implementations (by the order of ~1e-9).
+#'
+#' The Konishi approach is implemented in several functions:
+#' \describe{
+#'   \item{\code{AVar.VRr_kl()}}{From Konishi (1979: corollary 2.2):
+#'     \eqn{Vrel(R)} as function of eigenvalues. Prototype version.}
+#'   \item{\code{AVar.VRr_klv()}}{Vectorized version of \code{AVar.VRr_kl()}.
+#'     The best choice.}
+#'   \item{\code{AVar.VRr_kr()}}{From Konishi (1979: theorem 6.2):
+#'     \eqn{Vrel(R)} as function of correlation coefficients.}
+#'   \item{\code{AVar.VRr_krv()}}{Vectorized version of \code{AVar.VRr_kr()};
+#'     slightly faster for moderate \eqn{p}, but not particularly fast
+#'     for large \eqn{p} as the number of elements to be summed becomes large.}
+#' }
+#' Empirically, these all yield the same result, but
+#' \code{AVar.VRr_klv()} is by far the fastest.
+#'
+#' The choice between different functions does not matter when \eqn{p = 2},
+#' when the exact variance is returned by default.
+#' If asymptotic result is desired, use \code{mode.var2 = "asymptotic"}.
+#'
+#' Options for \code{mode} in \code{AVar.VRr_pf()} \code{AVar.VRr_pfd()}:
+#' \describe{
+#'   \item{\code{nested.for}}{Uses nested for loops, which is straifhgforward
+#'     and RAM efficient.}
+#'   \item{\code{for.ind}/\code{lapply}}{Runs the iteration along an
+#'     index vector to shorten computational time, although this does not
+#'     seem to yield any much improvement.}
+#'   \item{\code{mclapply}/\code{parLapply}}{Parallelize this iteration by
+#'     forking and socketing, respectively, with the named functions in the
+#'     package \code{parallel}. Note that the former doesn't work in the
+#'     Windows environment. See \code{vignette("parallel")} for details.}
+#' }
+#'
+#' \code{AVar.VRr_pf()} internally generates vectors and matrices
+#' whose lengths are about p^4 / 8 and p^4 / 4. These take RAM of ~2*p^4 bytes;
+#' this could be prohibitively large for large p.
+#'
+#' \code{AVar.VRr_pfd()} divides the index vector \code{b} (used in
+#' \code{AVar.VRr_pfv()}) into a list \code{bd} using the internal function
+#' \code{eigvaldisp:::divInd()}. The calculations are then done on each element
+#' of this list to save RAM space.
+#' This process takes some time when \eqn{p} is large (~10 sec
+#' for \eqn{p = 1024}).
+#' Alternatively, this list can be provided as the argument \code{bd}
+#' (which should exactly match the one to be generated; use
+#' \code{eigvaldisp:::divInd()}).
+#' The argument \code{max.size} controls the maximum size of resulting vectors;
+#' at least \code{max.size * (2 * length(n) + 6) * 8} bytes of RAM is required
+#' for storing temporary results (and more during computation);
+#' e.g., ~2e7 seems good for 16 GB RAM, ~4e8 for 256 GB.
+#' However, performance does not seem to improve past 1e6--1e7 presumably
+#' because memory allocation takes substantial time for large objects.
+#' The iteration can be parallelized with \code{mode = "mclapply"} or
+#' \code{"parLapply"}, but be careful about RAM limitations.
+#'
+#' @name AVar.VRr_xx
+#'
+#' @inheritParams Exv.VXx
+#'
+#' @param exv1.mode
+#'   Whether \code{"exact"} or \code{"asymptotic"} expression is used for
+#'   \eqn{E(r)}.
+#' @param var2.mode
+#'   Whether \code{"exact"} or \code{"asymptotic"} expression is used for
+#'   \eqn{Var(r^2)}.
+#' @param var1.mode
+#'   Whether \code{"exact"} or \code{"asymptotic"} expression is used for
+#'   \eqn{Cov(rij, rkl)}. (At present, only \code{"asymptotic"} is allowed.)
+#' @param order.exv1,order.var2
+#'   Used to specify the order of asymptotic expressions for
+#'   \eqn{E(r)}/\eqn{Var(r^2)} when \code{exv1.mode}/\code{var2.mode} is
+#'   \code{"asymptotic"}; see \link{Exv.rx}.
+#' @param mode
+#'   In \code{AVar.VRr_pf} and \code{AVar.VRr_pfd},
+#'   specifies the mode of iterations (see Details).
+#' @param mc.cores
+#'   Number of cores to be used (numeric/integer). When \code{"auto"} (default),
+#'   set to \code{min(c(ceiling(p / 2), max.cores))}, which usually works well.
+#'   (Used only when \code{mode = "mclapply"}, or \code{"parLapply"})
+#' @param max.cores
+#'   Maximum number of cores to be used.
+#'   (Used only when \code{mode = "mclapply"}, or \code{"parLapply"})
+#' @param do.mcaffinity
+#'   Whether to run \code{parallel::mcaffinity()}, which seems required in
+#'   some Linux environments to assign threads to multiple cores.
+#'   (Used only when \code{mode = "mclapply"}, or \code{"parLapply"})
+#' @param affinity_mc
+#'   Argument of \code{parallel::mcaffinity()} to specify assignment of threads.
+#'   (Used only when \code{mode = "mclapply"}, or \code{"parLapply"})
+#' @param cl
+#'   A cluster object (made by \code{parallel::makeCluster()}); when already
+#'   created, one can be specified with this argument. Otherwise, one is created
+#'   within function call, which is turned off on exit.
+#'   (Used only when \code{mode = "parLapply"})
+#' @param max.size
+#'   Maximum size of vectors created internally (see Details).
+#' @param bd
+#'   List of indices used for iteration (see Details).
+#' @param verbose
+#'   When \code{"yes"} or \code{"inline"}, progress of iteration is printed.
+#'   Intended to be used with large \eqn{p} (hundreds or more).
+#' @param cppfun
+#'   Option to specify the C++ function to be used.
+#'   (At present, only "Cov_r2C" is allowed.)
+#' @param ...
+#'   In the \code{pf} family functions, passed to \code{Exv.r1()} and
+#'   \code{Var.r2()} (when the corresponding modes are \code{"exact"}).
+#'   Otherwise ignored.
+#'
+#' @return
+#' A numeric vector of \eqn{Var[Vrel(R)]}, corresponding to \code{n}.
+#'
+#' @references
+#' Konishi, S. (1979). Asymptotic expansions for the distributions of statistics
+#'  based on the sample correlation matrix in principal componenet analysis.
+#'  *Hiroshima Mathematical Journal* **9**, 647--700.
+#'  doi:[10.32917/hmj/1206134750](https://doi.org/10.32917/hmj/1206134750).
+#'
+#' Pan, W. & Frank, K. A. (2004). An approximation to the distribution of the
+#'  product of two dependent correlation coefficients. *Journal of Statistical
+#'  Computation and Simulation* **74**, 419--443.
+#'  doi:[10.1080/00949650310001596822](https://doi.org/10.1080/00949650310001596822).
+#'
+#' Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+#'  quantifying the magnitude of phenotypic integration. *Evolution*,
+#'  doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'
+#' @seealso \link{Exv.VXx} for main moment functions.
+#'
+#' @examples
+#' # See also examples of Exv.VXx
+#' # Correlation matrix
+#' N <- 20
+#' Lambda <- c(4, 2, 1, 1)
+#' (Rho <- GenCov(evalues = Lambda / sum(Lambda) * 4, evectors = "Givens"))
+#' VE(V = Rho)$VR
+#' # Population value of Vrel(Rho)
+#'
+#' # Different choices for asymptotic variance of Vrel(R)
+#' # Variance from Pan-Frank method
+#' eigvaldisp:::AVar.VRr_pfd(Rho, n = N - 1) # Default
+#' eigvaldisp:::AVar.VRr_pf(Rho, n = N - 1)  # Slow for large p
+#' eigvaldisp:::AVar.VRr_pfv(Rho, n = N - 1) # Requires too much RAM for large p
+#' \dontrun{eigvaldisp:::AVar.VRr_pfc(Rho, n = N - 1)}
+#' # Try to run the last one if you have Rcpp
+#' # These are identical
+#'
+#' # Variance from Konishi's theory
+#' eigvaldisp:::AVar.VRr_klv(Rho, n = N - 1) # Best choice
+#' eigvaldisp:::AVar.VRr_kl(Rho, n = N - 1)
+#' eigvaldisp:::AVar.VRr_krv(Rho, n = N - 1)
+#' eigvaldisp:::AVar.VRr_kr(Rho, n = N - 1)
+#' # These are identical, but the first one is fast
+#' # On the other hand, these differ from that obtained with the Pan-Frank method
+#'
+#' # Example with p = 2
+#' Rho2 <- GenCov(evalues = c(1.5, 0.5), evectors = "Givens")
+#' Var.VRr(Rho2, n = N - 1)
+#' eigvaldisp:::AVar.VRr_pfd(Rho2, n = N - 1)
+#' eigvaldisp:::AVar.VRr_klv(Rho2, n = N - 1)
+#' # Same (ane exact) by default
+#'
+#' eigvaldisp:::AVar.VRr_pfd(Rho2, n = N - 1, var2.mode = "asymptotic")
+#' eigvaldisp:::AVar.VRr_klv(Rho2, n = N - 1, var2.mode = "asymptotic")
+#' # These return different asymptotic expressions
+#'
+#'
+NULL
+
+##### AVar.VRr_pf #####
+#' Approximate variance of relative eigenvalue variance of correlation matrix
+#'
+#' \code{AVar.VRr_pf()}: asymptotic and approximate variance of \eqn{Vrel(R)}
+#' based on Pan & Frank's (2004) approach.  Prototype version.
+#'
+#' @rdname AVar.VRr_xx
+#'
+AVar.VRr_pf <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
+                        var1.mode = "asymptotic",
+                        var2.mode = c("exact", "asymptotic"),
+                        order.exv1 = 2, order.var2 = 2,
+                        mode = c("for.ind", "nested.for", "lapply",
+                                 "mclapply", "parLapply"),
+                        mc.cores = "auto", max.cores = parallel::detectCores(),
+                        do.mcaffinity = TRUE,
+                        affinity_mc = seq_len(max.cores), cl = NULL, ...) {
+    exv1.mode <- match.arg(exv1.mode)
+    var1.mode <- match.arg(var1.mode)
+    var2.mode <- match.arg(var2.mode)
+    mode <- match.arg(mode)
+    if(mode == "mclapply" || mode == "parLapply") {
+        if(!requireNamespace("parallel", quietly = TRUE)) {
+            stop("Package 'parallel' is required for ",
+                 "mode = 'mclapply' or 'parLapply'")
+        }
+    }
+    getInds <- function(p){
+        a <- seq_len(p)
+        d <- digit(p)
+        A <- outer(as.integer(10 ^ d) * a, a, "+")
+        b <- t(A)[lower.tri(A)]
+        B <- outer((100 ^ d) * b, b, "+")
+        t(B)[lower.tri(B)]
+    }
+    parseInds <- function(x, d) {
+        i <- (x %/% 1000 ^ d) %% 10 ^ d
+        j <- (x %/% 100 ^ d) %% 10 ^ d
+        k <- (x %/% 10 ^ d) %% 10 ^ d
+        l <- x %% 10 ^ d
+        c(i, j, k, l)
+    }
+    Cov_r2s <- function(I = NULL, pI) {
+        if(!missing(I)) pI <- parseInds(I, d)
+        i <- pI[1]
+        j <- pI[2]
+        k <- pI[3]
+        l <- pI[4]
+        Eij <- exv_r1[(j - 1) * p + i - (j - 1) * (2 * p - j + 2) / 2, ]
+        Ekl <- exv_r1[(l - 1) * p + k - (l - 1) * (2 * p - l + 2) / 2, ]
+        Cijkl <- v1fun(n = n, R = R, i = i, j = j, k = k, l = l)
+        (4 * Eij * Ekl + 2 * Cijkl) * Cijkl
+    }
+    e1fun <- switch(exv1.mode,
+                    exact = function(n, x) Exv.r1(n, x, ...),
+                    asymptotic = function(n, x) AExv.r1(n, x,
+                                                        order. = order.exv1))
+    v1fun <- switch(var1.mode, ACov.r1)
+    v2fun <- switch(var2.mode,
+                    exact = function(n, x) Var.r2(n, x, do.square = TRUE, ...),
+                    asymptotic = function(n, x) AVar.r2(n, x,
+                                                        order. = order.var2))
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+
+    p <- ncol(R)
+    l_n <- length(n)
+    R_u <- R[upper.tri(R)]
+    var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
+    exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
+    d <- digit(p)
+    if(mode == "nested.for") {
+        cov_r2 <- numeric(l_n)
+        for(i in 1:(p - 2)) {
+            for(j in (i + 1):p) {
+                for(k in i:(p - 1)) {
+                    for(l in (k + 1):p) {
+                        if(i >= k && j >= l) next
+                        Eij <- exv_r1[(j - 1) * p +
+                                      i - (j - 1) * (2 * p - j + 2) / 2, ]
+                        Ekl <- exv_r1[(l - 1) * p +
+                                      k - (l - 1) * (2 * p - l + 2) / 2, ]
+                        Cijkl <- sapply(n, v1fun, R = R,
+                                        i = i, j = j, k = k, l = l)
+                        cov_r2 <- cov_r2 + (4 * Eij * Ekl + 2 * Cijkl) * Cijkl
+                    }
+                }
+            }
+        }
+    } else {
+        Inds <- getInds(p)
+        if(mode == "for.ind") {
+            cov_r2 <- numeric(l_n)
+            for(I in seq_along(Inds)) {
+                cov_r2 <- cov_r2 + Cov_r2s(Inds[I])
+            }
+        } else {
+            if(mode == "lapply") {
+                cov_r2 <- lapply(Inds, Cov_r2s)
+            } else {
+                # require(parallel)
+                if(mc.cores == "auto") {
+                    mc.cores <- pmin(ceiling(p / 2), max.cores)
+                }
+                if(mode == "mclapply") {
+                    if(do.mcaffinity) {
+                        try(invisible(parallel::mcaffinity(affinity_mc)),
+                            silent = TRUE)
+                    }
+                    cov_r2 <- parallel::mclapply(Inds, Cov_r2s,
+                                                 mc.cores = mc.cores)
+                } else { # if(mode == "parLapply")
+                    if(is.null(cl)) {
+                        cl <- parallel::makeCluster(mc.cores)
+                        on.exit(parallel::stopCluster(cl))
+                        if(do.mcaffinity) {
+                            try(parallel::clusterApply(cl, as.list(affinity_mc),
+                                parallel::mcaffinity), silent = TRUE)
+                        }
+                    }
+                    cov_r2 <- parallel::parLapply(cl = cl, Inds, Cov_r2s)
+                }
+            }
+            cov_r2 <- matrix(unlist(cov_r2), ncol = length(Inds))
+            cov_r2 <- rowSums(cov_r2)
+        }
+    }
+    ans <- colSums(var_r2) + 2 * cov_r2
+    4 * ans / (p * (p - 1))^2
+}
+
+##### AVar.VRr_pfv #####
+#' Approximate variance of relative eigenvalue variance of correlation matrix,
+#' vectorized
+#'
+#' \code{AVar.VRr_pfv()}: vectorized version of \code{AVar.VRr_pf()}.
+#' Much faster, but requires a large RAM space as \code{p} grows.
+#'
+#' @rdname AVar.VRr_xx
+#'
+AVar.VRr_pfv <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
+                       var1.mode = "asymptotic",
+                       var2.mode = c("exact", "asymptotic"),
+                       order.exv1 = 2, order.var2 = 2, ...) {
+    exv1.mode <- match.arg(exv1.mode)
+    var1.mode <- match.arg(var1.mode)
+    var2.mode <- match.arg(var2.mode)
+    rep_d <- function(x, from = 1, to = length(x)) {
+        x <- x[seq.int(from, length(x))]
+        sx <- seq_along(x)[seq_len(to - from + 1)]
+        unlist(lapply(sx, function(i) x[-seq_len(i)]))
+    }
+    e1fun <- switch(exv1.mode,
+                    exact = function(n, x) Exv.r1(n, x, ...),
+                    asymptotic = function(n, x) AExv.r1(n, x,
+                                                        order. = order.exv1))
+    c1fun <- switch(var1.mode, function(n, Rij, Rkl, Rik, Rjl, Ril, Rjk) {
+        A <- (Rij * Rkl * (Rik^2 + Ril^2 + Rjk^2 + Rjl^2) / 2 + Rik * Rjl +
+             Ril * Rjk - (Rij * Rik * Ril + Rij * Rjk * Rjl + Rik * Rjk * Rkl +
+                        Ril * Rjl * Rkl))
+        outer(A, n, "/")
+    })
+    v2fun <- switch(var2.mode,
+                    exact = function(n, x) Var.r2(n, x, do.square = TRUE, ...),
+                    asymptotic = function(n, x) AVar.r2(n, x,
+                                                        order. = order.var2))
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    l_n <- length(n)
+    R_u <- R[upper.tri(R)]
+    var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
+    d <- digit(p)
+    a <- seq_len(p)
+    A <- outer(as.integer(10 ^ d) * a, a, "+")
+    b <- t(A)[lower.tri(A)]
+    IJ <- rep.int(b, seq.int(length(b) - 1, 0))
+    KL <- rep_d(b)
+    Is <- as.integer((IJ %/% 10 ^ d) %% 10 ^ d)
+    Js <- as.integer(IJ %% 10 ^ d)
+    Ks <- as.integer((KL %/% 10 ^ d) %% 10 ^ d)
+    Ls <- as.integer(KL %% 10 ^ d)
+    rm(IJ, KL)
+    exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
+    Eij <- exv_r1[(Js - 1) * p + Is - (Js - 1) * (2 * p - Js + 2) / 2, ]
+    Ekl <- exv_r1[(Ls - 1) * p + Ks - (Ls - 1) * (2 * p - Ls + 2) / 2, ]
+    Eij_Ekl <- Eij * Ekl
+    rm(exv_r1, Eij, Ekl)
+    Rij <- R[(Js - 1) * p + Is]
+    Rkl <- R[(Ls - 1) * p + Ks]
+    Rik <- R[(Ks - 1) * p + Is]
+    Rjl <- R[(Ls - 1) * p + Js]
+    Ril <- R[(Ls - 1) * p + Is]
+    Rjk <- R[(Ks - 1) * p + Js]
+    rm(Is, Js, Ks, Ls)
+    Cijkl <- c1fun(n, Rij, Rkl, Rik, Rjl, Ril, Rjk)
+    rm(Rij, Rkl, Rik, Rjl, Ril, Rjk)
+    # cov_r2 <- 8 * Eij_Ekl * Cijkl + 4 * Cijkl ^ 2
+    # ans <- colSums(var_r2) + colSums(cov_r2)
+    cov_r2 <- 4 * (2 * crossprod(Eij_Ekl, Cijkl) + crossprod(Cijkl))
+    ans <- colSums(var_r2) + diag(cov_r2)
+    4 * ans / (p * (p - 1))^2
+}
+
+##### AVar.VRr_pfd #####
+#' Approximate variance of relative eigenvalue variance of correlation matrix,
+#' vectorized
+#'
+#' \code{AVar.VRr_pfd()}: further improvement over \code{AVar.VRr_pfv()}.
+#'
+#' @rdname AVar.VRr_xx
+#'
+AVar.VRr_pfd <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
+                         var1.mode = "asymptotic",
+                         var2.mode = c("exact", "asymptotic"),
+                         order.exv1 = 2, order.var2 = 2,
+                         mode = c("for", "lapply", "mclapply", "parLapply"),
+                         mc.cores = "auto", max.cores = parallel::detectCores(),
+                         do.mcaffinity = TRUE,
+                         affinity_mc = seq_len(max.cores), cl = NULL,
+                         max.size = 2e6, bd = NULL,
+                         verbose = c("no", "yes", "inline"), ...) {
+    exv1.mode <- match.arg(exv1.mode)
+    var1.mode <- match.arg(var1.mode)
+    var2.mode <- match.arg(var2.mode)
+    mode <- match.arg(mode)
+    verbose <- match.arg(verbose)
+    if(mode == "mclapply" || mode == "parLapply") {
+        if(!requireNamespace("parallel", quietly = TRUE)) {
+            stop("Package 'parallel' is required for ",
+                 "mode = 'mclapply' or 'parLapply'")
+        }
+    }
+    rep_d <- function(x, from = 1, to = length(x)) {
+        x <- x[seq.int(from, length(x))]
+        sx <- seq_along(x)[seq_len(to - from + 1)]
+        unlist(lapply(sx, function(i) x[-seq_len(i)]))
+    }
+    bd2I1 <- function(bd) {
+        lbd <- length(bd)
+        q <- sapply(bd, length)
+        qr <- q[seq.int(lbd, 1)]
+        p1 <- cumsum(qr)[seq.int(lbd, 1)]
+        p2 <- p1 - q + 1
+        rbind(p1, p2)
+    }
+    e1fun <- switch(exv1.mode,
+                    exact = function(n, x) Exv.r1(n, x, ...),
+                    asymptotic = function(n, x) AExv.r1(n, x,
+                                                        order. = order.exv1))
+    c1fun <- switch(var1.mode, function(n, Rij, Rkl, Rik, Rjl, Ril, Rjk) {
+        A <- (Rij * Rkl * (Rik^2 + Ril^2 + Rjk^2 + Rjl^2) / 2 + Rik * Rjl +
+             Ril * Rjk - (Rij * Rik * Ril + Rij * Rjk * Rjl + Rik * Rjk * Rkl +
+                        Ril * Rjl * Rkl))
+        outer(A, n, "/")
+    })
+    v2fun <- switch(var2.mode,
+                    exact = function(n, x) Var.r2(n, x, do.square = TRUE, ...),
+                    asymptotic = function(n, x) AVar.r2(n, x,
+                                                        order. = order.var2))
+    disp <- switch(verbose,
+        yes = function(i) cat(paste0(" ", i, "/", lbd, "; ", Sys.time(), "\n")),
+        inline = function(i) {
+            if(i %% 10^floor(log(lbd, 10) - 1) == 0) cat(paste0(" ", i, "."))
+            else invisible(NULL)},
+        function(i) invisible(NULL))
+    Cov_r2m <- function(i) {
+        disp(i)
+        IJ <- rep.int(bd[[i]], seq.int(I1[1, i], I1[2, i]) - 1)
+        KL <- rep_d(b, I2[1, i], I2[2, i])
+        Is <- as.integer((IJ %/% 10 ^ d) %% 10 ^ d)
+        Js <- as.integer(IJ %% 10 ^ d)
+        Ks <- as.integer((KL %/% 10 ^ d) %% 10 ^ d)
+        Ls <- as.integer(KL %% 10 ^ d)
+        # rm(IJ, KL)
+        Eij <- exv_r1[(Js - 1) * p + Is - (Js - 1) * (2 * p - Js + 2) / 2, ]
+        Ekl <- exv_r1[(Ls - 1) * p + Ks - (Ls - 1) * (2 * p - Ls + 2) / 2, ]
+        Eij_Ekl <- Eij * Ekl
+        # rm(Eij, Ekl)
+        Rij <- R[(Js - 1) * p + Is]
+        Rkl <- R[(Ls - 1) * p + Ks]
+        Rik <- R[(Ks - 1) * p + Is]
+        Rjl <- R[(Ls - 1) * p + Js]
+        Ril <- R[(Ls - 1) * p + Is]
+        Rjk <- R[(Ks - 1) * p + Js]
+        # rm(Is, Js, Ks, Ls)
+        Cijkl <- c1fun(n, Rij, Rkl, Rik, Rjl, Ril, Rjk)
+        # return(colSums(8 * Eij_Ekl * Cijkl + 4 * Cijkl ^ 2))
+        return(4 * diag(2 * crossprod(Eij_Ekl, Cijkl) + crossprod(Cijkl)))
+        # rm(Eij_Ekl, Cijkl)
+    }
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    l_n <- length(n)
+    R_u <- R[upper.tri(R)]
+    var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
+    exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
+    d <- digit(p)
+    if(is.null(bd)) {
+        a <- seq_len(p)
+        A <- outer(as.integer(10 ^ d) * a, a, "+")
+        b <- t(A)[lower.tri(A)]
+        bd <- divInd(b, Max = max.size)
+    }
+    I1 <- bd2I1(bd)
+    I2 <- length(b) - I1 + 1
+    lbd <- length(bd)
+    cov_r2 <- numeric(l_n)
+    if(verbose == "inline") cat(paste0(" Out of ", lbd, " iterations:"))
+    if(mode == "for") {
+        for(i in seq_along(bd)) {
+            cov_r2 <- cov_r2 + Cov_r2m(i)
+        }
+        ans <- colSums(var_r2) + cov_r2
+    } else {
+        if(mode == "lapply") {
+            cov_r2 <- lapply(seq_along(bd), Cov_r2m)
+        } else {
+            # require(parallel)
+            if(mc.cores == "auto") {
+                mc.cores <- pmin(lbd, max.cores)
+            }
+            if(mode == "mclapply") {
+                if(do.mcaffinity) {
+                    try(invisible(parallel::mcaffinity(affinity_mc)),
+                        silent = TRUE)
+                }
+                cov_r2 <- parallel::mclapply(seq_along(bd), Cov_r2m,
+                                             mc.cores = mc.cores)
+            } else if(mode == "parLapply") {
+                if(is.null(cl)) {
+                    cl <- parallel::makeCluster(mc.cores, outfile = "")
+                    on.exit(parallel::stopCluster(cl))
+                    if(do.mcaffinity) {
+                        try(parallel::clusterApply(cl, as.list(affinity_mc),
+                            parallel::mcaffinity), silent = TRUE)
+                    }
+                }
+                cov_r2 <- parallel::parLapply(cl = cl, seq_along(bd), Cov_r2m)
+            }
+        }
+        cov_r2 <- matrix(unlist(cov_r2), l_n)
+        ans <- colSums(var_r2) + rowSums(cov_r2)
+    }
+    if(verbose == "inline") cat("\n")
+    4 * ans / (p * (p - 1))^2
+}
+
+##### AVar.VRr_pfc #####
+#' Approximate variance of relative eigenvalue variance of correlation matrix,
+#' with Rcpp
+#'
+#' \code{AVar.VRr_pfc()}: fast version using \code{Rcpp}.
+#'
+# #' When the function to be used (specified by cppfun) is not found,
+# #' an attempt is made to sourceCpp() the .cpp file in the present directory.
+# #' It is recommended to do, e.g., sourceCpp("Cov.r2C.cpp")
+# #' to compile the C++ code beforehand as this typically takes several seconds.
+#'
+#' @rdname AVar.VRr_xx
+#'
+AVar.VRr_pfc <- function(R, n = 100, L, cppfun = "Cov_r2C",
+                         exv1.mode = c("exact", "asymptotic"),
+                         # var1.mode = "asymptotic",
+                         var2.mode = c("exact", "asymptotic"),
+                         order.exv1 = 2, order.var2 = 2, ...) {
+    # cppfun <- match.arg(cppfun)
+    exv1.mode <- match.arg(exv1.mode)
+    # var1.mode <- match.arg(var1.mode)
+    var2.mode <- match.arg(var2.mode)
+    # if(length(find(cppfun)) == 0) {
+    #     require(Rcpp)
+    #     sourceCpp(paste0(cppfun, ".cpp"))
+    # }
+    if(!requireNamespace("Rcpp", quietly = TRUE)) {
+        stop("Package 'Rcpp' is required for AVar.VRr_pfc() to run")
+    }
+    # c1fun <- switch(cppfun, Cov_r2C = Cov_r2C, Cov_r2V = Cov_r2V)
+    c1fun <- Cov_r2C
+    e1fun <- switch(exv1.mode,
+                    exact = function(n, x) Exv.r1(n, x, ...),
+                    asymptotic = function(n, x) AExv.r1(n, x,
+                                                        order. = order.exv1))
+    v2fun <- switch(var2.mode,
+                    exact = function(n, x) Var.r2(n, x, do.square = TRUE, ...),
+                    asymptotic = function(n, x) AVar.r2(n, x,
+                                                        order. = order.var2))
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    l_n <- length(n)
+    R_u <- R[upper.tri(R)]
+    var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
+    exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
+    cov_r2 <- c(c1fun(n, R, exv_r1))
+    ans <- colSums(var_r2) + cov_r2
+    4 * ans / (p * (p - 1))^2
+}
+
+##### AVar.VRr_kl #####
+#' Asymptotic variance of relative eigenvalue variance of correlation matrix
+#'
+#' \code{AVar.VRr_kl()}: asymptotic variance from Konishi's theory:
+#' \eqn{Vrel(R)} as function of eigenvalues.
+#'
+#' @rdname AVar.VRr_xx
+#'
+AVar.VRr_kl <- function(R, n = 100, L, ...) {
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    svd.R <- svd(R, nu = 0)
+    d <- svd.R$d
+    V2 <- svd.R$v ^ 2
+    R2 <- R ^ 2
+    ans <- numeric(1)
+    for(i in 1:p) {
+        for(j in 1:p) {
+            ans <- ans + d[i]^2 * d[j]^2 * drop(as.numeric(i == j)
+                   - (d[i] + d[j]) * crossprod(V2[, i], V2[, j])
+                   + crossprod(V2[, i], crossprod(R2, V2[, j])))
+        }
+    }
+    8 * ans / (p * (p - 1)) ^ 2 / n
+}
+
+##### AVar.VRr_klv #####
+#' Asymptotic variance of relative eigenvalue variance of correlation matrix
+#'
+#' \code{AVar.VRr_klv()}: vectorized version of \code{AVar.VRr_kl()}.
+#'
+#' @rdname AVar.VRr_xx
+#'
+AVar.VRr_klv <- function(R, n = 100, L, ...) {
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    svd.R <- svd(R, nu = 0)
+    d <- svd.R$d
+    d2 <- d ^ 2
+    V2 <- svd.R$v ^ 2
+    R2 <- R ^ 2
+    G <- diag(p) - outer(d, d, "+") * crossprod(V2) +
+         crossprod(V2, crossprod(R2, V2))
+    F <- (d2 %*% t(d2)) * G
+    ans <- sum(F)
+    8 * ans / (p * (p - 1)) ^ 2 / n
+}
+
+##### AVar.VRr_kr #####
+#' Asymptotic variance of relative eigenvalue variance of correlation matrix
+#'
+#' \code{AVar.VRr_kr()}: asymptotic variance from Konishi's theory:
+#' \eqn{Vrel(R)} as function of correlation coefficients
+#'
+#' @rdname AVar.VRr_xx
+#'
+AVar.VRr_kr <- function(R, n = 100, L, ...) {
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    ans <- numeric(1)
+    for(i in 1:p) {
+        for(j in (1:p)[-i]) {
+            for(k in i:p) {
+                for(l in (1:p)[-k]) {
+                    ans <- ans + (R[j, k] - R[i, j] * R[i, k]) *
+                                 (R[i, l] - R[i, k] * R[k, l]) *
+                                 R[i, j] * R[k, l]
+                }
+            }
+        }
+    }
+    16 * ans / (p * (p - 1)) ^ 2 / n
+}
+
+##### AVar.VRr_krv #####
+#' Asymptotic variance of relative eigenvalue variance of correlation matrix
+#'
+#' \code{AVar.VRr_krv()}: vectorized version of \code{AVar.VRr_kr()}.
+#'
+#' @rdname AVar.VRr_xx
+#'
+AVar.VRr_krv <- function(R, n = 100, L, ...) {
+    # digit <- function(x) {
+    #     i <- 1L
+    #     while(x %/% 10 >= 1) {
+    #         x <- x %/% 10
+    #         i <- i + 1
+    #     }
+    #     return(i)
+    # }
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    d <- digit(p)
+    a <- seq_len(p)
+    A <- outer(as.integer(10 ^ d) * a, a, "+")
+    b <- A[lower.tri(A) | upper.tri(A)]
+    B <- matrix(rep.int(b, length(b)), length(b))
+    IJ <- t(B)[lower.tri(B)]
+    KL <- B[lower.tri(B)]
+    Is <- as.integer((IJ %/% 10 ^ d) %% 10 ^ d)
+    Js <- as.integer(IJ %% 10 ^ d)
+    Ks <- as.integer((KL %/% 10 ^ d) %% 10 ^ d)
+    Ls <- as.integer(KL %% 10 ^ d)
+    Rij <- R[(Js - 1) * p + Is]
+    Rkl <- R[(Ls - 1) * p + Ks]
+    Rik <- R[(Ks - 1) * p + Is]
+    Rjl <- R[(Ls - 1) * p + Js]
+    Ril <- R[(Ls - 1) * p + Is]
+    Rjk <- R[(Ks - 1) * p + Js]
+    ans <- (Rjk - Rij * Rik) * (Ril - Rik * Rkl) * Rij * Rkl
+    ans <- sum(ans)
+    16 * ans / (p * (p - 1)) ^ 2 / n
+}
+
+##### Exv.VXax #####
+#' Moments of ``bias-corrected'' eigenvalue dispersion indices
+#'
+#' Functions to calculate expectation/variance of eigenvalue dispersion indices
+#' of covariance/correlation matrices.
+#'
+#' Usage is identical to that of the corresponding unadjusted versions
+#' (see \link{Exv.VXx}), which is in most cases called internally.
+#'
+#' @name Exv.VXax
+#'
+#' @inheritParams Exv.VXx
+#'
+#' @return
+#' A numeric vector of the desired moment, corresponding to \code{n}.
+#'
+#' @references
+#' Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+#'  quantifying the magnitude of phenotypic integration. *Evolution*,
+#'  doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'
+#' @seealso
+#' \link{VXax} for ``bias-corrected'' estimators;
+#' \link{Exv.VXx} for moments of unajusted versions.
+#'
+#' @examples
+#' # See also examples of Exv.VXx
+#' # Covariance matrix
+#' N <- 20
+#' Lambda <- c(4, 2, 1, 1)
+#' (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
+#' VE(V = Sigma)$VE
+#' VE(V = Sigma)$VR
+#' # Population values of V(Sigma) and Vrel(Sigma)
+#'
+#' # Moments of bias-corrected eigenvalue variance of covariance matrix
+#' Exv.VEav(Sigma, n = N - 1)
+#' Var.VEav(Sigma, n = N - 1)
+#' # The expectation is equal to the population value (as it should be)
+#'
+#' # Moments of adjusted relative eigenvalue variance of covariance matrix
+#' Exv.VRav(Sigma, n = N - 1)
+#' Var.VRav(Sigma, n = N - 1)
+#' # Slight underestimation is expected
+#' # All these are the same with L = Lambda is specified instead of Sigma.
+#'
+#' # Correlation matrix
+#' (Rho <- GenCov(evalues = Lambda / sum(Lambda) * 4, evectors = "Givens"))
+#' VE(V = Rho)$VR
+#' # Population value of Vrel(Rho), identical to Vrel(Sigma) as it should be
+#'
+#' Exv.VRar(Rho, n = N - 1)
+#' Var.VRar(Rho, n = N - 1)
+#' # Slight underestimation is expected
+#' # These results vary with the choice of eigenvalues
+#' # If interested, repeat from the definition of Rho
+#'
+#' # All options for Var.VRr() are accommodated
+#' Var.VRar(Rho, n = N - 1, fun = "pfd") # Pan-Frank method; default
+#' Var.VRar(Rho, n = N - 1, fun = "klv") # Konishi's theory
+#'
+NULL
+
+##### Exv.VEav #####
+#' Expectation of bias-corrected eigenvalue variance of covariance matrix
+#'
+#' \code{Exv.VEav()}: expectation of unbiased eigenvalue variance of
+#' covariance matrix. Of little practical use because
+#' this is just the population value \eqn{V(\Sigma)}.
+#'
+#' @rdname Exv.VXax
+#'
+#' @export
+#'
+Exv.VEav <- function(V, n = 100, L, drop_0 = FALSE,
+                     tol = .Machine$double.eps * 100, ...) {
+    if(missing(L)) {
+        L <- svd(V, nu = 0, nv = 0)$d
+    }
+    if(drop_0) {
+        L <- L[L > tol]
+    } else {
+        L[L < tol] <- 0
+    }
+    p <- length(L)
+    t1 <- sum(L)
+    t2 <- sum(L ^ 2)
+    t2 / p - t1 ^ 2 / p^2
+}
+
+##### Exv.VRav #####
+#' Expectation of adjusted relative eigenvalue variance of covariance matrix
+#'
+#' \code{Exv.VRav()}: expectation of adjusted relative eigenvalue variance
+#' of covariance matrix.
+#'
+#' @rdname Exv.VXax
+#'
+#' @export
+#'
+Exv.VRav <- function(V, n = 100, L, drop_0 = FALSE,
+                     tol = .Machine$double.eps * 100, ...) {
+    if(missing(L)) {
+        L <- svd(V, nu = 0, nv = 0)$d
+    }
+    if(drop_0) {
+        L <- L[L > tol]
+    } else {
+        L[L < tol] <- 0
+    }
+    p <- length(L)
+    E <- Exv.VRv(L = L, n = n, drop_0 = drop_0, tol = tol, ...)
+    En <- (p + 2) / (p * n + 2)
+    1 - (1 - E) / (1 - En)
+}
+
+##### Exv.VRar #####
+#' Expectation of adjusted relative eigenvalue variance of correlation matrix
+#'
+#' \code{Exv.VRar()}: expectation of adjusted relative eigenvalue variance
+#' of correlation matrix.
+#'
+#' @rdname Exv.VXax
+#'
+#' @export
+#'
+Exv.VRar <- function(R, n = 100, L, tol = .Machine$double.eps * 100,
+                     tol.hg = 0, maxiter.hg = 2000, ...) {
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    E <- Exv.VRr(R = R, n = n, tol = tol,
+                 tol.hg = tol.hg, maxiter.hg = maxiter.hg, ...)
+    En <- 1 / n
+    1 - (1 - E) / (1 - En)
+}
+
+##### Var.VEav #####
+#' Variance of bias-corrected eigenvalue variance of covariance matrix
+#'
+#' \code{Var.VEav()}: variance of unbiased eigenvalue variance of
+#' covariance matrix.
+#'
+#' @rdname Exv.VXax
+#'
+#' @export
+#'
+Var.VEav <- function(V, n = 100, L, drop_0 = FALSE,
+                     tol = .Machine$double.eps * 100, ...) {
+    if(missing(L)) {
+        L <- svd(V, nu = 0, nv = 0)$d
+    }
+    if(drop_0) {
+        L <- L[L > tol]
+    } else {
+        L[L < tol] <- 0
+    }
+    p <- length(L)
+    t1 <- sum(L)
+    t2 <- sum(L ^ 2)
+    t3 <- sum(L ^ 3)
+    t4 <- sum(L ^ 4)
+    4 * ((2 * p^2 * n^2 + 3 * p^2 * n - 6 * p^2 - 4 * p * n - 4) * t4 +
+         - 4 * p * (n - 1) * (n + 2) * t3 * t1 +
+         (p^2 * n + 4 * p + 2 * n + 2) * t2^2 +
+         2 * (n - 1) * (n + 2) * t2 * t1^2) / (p ^ 4 * n * (n - 1) * (n + 2))
+}
+
+##### Var.VRav #####
+#' Variance of adjusted relative eigenvalue variance of covariance matrix
+#'
+#' \code{Var.VR.av()}: variance of adjusted relative eigenvalue variance of
+#' covariance matrix.
+#'
+#' @rdname Exv.VXax
+#'
+#' @export
+#'
+Var.VRav <- function(V, n = 100, L, drop_0 = FALSE,
+                 tol = .Machine$double.eps * 100, ...) {
+    # divisor <- match.arg(divisor)
+    if(missing(L)) {
+        L <- svd(V, nu = 0, nv = 0)$d
+    }
+    if(drop_0) {
+        L <- L[L > tol]
+    } else {
+        L[L < tol] <- 0
+    }
+    p <- length(L)
+    V <- Var.VRv(L = L, n = n, drop_0 = drop_0, tol = tol, ...)
+    En <- (p + 2) / (p * n + 2)
+    V / (1 - En)^2
+}
+
+##### Var.VRar #####
+#' Variance of adjusted relative eigenvalue variance of covariance matrix
+#'
+#' \code{Var.VRar()}: variance of adjusted relative eigenvalue variance
+#' of correlation matrix.
+#'
+#' @rdname Exv.VXax
+#'
+#' @export
+#'
+Var.VRar <- function(R, n = 100, L, tol = .Machine$double.eps * 100,
+                     tol.hg = 0, maxiter.hg = 2000, ...) {
+    if(missing(R)) {
+        R <- GenCov(evalues = L, evectors = "Givens")
+        if(L[2] != L[length(L)]) {
+            warning("R was generated from the eigenvalues provided \n  ",
+                    "Expectation may vary even if eigenvalues are fixed")
+        }
+    } else if(any(diag(R) != 1)) {
+        R <- R / R[1, 1]
+        if(any(diag(R) != 1)) {
+            stop("Provide a valid correlation matrix, or its eigenvalues")
+        }
+        warning("R was scaled to have diagonal elements of unity")
+    }
+    p <- ncol(R)
+    V <- Var.VRr(R = R, n = n, tol = tol,
+                 tol.hg = tol.hg, maxiter.hg = maxiter.hg, ...)
+    En <- 1 / n
+    V / (1 - En)^2
+}
