@@ -4,10 +4,10 @@
 #' Function to calculate eigenvalue variance \eqn{V} and
 #' relative eigenvalue variance \eqn{V_{rel}}
 #' of a covariance/correlation matrix, either from a data matrix \code{X}
-#' or a covariance/correlation matrix \code{V}.
+#' or a covariance/correlation matrix \code{S}.
 #'
-#' Provide either a data matrix (\code{X}), cov matrix (\code{V}),
-#' or vector of eigenvalues (\code{L}).
+#' Provide either a data matrix (\code{X}), covariance/correlation matrix
+#' (\code{S}), or vector of eigenvalues (\code{L}).
 #' When \code{X} is given, the default divisor is \eqn{N - 1} where \eqn{N}
 #' is sample size.
 #'
@@ -23,7 +23,7 @@
 #'
 #' @param X
 #'   Data matrix from which covariance/corrrelation matrix is obtained.
-#' @param V
+#' @param S
 #'   Covariance/correlation matrix.
 #' @param L
 #'   Vector of eigenvalues.
@@ -32,7 +32,7 @@
 #' @param scale.
 #'   Logical to specify whether SD-scaling should be done
 #'   (that is, when \code{TRUE}, the analysis is on the correlation matrix).
-#'   When \code{V} is provided (but \code{X} is not), this is converted to
+#'   When \code{S} is provided (but \code{X} is not), this is converted to
 #'   a correlation matrix.
 #' @param divisor
 #'   Either \code{"UB"} (default) or \code{"ML"},
@@ -101,15 +101,15 @@
 #' Lambda <- c(4, 2, 1, 1)
 #' (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
 #' VE(L = Lambda)
-#' VE(V = Sigma) # Same
+#' VE(S = Sigma) # Same
 #'
 #' # For a random sample, sample covariance matrix or its eigenvalues
 #' N <- 20
-#' X <- eigvaldisp:::rmvn(N = N, V = Sigma)
+#' X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
 #' S <- cov(X)
 #' L <- eigen(S)$values
 #' VE(X = X)
-#' VE(V = S) # Same
+#' VE(S = S) # Same
 #' VE(L = L) # Same
 #' # Thus, providing X is usually the most straightforward for a sample
 #' # (and this is usally quicker for p > 30-50 or so).
@@ -118,13 +118,13 @@
 #' # Same for maximum likelihood estimator (divisor m = N)
 #' VE(X = X, divisor = "ML")
 #' VE(X = X, m = N)        # Same, but any divisor can be specified
-#' VE(V = S * (N - 1) / N) # Same
+#' VE(S = S * (N - 1) / N) # Same
 #' # L and meanL are (N - 1) / N times the above,
 #' # VE is ((N - 1) / N) ^ 2 times the above, whereas VR remains the same.
 #'
 #' # For a sample correlation matrix
 #' R <- cor(X)
-#' VE(V = R)
+#' VE(S = R)
 #' VE(X = X, scale. = TRUE) # Same, hence is usually quicker when p is large
 #'
 #' # Interested in eigenvectors?
@@ -133,12 +133,12 @@
 #' # Singular covariance matrix
 #' Lambda2 <- c(4, 2, 1, 0)
 #' (Sigma2 <- GenCov(evalues = Lambda2, evectors = "random"))
-#' VE(V = Sigma2)                # Calculated in the full space
-#' VE(V = Sigma2, sub = 1:3)     # In the subspace of the first 3 PCs
-#' VE(V = Sigma2, drop_0 = TRUE) # Dropping zero eigenvalues (same in this case)
+#' VE(S = Sigma2)                # Calculated in the full space
+#' VE(S = Sigma2, sub = 1:3)     # In the subspace of the first 3 PCs
+#' VE(S = Sigma2, drop_0 = TRUE) # Dropping zero eigenvalues (same in this case)
 #'
 #' # Sample from singular covariance
-#' X2 <- eigvaldisp:::rmvn(N = N, V = Sigma2, sqrt_method = "pivot")
+#' X2 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma2, sqrt_method = "pivot")
 #' VE(X = X2)                    # In the full space
 #' VE(X = X2, sub = 1:3)         # In the subspace of the first 3 PCs
 #' VE(X = X2, drop_0 = TRUE)     # Practically the same
@@ -152,7 +152,7 @@
 #' # a sample null space always encompasses the population null space.
 #' Lambda3 <- 9:0
 #' Sigma3 <- GenCov(evalues = Lambda3, evectors = "random")
-#' X3 <- eigvaldisp:::rmvn(N = 6, V = Sigma3, sqrt_method = "pivot")
+#' X3 <- eigvaldisp:::rmvn(N = 6, Sigma = Sigma3, sqrt_method = "pivot")
 #' eigS3 <- eigen(cov(X3))
 #' (Popul_null <- eigen(Sigma3)$vectors[, Lambda3 < 1e-12])
 #' (Sample_null <-eigS3$vectors[, eigS3$values < 1e-12])
@@ -161,7 +161,7 @@
 #' tcrossprod(crossprod(Popul_null, Sample_null))
 #' # sum of squared cosines equals 1, as expected
 #'
-VE <- function(X, V, L, center = TRUE, scale. = FALSE,
+VE <- function(X, S, L, center = TRUE, scale. = FALSE,
                divisor = c("UB", "ML"), m = switch(divisor, UB = N - 1, ML = N),
                nv = 0, sub = seq_len(length(L)),
                drop_0 = FALSE, tol = .Machine$double.eps * 100) {
@@ -179,10 +179,10 @@ VE <- function(X, V, L, center = TRUE, scale. = FALSE,
             L <- L / m
         }
         L <- c(L, rep_len(0, max(p - length(L), 0)))
-    } else if(!missing(V)) {
-        p <- ncol(V)
-        if(scale.) V <- cov2cor(V)
-        svd.X <- svd(V, nu = 0, nv = nv)
+    } else if(!missing(S)) {
+        p <- ncol(S)
+        if(scale.) S <- cov2cor(S)
+        svd.X <- svd(S, nu = 0, nv = nv)
         L <- svd.X$d
     }
     L <- L[sub]
@@ -261,17 +261,17 @@ VE <- function(X, V, L, center = TRUE, scale. = FALSE,
 #' @examples
 #' # Spherical covariance matrix (VE = VR = 0)
 #' Sigma <- diag(4)
-#' VE(V = Sigma)
+#' VE(S = Sigma)
 #'
 #' N <- 20
 #' set.seed(375)
-#' X <- eigvaldisp:::rmvn(N = N, V = Sigma)
+#' X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
 #' S <- cov(X)
 #' L <- eigen(S)$values
 #'
 #' # Bias-corrected eigenvalue variance of covariance matrix
 #' VEav(X = X)
-#' VEav(V = S, n = N - 1)$VEav # Same, but n is required
+#' VEav(S = S, n = N - 1)$VEav # Same, but n is required
 #' VEav(L = L, n = N - 1)$VEav # Same
 #' # Note the overestimation in VE and VR,
 #' # and (slightly) better performance of VEav
@@ -281,7 +281,7 @@ VE <- function(X, V, L, center = TRUE, scale. = FALSE,
 #' VRav(X = X)$VRav
 #'
 #' # Population value for the correlation matrix (same to Sigma in this case)
-#' VE(V = stats::cov2cor(Sigma))
+#' VE(S = stats::cov2cor(Sigma))
 #'
 #' # Adjusted relative eigenvalue variance of correlation matrix
 #' VRar(X = X)
@@ -289,10 +289,10 @@ VE <- function(X, V, L, center = TRUE, scale. = FALSE,
 #'
 #' # Covariance/correlation matrix with strong covariation (VR = 0.8)
 #' (Sigma2 <- GenCov(p = 4, VR = 0.8, evectors = "Givens"))
-#' VE(V = Sigma2)
+#' VE(S = Sigma2)
 #'
 #' N <- 20
-#' X2 <- eigvaldisp:::rmvn(N = N, V = Sigma2)
+#' X2 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma2)
 #'
 #' VEav(X = X2)
 #' # This is better than the un-corrected version
@@ -312,7 +312,7 @@ NULL
 #'
 #' @export
 #'
-VEav <- function(X, V, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
+VEav <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
                  m = switch(divisor, UB = N - 1, ML = N),
                  center = TRUE, nv = 0, ...) {
     divisor <- match.arg(divisor)
@@ -327,10 +327,10 @@ VEav <- function(X, V, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
         L <- c(L, rep_len(0, max(p - length(L), 0)))
     } else {
         if(missing(n)) stop("Provide n (or X)")
-        if(!missing(V)) {
-            p <- ncol(V)
-            # if(scale.) V <- cov2cor(V)
-            svd.X <- svd(V, nu = 0, nv = nv)
+        if(!missing(S)) {
+            p <- ncol(S)
+            # if(scale.) S <- cov2cor(S)
+            svd.X <- svd(S, nu = 0, nv = nv)
             L <- svd.X$d
         }
         L0 <- L * n
@@ -354,7 +354,7 @@ VEav <- function(X, V, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
 #'
 #' @export
 #'
-VRav <- function(X, V, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
+VRav <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
                  m = switch(divisor, UB = N - 1, ML = N),
                  center = TRUE, nv = 0, ...) {
     divisor <- match.arg(divisor)
@@ -368,10 +368,10 @@ VRav <- function(X, V, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
         L <- c(L, rep_len(0, max(p - length(L), 0)))
     } else {
         if(missing(n)) stop("Provide n (or X)")
-        if(!missing(V)) {
-            p <- ncol(V)
-            # if(scale.) V <- cov2cor(V)
-            svd.X <- svd(V, nu = 0, nv = nv)
+        if(!missing(S)) {
+            p <- ncol(S)
+            # if(scale.) S <- cov2cor(S)
+            svd.X <- svd(S, nu = 0, nv = nv)
             L <- svd.X$d
         }
     }
@@ -392,7 +392,7 @@ VRav <- function(X, V, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
 #'
 #' @export
 #'
-VRar <- function(X, V, L, n = N - as.numeric(center),
+VRar <- function(X, S, L, n = N - as.numeric(center),
                  center = TRUE, nv = 0, ...) {
     if(!missing(X)) {
         X <- scale2(X, center = center, scale = TRUE)
@@ -404,10 +404,10 @@ VRar <- function(X, V, L, n = N - as.numeric(center),
         L <- c(L, rep_len(0, max(p - length(L), 0)))
     } else {
         if(missing(n)) stop("Provide n (or X)")
-        if(!missing(V)) {
-            p <- ncol(V)
-            if(TRUE) V <- cov2cor(V)
-            svd.X <- svd(V, nu = 0, nv = nv)
+        if(!missing(S)) {
+            p <- ncol(S)
+            if(TRUE) S <- cov2cor(S)
+            svd.X <- svd(S, nu = 0, nv = nv)
             L <- svd.X$d
         }
     }
@@ -431,8 +431,8 @@ VRar <- function(X, V, L, n = N - as.numeric(center),
 #' These are returned as an invisible list.
 #'
 #' When \code{Sim.VE()} is called, either data (\code{X}),
-#' a covariance matrix (\code{V}),
-#' or its Cholesky factor (\code{cV}) should be given.
+#' a covariance matrix (\code{Sigma}),
+#' or its Cholesky factor (\code{cSigma}) should be given.
 #' Specify the sample size \code{N} as well, unless \code{X} is provided.
 #'
 #' \code{Sim.VE()} does not actually calculate sample covariance/correlation
@@ -448,13 +448,13 @@ VRar <- function(X, V, L, n = N - as.numeric(center),
 #' @param b
 #'   Number of iterations.
 #' @param X
-#'   (Optional) Data matrix; when \code{V} and \code{cV} are missing,
+#'   (Optional) Data matrix; when \code{Sigma} and \code{cSigma} are missing,
 #'   the sample covariance matrix from \code{X} is used as
 #'   the population covariance matrix in simulations (parametric bootstrapping).
-# #' @param V,cV,N   passed to rmvn
+# #' @param Sigma,cSigma,N   passed to rmvn
 #' @param divisor,m,nv,drop_0,tol,center,scale.,sub
 #'   These arguments are passed to \code{VE()}.
-#'   \code{center} and \code{scale.} are also used construct \code{V}
+#'   \code{center} and \code{scale.} are also used construct \code{Sigma}
 #'   when \code{X} is provided.
 #'
 #' @return
@@ -485,50 +485,50 @@ VRar <- function(X, V, L, n = N - as.numeric(center),
 #' (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
 #' N <- 10
 #' set.seed(35638)
-#' X1 <- eigvaldisp:::rmvn(N = N, V = Sigma)
+#' X1 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
 #' cSigma <- chol(Sigma)
 #' set.seed(35638)
-#' X2 <- eigvaldisp:::rmvn(N = N, cV = cSigma)
+#' X2 <- eigvaldisp:::rmvn(N = N, cSigma = cSigma)
 #' stopifnot(all.equal(X1, X2))
-#' # These are identical. Providing cV is quicker as it skips sqrtfun(V),
+#' # These are identical. Providing cSigma is quicker as it skips sqrtfun(Sigma),
 #' # so this may be useful when multiple simulations are to be run with
 #' # the same population covariance matrix.
 #'
 #' # A small simulation
-#' sim_result <- Sim.VE(b = 50L, V = Sigma, N = N)
+#' sim_result <- Sim.VE(b = 50L, Sigma = Sigma, N = N)
 #' str(sim_result)
 #' # Results are returned as a list (see "Value" for details)
 #'
 #' # Syntax for parametric bootstrapping
 #' param_boot <- Sim.VE(b = 50L, X = X1)
 #'
-Sim.VE <- function(b = 100L, X, V, cV = sqrtfun(V), N = nrow(X),
+Sim.VE <- function(b = 100L, X, Sigma, cSigma = sqrtfun(Sigma), N = nrow(X),
                    divisor = c("UB", "ML"),
                    m = switch(divisor, UB = N - 1, ML = N),
-                   center = TRUE, scale. = FALSE, sub = seq_len(ncol(cV)),
+                   center = TRUE, scale. = FALSE, sub = seq_len(ncol(cSigma)),
                    nv = 0, sqrt_method = "chol",
                    drop_0 = FALSE, tol = .Machine$double.eps * 100) {
     sqrt_method <- match.arg(sqrt_method, c("default", "chol", "chol_piv",
                                    "chol_qr", "matsqrt", "pivot", "qr", "sqrt"))
     divisor <- match.arg(divisor)
-    ## If X is provided (and V and cV are missing), sample cov matrix is used
-    if(missing(V) && missing(cV) && !missing(X)) {
+    ## If X is provided (and Sigma and cSigma are missing), sample cov matrix is used
+    if(missing(Sigma) && missing(cSigma) && !missing(X)) {
         X <- scale2(X, center = center, scale = scale.)
-        V <- crossprod(X) / m
+        Sigma <- crossprod(X) / m
     }
-    ## Only cV is used for simulations (rather than X and V)
-    if(missing(cV)) {
+    ## Only cSigma is used for simulations (rather than X and Sigma)
+    if(missing(cSigma)) {
         sqrtfun <- switch(sqrt_method, matsqrt = matsqrt, sqrt = matsqrt,
                           chol_qr = chol_qr, qr = chol_qr,
                           pivot = chol_piv, chol_piv = chol_piv, chol)
-        cV <- sqrtfun(V)
-    } else if(!missing(V) || !missing(X)) {
-        warning("The arguments X and/or V were ignored as cV was given")
+        cSigma <- sqrtfun(Sigma)
+    } else if(!missing(Sigma) || !missing(X)) {
+        warning("The arguments X and/or Sigma were ignored as cSigma was given")
     }
-    p <- ncol(cV)
-    ## Eigenvectors of the original cov matrix, taken from cV
-    Uv.org <- svd(cV, nu = 0, nv = nv)$v
-    Ur.org <- svd(cov2cor(crossprod(cV)), nu = 0, nv = nv)$v
+    p <- ncol(cSigma)
+    ## Eigenvectors of the original cov matrix, taken from cSigma
+    Uv.org <- svd(cSigma, nu = 0, nv = nv)$v
+    Ur.org <- svd(cov2cor(crossprod(cSigma)), nu = 0, nv = nv)$v
     ## Objects to store simulation results
     ansv.L <- matrix(numeric(b * p), p, b)
     ansr.L <- matrix(numeric(b * p), p, b)
@@ -546,7 +546,7 @@ Sim.VE <- function(b = 100L, X, V, cV = sqrtfun(V), N = nrow(X),
     ## Simulation runs; a while loop and tryCatch() are used
     ## as svd() (in VE()) occationally returns an error.
     while(i <= b) {
-        Xi <- rmvn(cV = cV, N = N, sqrt_method = sqrt_method)
+        Xi <- rmvn(cSigma = cSigma, N = N, sqrt_method = sqrt_method)
         ansv <- tryCatch(VE(Xi, center = center, scale. = FALSE, nv = nv,
                             sub = sub, divisor = divisor, m = m,
                             drop_0 = drop_0, tol = tol),
@@ -594,19 +594,19 @@ Sim.VE <- function(b = 100L, X, V, cV = sqrtfun(V), N = nrow(X),
 #' @param N
 #'   Sample size in each iteration or each run of \code{rmvn()}.
 #' @param p
-#'   Number of variables; ignored when \code{V} or \code{cV} is provided.
+#'   Number of variables; ignored when \code{Sigma} or \code{cSigma} is provided.
 #' @param s2
 #'   Population variance used for the spherical condition;
-#'   ignored when \code{V} or \code{cV} is provided.
-#' @param V
+#'   ignored when \code{Sigma} or \code{cSigma} is provided.
+#' @param Sigma
 #'   Population covariance matrix, assumed validly constructed;
 #'   by default a spherical covariance is used;
-#'   ignored when \code{cV} is provided.
-#' @param cV
-#'   Cholesky factor of \code{V}; this can be specified instead of \code{V}.
-#'   Potentially useful when multiple simulations are run for the same \code{V}
+#'   ignored when \code{cSigma} is provided.
+#' @param cSigma
+#'   Cholesky factor of \code{Sigma}; this can be specified instead of \code{Sigma}.
+#'   Potentially useful when multiple simulations are run for the same \code{Sigma}
 #'   (although this will not substantially improve speed for a single call of
-#'   \code{Sim.VE(V = ...)}, where \code{sqrtfun(V)} is called only once).
+#'   \code{Sim.VE(Sigma = ...)}, where \code{sqrtfun(Sigma)} is called only once).
 #' @param mean
 #'   Population mean vector; default is a \eqn{p} vector of 0's.
 #' @param sqrt_method
@@ -616,7 +616,7 @@ Sim.VE <- function(b = 100L, X, V, cV = sqrtfun(V), N = nrow(X),
 #'   \code{"chol_piv"} or \code{"pivot"} for \code{chol_piv()},
 #'   \code{"chol_qr"} or \code{"qr"} for \code{chol_qr()},
 #'   \code{"matsqrt"} or \code{"sqrt"} for \code{matsqrt()}.
-#'   See \link{sqrt_methods} for details. Ignored when \code{cV} is provided.
+#'   See \link{sqrt_methods} for details. Ignored when \code{cSigma} is provided.
 #'
 #' @return
 #'   \code{rmvn()} returns a \eqn{N * p} matrix with
@@ -626,19 +626,19 @@ Sim.VE <- function(b = 100L, X, V, cV = sqrtfun(V), N = nrow(X),
 #'
 # #' @export
 #'
-rmvn <- function(N, p = 2L, s2 = 1, V = s2 * diag(p), cV = sqrtfun(V),
+rmvn <- function(N, p = 2L, s2 = 1, Sigma = s2 * diag(p), cSigma = sqrtfun(Sigma),
                  mean = rep_len(0, p), sqrt_method = "chol") {
-    if(missing(cV)) {
+    if(missing(cSigma)) {
         sqrt_method <- match.arg(sqrt_method, c("default", "chol", "chol_piv",
                                    "chol_qr", "matsqrt", "pivot", "qr", "sqrt"))
         sqrtfun <- switch(sqrt_method, matsqrt = matsqrt, sqrt = matsqrt,
                           chol_qr = chol_qr, qr = chol_qr,
                           pivot = chol_piv, chol_piv = chol_piv, chol)
-        cV <- sqrtfun(V)
+        cSigma <- sqrtfun(Sigma)
     }
-    p <- nrow(cV)
+    p <- nrow(cSigma)
     X <- matrix(rnorm(p * N), N, p)
-    X <- X %*% cV
+    X <- X %*% cSigma
     # if (missing(mean)) mean <- rep_len(0, p)
     X <- sweep(X, 2, mean, "+")
     return(X)

@@ -13,9 +13,9 @@
 \title{Approximate variance of relative eigenvalue variance of correlation matrix}
 \usage{
 AVar.VRr_pf(
-  R,
+  Rho,
   n = 100,
-  L,
+  Lambda,
   exv1.mode = c("exact", "asymptotic"),
   var1.mode = "asymptotic",
   var2.mode = c("exact", "asymptotic"),
@@ -31,9 +31,9 @@ AVar.VRr_pf(
 )
 
 AVar.VRr_pfv(
-  R,
+  Rho,
   n = 100,
-  L,
+  Lambda,
   exv1.mode = c("exact", "asymptotic"),
   var1.mode = "asymptotic",
   var2.mode = c("exact", "asymptotic"),
@@ -43,9 +43,9 @@ AVar.VRr_pfv(
 )
 
 AVar.VRr_pfd(
-  R,
+  Rho,
   n = 100,
-  L,
+  Lambda,
   exv1.mode = c("exact", "asymptotic"),
   var1.mode = "asymptotic",
   var2.mode = c("exact", "asymptotic"),
@@ -64,9 +64,9 @@ AVar.VRr_pfd(
 )
 
 AVar.VRr_pfc(
-  R,
+  Rho,
   n = 100,
-  L,
+  Lambda,
   cppfun = "Cov_r2C",
   exv1.mode = c("exact", "asymptotic"),
   var2.mode = c("exact", "asymptotic"),
@@ -75,21 +75,21 @@ AVar.VRr_pfc(
   ...
 )
 
-AVar.VRr_kl(R, n = 100, L, ...)
+AVar.VRr_kl(Rho, n = 100, Lambda, ...)
 
-AVar.VRr_klv(R, n = 100, L, ...)
+AVar.VRr_klv(Rho, n = 100, Lambda, ...)
 
-AVar.VRr_kr(R, n = 100, L, ...)
+AVar.VRr_kr(Rho, n = 100, Lambda, ...)
 
-AVar.VRr_krv(R, n = 100, L, ...)
+AVar.VRr_krv(Rho, n = 100, Lambda, ...)
 }
 \arguments{
-\item{R}{Population correlation matrix; assumed to be validly constructed
+\item{Rho}{Population correlation matrix; assumed to be validly constructed
 (although simple checks are done).}
 
 \item{n}{Degrees of freedom (not sample sizes); numeric of length 1 or more.}
 
-\item{L}{Numeric vector of population eigenvalues.}
+\item{Lambda}{Numeric vector of population eigenvalues.}
 
 \item{exv1.mode}{Whether \code{"exact"} or \code{"asymptotic"} expression is used for
 \eqn{E(r)}.}
@@ -257,7 +257,7 @@ The iteration can be parallelized with \code{mode = "mclapply"} or
 N <- 20
 Lambda <- c(4, 2, 1, 1)
 (Rho <- GenCov(evalues = Lambda / sum(Lambda) * 4, evectors = "Givens"))
-VE(V = Rho)$VR
+VE(S = Rho)$VR
 # Population value of Vrel(Rho)
 
 # Different choices for asymptotic variance of Vrel(R)

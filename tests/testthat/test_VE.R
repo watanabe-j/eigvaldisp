@@ -1,4 +1,4 @@
-test_that("value of VE(V = GenCov(VR = VR))", {
+test_that("value of VE(S = GenCov(VR = VR))", {
     p <- sample(3:20, 1)
     q <- sample(1:p, 1)
     VR <- stats::runif(1, 0, (p - q) / q / (p - 1))
@@ -11,11 +11,11 @@ test_that("value of VE(V = GenCov(VR = VR))", {
     A_Givens <- GenCov(p = p, q = q, VR = VR, evectors = "Givens")
     A_MAP    <- GenCov(p = p, q = q, VR = VR, evectors = "MAP")
 
-    VE_A_spec   <- VE(V = A_spec  )
-    VE_A_plain  <- VE(V = A_plain )
-    VE_A_random <- VE(V = A_random)
-    VE_A_Givens <- VE(V = A_Givens)
-    VE_A_MAP    <- VE(V = A_MAP   )
+    VE_A_spec   <- VE(S = A_spec  )
+    VE_A_plain  <- VE(S = A_plain )
+    VE_A_random <- VE(S = A_random)
+    VE_A_Givens <- VE(S = A_Givens)
+    VE_A_MAP    <- VE(S = A_MAP   )
 
     expect_equal(VE_A_spec  $VR, VR)
     expect_equal(VE_A_plain $VR, VR)
@@ -30,7 +30,7 @@ test_that("value of VE(V = GenCov(VR = VR))", {
     expect_equal(VE_A_MAP   $VE, VR * (p - 1))
 })
 
-test_that("value of VE(V = GenCov(evalues = Lambda))", {
+test_that("value of VE(S = GenCov(evalues = Lambda))", {
     p <- sample(3:20, 1)
     Lambda <- sort(stats::rchisq(p, 5), decreasing = TRUE)
     Lambda2 <- Lambda / sum(Lambda) * p
@@ -43,11 +43,11 @@ test_that("value of VE(V = GenCov(evalues = Lambda))", {
     A_Givens <- GenCov(evalues = Lambda2, evectors = "Givens")
     A_MAP    <- GenCov(evalues = Lambda2, evectors = "MAP")
 
-    VE_A_spec   <- VE(V = A_spec  )
-    VE_A_plain  <- VE(V = A_plain )
-    VE_A_random <- VE(V = A_random)
-    VE_A_Givens <- VE(V = A_Givens)
-    VE_A_MAP    <- VE(V = A_MAP   )
+    VE_A_spec   <- VE(S = A_spec  )
+    VE_A_plain  <- VE(S = A_plain )
+    VE_A_random <- VE(S = A_random)
+    VE_A_Givens <- VE(S = A_Givens)
+    VE_A_MAP    <- VE(S = A_MAP   )
 
     expect_equal(VE_A_spec  $L, Lambda)
     expect_equal(VE_A_plain $L, Lambda)
@@ -74,24 +74,24 @@ test_that("value of VE(V = GenCov(evalues = Lambda))", {
     expect_equal(VE_A_MAP   $VE, var(Lambda2) * (p - 1) / p)
 })
 
-test_that("value of VE(V = GenCov(evalues = Lambda))", {
+test_that("value of VE(S = GenCov(evalues = Lambda))", {
     p <- sample(3:20, 1)
     N <- sample(3:20, 1)
     Lambda <- sort(stats::rchisq(p, 5), decreasing = TRUE)
     Sigma <- GenCov(evalues = Lambda, evectors = "random")
 
-    X <- rmvn(N, V = Sigma)
+    X <- rmvn(N, Sigma = Sigma)
     S <- stats::cov(X)
     R <- stats::cor(X)
     L <- svd(S, nu = 0, nv = 0)$d
     K <- svd(R, nu = 0, nv = 0)$d
 
     VE_X  <- VE(X = X, scale. = FALSE)
-    VE_S  <- VE(V = S, scale. = FALSE)
+    VE_S  <- VE(S = S, scale. = FALSE)
     VE_L  <- VE(L = L)
     VE_Xs <- VE(X = X, scale. = TRUE)
-    VE_Ss <- VE(V = S, scale. = TRUE)
-    VE_R  <- VE(V = R)
+    VE_Ss <- VE(S = S, scale. = TRUE)
+    VE_R  <- VE(S = R)
     VE_K  <- VE(L = K)
 
     expect_equal(VE_X, VE_S)

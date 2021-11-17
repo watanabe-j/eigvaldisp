@@ -9,7 +9,7 @@
 \usage{
 VEav(
   X,
-  V,
+  S,
   L,
   n = N - as.numeric(center),
   divisor = c("UB", "ML"),
@@ -21,7 +21,7 @@ VEav(
 
 VRav(
   X,
-  V,
+  S,
   L,
   n = N - as.numeric(center),
   divisor = c("UB", "ML"),
@@ -31,12 +31,12 @@ VRav(
   ...
 )
 
-VRar(X, V, L, n = N - as.numeric(center), center = TRUE, nv = 0, ...)
+VRar(X, S, L, n = N - as.numeric(center), center = TRUE, nv = 0, ...)
 }
 \arguments{
 \item{X}{Data matrix from which covariance/corrrelation matrix is obtained.}
 
-\item{V}{Covariance/correlation matrix.}
+\item{S}{Covariance/correlation matrix.}
 
 \item{L}{Vector of eigenvalues.}
 
@@ -103,17 +103,17 @@ the unadjusted version.
 \examples{
 # Spherical covariance matrix (VE = VR = 0)
 Sigma <- diag(4)
-VE(V = Sigma)
+VE(S = Sigma)
 
 N <- 20
 set.seed(375)
-X <- eigvaldisp:::rmvn(N = N, V = Sigma)
+X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
 S <- cov(X)
 L <- eigen(S)$values
 
 # Bias-corrected eigenvalue variance of covariance matrix
 VEav(X = X)
-VEav(V = S, n = N - 1)$VEav # Same, but n is required
+VEav(S = S, n = N - 1)$VEav # Same, but n is required
 VEav(L = L, n = N - 1)$VEav # Same
 # Note the overestimation in VE and VR,
 # and (slightly) better performance of VEav
@@ -123,7 +123,7 @@ VEav(L = L, n = N - 1)$VEav # Same
 VRav(X = X)$VRav
 
 # Population value for the correlation matrix (same to Sigma in this case)
-VE(V = stats::cov2cor(Sigma))
+VE(S = stats::cov2cor(Sigma))
 
 # Adjusted relative eigenvalue variance of correlation matrix
 VRar(X = X)
@@ -131,10 +131,10 @@ VRar(X = X)
 
 # Covariance/correlation matrix with strong covariation (VR = 0.8)
 (Sigma2 <- GenCov(p = 4, VR = 0.8, evectors = "Givens"))
-VE(V = Sigma2)
+VE(S = Sigma2)
 
 N <- 20
-X2 <- eigvaldisp:::rmvn(N = N, V = Sigma2)
+X2 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma2)
 
 VEav(X = X2)
 # This is better than the un-corrected version

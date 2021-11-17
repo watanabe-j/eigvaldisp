@@ -72,7 +72,7 @@ Lambda <- c(4, 2, 1, 1)
 eigen(Sigma)$values
 
 ## Calculate eigenvalue dispersion indices of this matrix
-EDI_pop <- VE(V = Sigma)
+EDI_pop <- VE(S = Sigma)
 
 ## Eigenvalue variance ("V(Sigma)")
 EDI_pop$VE
@@ -93,13 +93,13 @@ the population covariance matrix generated above (via the internal function `rmv
 ```{r}
 ## Simulate a multivariate normal sample
 N <- 20
-X <- eigvaldisp:::rmvn(N = N, V = Sigma)
+X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
 cov(X)
 ## Reasonable estimate of Sigma
 
 ## Calculating eigenvalue dispersion indices from the sample
 EDI_sam <- VE(X = X)
-## Same as VE(V = cov(X)) but usually faster
+## Same as VE(S = cov(X)) but usually faster
 
 ## Sample eigenvalue variance ("V(S)")
 EDI_sam$VE
@@ -119,7 +119,7 @@ The expectation and variance of the eigenvalue dispersion indices are implemente
 ```{r}
 ## Expectation of eigenvalue variance ("E[V(S)]")
 ## The argument n is for the degree of freedom, hence N - 1 in this case
-(E_V_Sigma <- Exv.VEv(V = Sigma, n = N - 1))
+(E_V_Sigma <- Exv.VEv(Sigma = Sigma, n = N - 1))
 
 ## Expected bias
 E_V_Sigma - EDI_pop$VE
@@ -177,11 +177,11 @@ This function does not distinguish population and sample (although providing `X`
 With the above example,
 ```{r}
 ## Eigenvalue dispersion indices of the population covariance matrix
-str(VE(V = Sigma))
+str(VE(S = Sigma))
 
 ## Of the population correlation matrix
-## Same as VE(V = cov2cor(Sigma))
-str(VE(V = Sigma, scale. = TRUE))
+## Same as VE(S = cov2cor(Sigma))
+str(VE(S = Sigma, scale. = TRUE))
 
 ## Of the sample covariance matrix
 str(VE(X = X))
@@ -190,9 +190,9 @@ str(VE(X = X))
 str(VE(X = X, scale. = TRUE))
 
 ## These are the same
-all.equal(VE(X = X), VE(V = cov(X)))
+all.equal(VE(X = X), VE(S = cov(X)))
 all.equal(VE(X = X), VE(L = eigen(cov(X))$values))
-all.equal(VE(X = X, scale. = TRUE), VE(V = cor(X)))
+all.equal(VE(X = X, scale. = TRUE), VE(S = cor(X)))
 ```
 
 This function can also return user-specified number of leading eigenvectors, when the argument `nv` is set to the desired number:
@@ -227,9 +227,9 @@ $\bar{V}_\mathrm{rel}(\m{S})$ | `Exv.VRav()` | `Var.VRav()`
 $\bar{V}_\mathrm{rel}(\m{R})$ | `Exv.VRav()` | `Var.VRav()`
 *Note*: The functions for $\V(\m{R})$ are retained for completeness, but this statistic is almost redundant with $\Vr(\m{R})$ (above). No functions for "bias-corrected" version of this has been implemented.
 
-These functions typically take two arguments: the population covariance or correlation matrix (`V` or `R`, as appropriate), and the degrees of freedom `n`. They are (pseudo-)vectorized with respect to `n`, so that the output is a vector with the same length as `n`.
+These functions typically take two arguments: the population covariance or correlation matrix (`Sigma` or `Rho`, as appropriate), and the degrees of freedom `n`. They are (pseudo-)vectorized with respect to `n`, so that the output is a vector with the same length as `n`.
 
-They can take a vector of population eigenvalues as the argument `L`, instead of `V` or `R`. For functions pertaining to $\V(\m{S})$ and $\Vr(\m{S})$, the results are identical (and indeed leads to slight improvement of speed when `L` is already available). On the other hand, this is usually **not** recommended for those pertaining to $\Vr(\m{R})$, because the distribution of this index is also dependent on population eigenvectors as well as population eigenvalues, except in certain restrictive conditions [see @Watanabe2021]. If the latter functions are provided with `L`, a population correlation matrix is generated with random eigenvectors, which in general leads to random fluctuation in the results (see examples below).
+They can take a vector of population eigenvalues as the argument `Lambda`, instead of `Sigma` or `Rho`. For functions pertaining to $\V(\m{S})$ and $\Vr(\m{S})$, the results are identical (and indeed leads to slight improvement of speed when `Lambda` is already available). On the other hand, this is usually **not** recommended for those pertaining to $\Vr(\m{R})$, because the distribution of this index is also dependent on population eigenvectors as well as population eigenvalues, except in certain restrictive conditions [see @Watanabe2021]. If the latter functions are provided with `Lambda`, a population correlation matrix is generated with random eigenvectors, which in general leads to random fluctuation in the results (see examples below).
 
 All these functions return exact moments under the null condition of sphericity or no correlation ($\m{\Sigma} = \sigma^2\m{I}_p$ and $\m{P} = \m{I}_p$, respectively, with $\m{I}_p$ being the identity matrix). Otherwise, they return exact (`Exv.VEv()`, `Var.VEv()`, `Exv.VRr()`) or asymptotic moments (`Exv.VRv()`, `Var.VRv()`); the accuracy of the latter can be suboptimal when `n` is small (though they are the best implementations to my knowledge). `Var.VRr()` is tricky; it returns the exact variance when $p = 2$ or under the null condition, but otherwise returns an asymptotic variance with one of the functions described below.
 
@@ -252,16 +252,16 @@ EDI_pop$VR ## Population value
 Rho <- cov2cor(Sigma)
 Exv.VRr(Rho, Ns - 1)
 Var.VRr(Rho, Ns - 1)
-VE(V = Rho)$VR ## Population value
+VE(S = Rho)$VR ## Population value
 
 ## Comparing results the covariance matrix
-Exv.VRv(V = Sigma, n = Ns - 1)
-Exv.VRv(L = Lambda, n = Ns - 1)
+Exv.VRv(Sigma = Sigma, n = Ns - 1)
+Exv.VRv(Lambda = Lambda, n = Ns - 1)
 ## These are equal (up to potential rounding error)
 
 ## With eigenvalues of the correlation matrix
-Exv.VRr(R = Rho, n = Ns - 1)
-Exv.VRr(L = eigen(Rho)$values, n = Ns - 1)
+Exv.VRr(Rho = Rho, n = Ns - 1)
+Exv.VRr(Lambda = eigen(Rho)$values, n = Ns - 1)
 ## These are NOT equal. Note the warning
 ## Indeed, the latter's result varies from run to run
 
@@ -313,8 +313,8 @@ For further details see `help(Exv.rx)`.
 ### `Sim.VE()`: simulating eigenvalue dispersion indices
 This function is to conduct Monte Carlo simulations of eigenvalue dispersion indices with multivariate normal populations (and was used in the simulations of @Watanabe2021).
 
-This function usually takes three arguments: `b`, the number of simulations, `V`, the population covariance matrix, and `N`, sample size.
-Alternatively, parametric bootstrapping can be performed by providing a data matrix `X` (in which case `V` and `N` are not required).
+This function usually takes three arguments: `b`, the number of simulations, `Sigma`, the population covariance matrix, and `N`, sample size.
+Alternatively, parametric bootstrapping can be performed by providing a data matrix `X` (in which case `Sigma` and `N` are not required).
 
 It returns a list of the following elements:
 
@@ -329,7 +329,7 @@ Optionally, eigenvectors can be calculated and returned, at the cost of computat
 
 Example with rather small `b`:
 ```{r}
-simres <- Sim.VE(10L, V = Sigma, N = N)
+simres <- Sim.VE(10L, Sigma = Sigma, N = N)
 str(simres)
 ```
 
@@ -339,23 +339,23 @@ This is an internal function used to generate a multivariate normal sample with 
 
 `rmvn()` is rather similar to `mvtnorm::rmvnorm()` (by convergence, in biologists' words), but has been designed to work optimally for simple simulation studies. By default, `rmvn()` uses Cholesky factorization `chol()` to obtain a matrix square root of the covariance matrix (and this is slightly faster than `mvtnorm::rmvnorm(..., method = "chol")`). Options for different algorithms are available, as this default method fails when the covariance matrix is singular (the user is assumed to know when this happens). On the other hand, `mvtnorm::rmvnorm()` is robust in this sense, as its default algorithm can appropriately handle singular covariance matrices.
 
-In addition, `rmvn()` can directly take the matrix square root as the argument `cV`, which can be useful when numerous simulations are run with the same population covariance matrix.
+In addition, `rmvn()` can directly take the matrix square root as the argument `cSigma`, which can be useful when numerous simulations are run with the same population covariance matrix.
 
 Quick examples:
 ```{r}
 ## Full-rank covariance matrix
 Sigma1 <- GenCov(evalues = c(4, 2, 1, 1), evectors = "random")
-X1 <- eigvaldisp:::rmvn(10, V = Sigma1)
+X1 <- eigvaldisp:::rmvn(10, Sigma = Sigma1)
 
 ## Singular covariance matrix (with only 1 eigenvalue equal to zero)
 Sigma2 <- GenCov(evalues = c(4, 2, 1, 0), evectors = "random")
-## Not run: eigvaldisp:::rmvn(10, V = Sigma2) ## Fails
-X2 <- eigvaldisp:::rmvn(10, V = Sigma2, sqrt_method = "pivot")
+## Not run: eigvaldisp:::rmvn(10, Sigma = Sigma2) ## Fails
+X2 <- eigvaldisp:::rmvn(10, Sigma = Sigma2, sqrt_method = "pivot")
 
 ## Singular covariance matrix (with >1 eigenvalue equal to zero)
 Sigma3 <- GenCov(evalues = c(4, 2, 0, 0), evectors = "random")
-X3 <- eigvaldisp:::rmvn(10, V = Sigma3, sqrt_method = "chol_piv") ## May fail
-X3 <- eigvaldisp:::rmvn(10, V = Sigma3, sqrt_method = "matsqrt")  ## Better
+X3 <- eigvaldisp:::rmvn(10, Sigma = Sigma3, sqrt_method = "chol_piv") ## May fail
+X3 <- eigvaldisp:::rmvn(10, Sigma = Sigma3, sqrt_method = "matsqrt")  ## Better
 ```
 
 

@@ -51,7 +51,7 @@ Lambda <- c(4, 2, 1, 1)
 Sigma <- GenCov(evalues = Lambda, evectors = "random")
 
 # Calculating eigenvalue dispersion indices of this matrix
-EDI_pop <- VE(V = Sigma)
+EDI_pop <- VE( = Sigma)
 
 # Eigenvalue variance ("V(Sigma)"): 1.5
 EDI_pop$VE
@@ -69,11 +69,11 @@ the same population covariance matrix:
 ```
 # Simulate a multivariate normal sample
 N <- 20
-X <- eigvaldisp:::rmvn(N = N, V = Sigma)
+X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
 
 # Calculating eigenvalue dispersion indices from the sample
 EDI_sam <- VE(X = X)
-# Same as VE(V = cov(X)) but faster
+# Same as VE(S = cov(X)) but faster
 
 # Sample eigenvalue variance ("V(S)")
 EDI_sam$VE

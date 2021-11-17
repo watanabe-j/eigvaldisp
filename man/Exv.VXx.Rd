@@ -13,9 +13,9 @@
 \title{Moments of eigenvalue dispersion indices}
 \usage{
 Exv.VEv(
-  V,
+  Sigma,
   n = 100,
-  L,
+  Lambda,
   divisor = c("UB", "ML"),
   m = switch(divisor, UB = n, ML = n + 1),
   drop_0 = FALSE,
@@ -23,12 +23,19 @@ Exv.VEv(
   ...
 )
 
-Exv.VRv(V, n = 100, L, drop_0 = FALSE, tol = .Machine$double.eps * 100, ...)
+Exv.VRv(
+  Sigma,
+  n = 100,
+  Lambda,
+  drop_0 = FALSE,
+  tol = .Machine$double.eps * 100,
+  ...
+)
 
 Exv.VEr(
-  R,
+  Rho,
   n = 100,
-  L,
+  Lambda,
   tol = .Machine$double.eps * 100,
   tol.hg = 0,
   maxiter.hg = 2000,
@@ -36,9 +43,9 @@ Exv.VEr(
 )
 
 Exv.VRr(
-  R,
+  Rho,
   n = 100,
-  L,
+  Lambda,
   tol = .Machine$double.eps * 100,
   tol.hg = 0,
   maxiter.hg = 2000,
@@ -46,9 +53,9 @@ Exv.VRr(
 )
 
 Var.VEv(
-  V,
+  Sigma,
   n = 100,
-  L,
+  Lambda,
   divisor = c("UB", "ML"),
   m = switch(divisor, UB = n, ML = n + 1),
   drop_0 = FALSE,
@@ -56,24 +63,31 @@ Var.VEv(
   ...
 )
 
-Var.VRv(V, n = 100, L, drop_0 = FALSE, tol = .Machine$double.eps * 100, ...)
+Var.VRv(
+  Sigma,
+  n = 100,
+  Lambda,
+  drop_0 = FALSE,
+  tol = .Machine$double.eps * 100,
+  ...
+)
 
-Var.VEr(R, n = 100, L, ...)
+Var.VEr(Rho, n = 100, Lambda, ...)
 
 Var.VRr(
-  R,
+  Rho,
   n = 100,
-  L,
+  Lambda,
   fun = c("pfd", "pfv", "pfc", "pf", "klv", "kl", "krv", "kr"),
   ...
 )
 }
 \arguments{
-\item{V}{Population covariance matrix; assumed to be validly constructed.}
+\item{Sigma}{Population covariance matrix; assumed to be validly constructed.}
 
 \item{n}{Degrees of freedom (not sample sizes); numeric of length 1 or more.}
 
-\item{L}{Numeric vector of population eigenvalues.}
+\item{Lambda}{Numeric vector of population eigenvalues.}
 
 \item{divisor}{Either \code{"UB"} (default) or \code{"ML"},
 to decide the default value of \code{m}.}
@@ -90,7 +104,7 @@ this is passed to \code{Exv.r2()} along with other arguments.}
 \item{...}{In \code{Var.VRr()}, additional arguments are passed to an internal
 function which it in turn calls. Otherwise ignored.}
 
-\item{R}{Population correlation matrix; assumed to be validly constructed
+\item{Rho}{Population correlation matrix; assumed to be validly constructed
 (although simple checks are done).}
 
 \item{tol.hg, maxiter.hg}{Passed to \code{Exv.r2()}; see description of that function.}
@@ -162,12 +176,12 @@ practical demand for these functions (and \eqn{V(R)} itself).
 As detailed in Watanabe (2021), the distribution of \eqn{Vrel(R)} cannot be
 uniquely specified by eigenvalues alone. Hence, a full correlation
 matrix \code{R} should preferably be provided. Otherwise, a correlation
-matrix is constructed from the eigenvalues \code{L} provided using
+matrix is constructed from the eigenvalues \code{Lambda} provided using
 the function \code{GenCov()} with randomly picked eigenvectors.
 
 On the other hand, the choice of eigenvectors does not matter for
-covariance matrices, thus either the full covariance matrix \code{V} or
-vector of eigenvalues \code{L} can be provided to yield identical results.
+covariance matrices, thus either the full covariance matrix \code{Sigma} or
+vector of eigenvalues \code{Lambda} can be provided to yield identical results.
 
 When \code{R} is provided, some simple checks are done: the matrix is
 scaled to have diagonals of 1; and if any of these are unequal,
@@ -182,8 +196,8 @@ all elliptically contoured distributions (see Anderson, 2003).
 N <- 20
 Lambda <- c(4, 2, 1, 1)
 (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
-VE(V = Sigma)$VE
-VE(V = Sigma)$VR
+VE(S = Sigma)$VE
+VE(S = Sigma)$VR
 # Population values of V(Sigma) and Vrel(Sigma)
 
 # From population covariance matrix
@@ -194,15 +208,15 @@ Var.VRv(Sigma, N - 1)
 # Note the amount of bias from the population value obtained above
 
 # From population eigenvalues
-Exv.VEv(L = Lambda, n = N - 1)
-Var.VEv(L = Lambda, n = N - 1)
-Exv.VRv(L = Lambda, n = N - 1)
-Var.VRv(L = Lambda, n = N - 1)
+Exv.VEv(Lambda = Lambda, n = N - 1)
+Var.VEv(Lambda = Lambda, n = N - 1)
+Exv.VRv(Lambda = Lambda, n = N - 1)
+Var.VRv(Lambda = Lambda, n = N - 1)
 # Same, regardless of the random choice of eigenvectors
 
 # Correlation matrix
 (Rho <- GenCov(evalues = Lambda / sum(Lambda) * 4, evectors = "Givens"))
-VE(V = Rho)$VR
+VE(S = Rho)$VR
 # Population value of Vrel(Rho)
 
 Exv.VRr(Rho, N - 1)

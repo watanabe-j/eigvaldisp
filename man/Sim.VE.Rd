@@ -8,14 +8,14 @@
 Sim.VE(
   b = 100L,
   X,
-  V,
-  cV = sqrtfun(V),
+  Sigma,
+  cSigma = sqrtfun(Sigma),
   N = nrow(X),
   divisor = c("UB", "ML"),
   m = switch(divisor, UB = N - 1, ML = N),
   center = TRUE,
   scale. = FALSE,
-  sub = seq_len(ncol(cV)),
+  sub = seq_len(ncol(cSigma)),
   nv = 0,
   sqrt_method = "chol",
   drop_0 = FALSE,
@@ -26,8 +26,8 @@ rmvn(
   N,
   p = 2L,
   s2 = 1,
-  V = s2 * diag(p),
-  cV = sqrtfun(V),
+  Sigma = s2 * diag(p),
+  cSigma = sqrtfun(Sigma),
   mean = rep_len(0, p),
   sqrt_method = "chol"
 )
@@ -35,23 +35,23 @@ rmvn(
 \arguments{
 \item{b}{Number of iterations.}
 
-\item{X}{(Optional) Data matrix; when \code{V} and \code{cV} are missing,
+\item{X}{(Optional) Data matrix; when \code{Sigma} and \code{cSigma} are missing,
 the sample covariance matrix from \code{X} is used as
 the population covariance matrix in simulations (parametric bootstrapping).}
 
-\item{V}{Population covariance matrix, assumed validly constructed;
+\item{Sigma}{Population covariance matrix, assumed validly constructed;
 by default a spherical covariance is used;
-ignored when \code{cV} is provided.}
+ignored when \code{cSigma} is provided.}
 
-\item{cV}{Cholesky factor of \code{V}; this can be specified instead of \code{V}.
-Potentially useful when multiple simulations are run for the same \code{V}
+\item{cSigma}{Cholesky factor of \code{Sigma}; this can be specified instead of \code{Sigma}.
+Potentially useful when multiple simulations are run for the same \code{Sigma}
 (although this will not substantially improve speed for a single call of
-\code{Sim.VE(V = ...)}, where \code{sqrtfun(V)} is called only once).}
+\code{Sim.VE(Sigma = ...)}, where \code{sqrtfun(Sigma)} is called only once).}
 
 \item{N}{Sample size in each iteration or each run of \code{rmvn()}.}
 
 \item{divisor, m, nv, drop_0, tol, center, scale., sub}{These arguments are passed to \code{VE()}.
-\code{center} and \code{scale.} are also used construct \code{V}
+\code{center} and \code{scale.} are also used construct \code{Sigma}
 when \code{X} is provided.}
 
 \item{sqrt_method}{Method for matrix square root, which defines the internal function
@@ -60,12 +60,12 @@ when \code{X} is provided.}
 \code{"chol_piv"} or \code{"pivot"} for \code{chol_piv()},
 \code{"chol_qr"} or \code{"qr"} for \code{chol_qr()},
 \code{"matsqrt"} or \code{"sqrt"} for \code{matsqrt()}.
-See \link{sqrt_methods} for details. Ignored when \code{cV} is provided.}
+See \link{sqrt_methods} for details. Ignored when \code{cSigma} is provided.}
 
-\item{p}{Number of variables; ignored when \code{V} or \code{cV} is provided.}
+\item{p}{Number of variables; ignored when \code{Sigma} or \code{cSigma} is provided.}
 
 \item{s2}{Population variance used for the spherical condition;
-ignored when \code{V} or \code{cV} is provided.}
+ignored when \code{Sigma} or \code{cSigma} is provided.}
 
 \item{mean}{Population mean vector; default is a \eqn{p} vector of 0's.}
 }
@@ -103,8 +103,8 @@ multivariate normal variates.
 }
 \details{
 When \code{Sim.VE()} is called, either data (\code{X}),
-a covariance matrix (\code{V}),
-or its Cholesky factor (\code{cV}) should be given.
+a covariance matrix (\code{Sigma}),
+or its Cholesky factor (\code{cSigma}) should be given.
 Specify the sample size \code{N} as well, unless \code{X} is provided.
 
 \code{Sim.VE()} does not actually calculate sample covariance/correlation
@@ -120,17 +120,17 @@ Lambda <- c(4, 2, 1, 1)
 (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
 N <- 10
 set.seed(35638)
-X1 <- eigvaldisp:::rmvn(N = N, V = Sigma)
+X1 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
 cSigma <- chol(Sigma)
 set.seed(35638)
-X2 <- eigvaldisp:::rmvn(N = N, cV = cSigma)
+X2 <- eigvaldisp:::rmvn(N = N, cSigma = cSigma)
 stopifnot(all.equal(X1, X2))
-# These are identical. Providing cV is quicker as it skips sqrtfun(V),
+# These are identical. Providing cSigma is quicker as it skips sqrtfun(Sigma),
 # so this may be useful when multiple simulations are to be run with
 # the same population covariance matrix.
 
 # A small simulation
-sim_result <- Sim.VE(b = 50L, V = Sigma, N = N)
+sim_result <- Sim.VE(b = 50L, Sigma = Sigma, N = N)
 str(sim_result)
 # Results are returned as a list (see "Value" for details)
 

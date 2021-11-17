@@ -10,28 +10,56 @@
 \alias{Var.VRar}
 \title{Moments of ``bias-corrected'' eigenvalue dispersion indices}
 \usage{
-Exv.VEav(V, n = 100, L, drop_0 = FALSE, tol = .Machine$double.eps * 100, ...)
+Exv.VEav(
+  Sigma,
+  n = 100,
+  Lambda,
+  drop_0 = FALSE,
+  tol = .Machine$double.eps * 100,
+  ...
+)
 
-Exv.VRav(V, n = 100, L, drop_0 = FALSE, tol = .Machine$double.eps * 100, ...)
+Exv.VRav(
+  Sigma,
+  n = 100,
+  Lambda,
+  drop_0 = FALSE,
+  tol = .Machine$double.eps * 100,
+  ...
+)
 
 Exv.VRar(
-  R,
+  Rho,
   n = 100,
-  L,
+  Lambda,
   tol = .Machine$double.eps * 100,
   tol.hg = 0,
   maxiter.hg = 2000,
   ...
 )
 
-Var.VEav(V, n = 100, L, drop_0 = FALSE, tol = .Machine$double.eps * 100, ...)
+Var.VEav(
+  Sigma,
+  n = 100,
+  Lambda,
+  drop_0 = FALSE,
+  tol = .Machine$double.eps * 100,
+  ...
+)
 
-Var.VRav(V, n = 100, L, drop_0 = FALSE, tol = .Machine$double.eps * 100, ...)
+Var.VRav(
+  Sigma,
+  n = 100,
+  Lambda,
+  drop_0 = FALSE,
+  tol = .Machine$double.eps * 100,
+  ...
+)
 
 Var.VRar(
-  R,
+  Rho,
   n = 100,
-  L,
+  Lambda,
   tol = .Machine$double.eps * 100,
   tol.hg = 0,
   maxiter.hg = 2000,
@@ -39,11 +67,11 @@ Var.VRar(
 )
 }
 \arguments{
-\item{V}{Population covariance matrix; assumed to be validly constructed.}
+\item{Sigma}{Population covariance matrix; assumed to be validly constructed.}
 
 \item{n}{Degrees of freedom (not sample sizes); numeric of length 1 or more.}
 
-\item{L}{Numeric vector of population eigenvalues.}
+\item{Lambda}{Numeric vector of population eigenvalues.}
 
 \item{drop_0}{Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped.}
 
@@ -54,7 +82,7 @@ this is passed to \code{Exv.r2()} along with other arguments.}
 \item{...}{In \code{Var.VRr()}, additional arguments are passed to an internal
 function which it in turn calls. Otherwise ignored.}
 
-\item{R}{Population correlation matrix; assumed to be validly constructed
+\item{Rho}{Population correlation matrix; assumed to be validly constructed
 (although simple checks are done).}
 
 \item{tol.hg}{Passed to \code{Exv.r2()}; see description of that function.}
@@ -97,8 +125,8 @@ Usage is identical to that of the corresponding unadjusted versions
 N <- 20
 Lambda <- c(4, 2, 1, 1)
 (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
-VE(V = Sigma)$VE
-VE(V = Sigma)$VR
+VE(S = Sigma)$VE
+VE(S = Sigma)$VR
 # Population values of V(Sigma) and Vrel(Sigma)
 
 # Moments of bias-corrected eigenvalue variance of covariance matrix
@@ -110,11 +138,11 @@ Var.VEav(Sigma, n = N - 1)
 Exv.VRav(Sigma, n = N - 1)
 Var.VRav(Sigma, n = N - 1)
 # Slight underestimation is expected
-# All these are the same with L = Lambda is specified instead of Sigma.
+# All these are the same with Lambda = Lambda is specified instead of Sigma.
 
 # Correlation matrix
 (Rho <- GenCov(evalues = Lambda / sum(Lambda) * 4, evectors = "Givens"))
-VE(V = Rho)$VR
+VE(S = Rho)$VR
 # Population value of Vrel(Rho), identical to Vrel(Sigma) as it should be
 
 Exv.VRar(Rho, n = N - 1)

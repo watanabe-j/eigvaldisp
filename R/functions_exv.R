@@ -34,12 +34,12 @@
 #' As detailed in Watanabe (2021), the distribution of \eqn{Vrel(R)} cannot be
 #' uniquely specified by eigenvalues alone. Hence, a full correlation
 #' matrix \code{R} should preferably be provided. Otherwise, a correlation
-#' matrix is constructed from the eigenvalues \code{L} provided using
+#' matrix is constructed from the eigenvalues \code{Lambda} provided using
 #' the function \code{GenCov()} with randomly picked eigenvectors.
 #'
 #' On the other hand, the choice of eigenvectors does not matter for
-#' covariance matrices, thus either the full covariance matrix \code{V} or
-#' vector of eigenvalues \code{L} can be provided to yield identical results.
+#' covariance matrices, thus either the full covariance matrix \code{Sigma} or
+#' vector of eigenvalues \code{Lambda} can be provided to yield identical results.
 #'
 #' When \code{R} is provided, some simple checks are done: the matrix is
 #' scaled to have diagonals of 1; and if any of these are unequal,
@@ -57,14 +57,14 @@
 # #'
 #' @name Exv.VXx
 #'
-#' @param V
+#' @param Sigma
 #'   Population covariance matrix; assumed to be validly constructed.
-#' @param R
+#' @param Rho
 #'   Population correlation matrix; assumed to be validly constructed
 #'   (although simple checks are done).
 #' @param n
 #'   Degrees of freedom (not sample sizes); numeric of length 1 or more.
-#' @param L
+#' @param Lambda
 #'   Numeric vector of population eigenvalues.
 #' @param divisor
 #'   Either \code{"UB"} (default) or \code{"ML"},
@@ -108,8 +108,8 @@
 #' N <- 20
 #' Lambda <- c(4, 2, 1, 1)
 #' (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
-#' VE(V = Sigma)$VE
-#' VE(V = Sigma)$VR
+#' VE(S = Sigma)$VE
+#' VE(S = Sigma)$VR
 #' # Population values of V(Sigma) and Vrel(Sigma)
 #'
 #' # From population covariance matrix
@@ -120,15 +120,15 @@
 #' # Note the amount of bias from the population value obtained above
 #'
 #' # From population eigenvalues
-#' Exv.VEv(L = Lambda, n = N - 1)
-#' Var.VEv(L = Lambda, n = N - 1)
-#' Exv.VRv(L = Lambda, n = N - 1)
-#' Var.VRv(L = Lambda, n = N - 1)
+#' Exv.VEv(Lambda = Lambda, n = N - 1)
+#' Var.VEv(Lambda = Lambda, n = N - 1)
+#' Exv.VRv(Lambda = Lambda, n = N - 1)
+#' Var.VRv(Lambda = Lambda, n = N - 1)
 #' # Same, regardless of the random choice of eigenvectors
 #'
 #' # Correlation matrix
 #' (Rho <- GenCov(evalues = Lambda / sum(Lambda) * 4, evectors = "Givens"))
-#' VE(V = Rho)$VR
+#' VE(S = Rho)$VR
 #' # Population value of Vrel(Rho)
 #'
 #' Exv.VRr(Rho, N - 1)
@@ -166,21 +166,21 @@ NULL
 #'
 #' @export
 #'
-Exv.VEv <- function(V, n = 100, L, divisor = c("UB", "ML"),
+Exv.VEv <- function(Sigma, n = 100, Lambda, divisor = c("UB", "ML"),
                     m = switch(divisor, UB = n, ML = n + 1), drop_0 = FALSE,
                     tol = .Machine$double.eps * 100, ...) {
     divisor <- match.arg(divisor)
-    if(missing(L)) {
-        L <- svd(V, nu = 0, nv = 0)$d
+    if(missing(Lambda)) {
+        Lambda <- svd(Sigma, nu = 0, nv = 0)$d
     }
     if(drop_0) {
-        L <- L[L > tol]
+        Lambda <- Lambda[Lambda > tol]
     } else {
-        L[L < tol] <- 0
+        Lambda[Lambda < tol] <- 0
     }
-    p <- length(L)
-    t1 <- sum(L)
-    t2 <- sum(L ^ 2)
+    p <- length(Lambda)
+    t1 <- sum(Lambda)
+    t2 <- sum(Lambda ^ 2)
     n * ((p - n) * t1 ^ 2 + (p * n + p - 2) * t2) / (p ^ 2 * m ^ 2)
 }
 
@@ -194,21 +194,21 @@ Exv.VEv <- function(V, n = 100, L, divisor = c("UB", "ML"),
 #'
 #' @export
 #'
-Exv.VRv <- function(V, n = 100, L, drop_0 = FALSE,
+Exv.VRv <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                     tol = .Machine$double.eps * 100, ...) {
-    if(missing(L)) {
-        L <- svd(V, nu = 0, nv = 0)$d
+    if(missing(Lambda)) {
+        Lambda <- svd(Sigma, nu = 0, nv = 0)$d
     }
     if(drop_0) {
-        L <- L[L > tol]
+        Lambda <- Lambda[Lambda > tol]
     } else {
-        L[L < tol] <- 0
+        Lambda[Lambda < tol] <- 0
     }
-    p <- length(L)
-    t1 <- sum(L)
-    t2 <- sum(L ^ 2)
-    t3 <- sum(L ^ 3)
-    t4 <- sum(L ^ 4)
+    p <- length(Lambda)
+    t1 <- sum(Lambda)
+    t2 <- sum(Lambda ^ 2)
+    t3 <- sum(Lambda ^ 3)
+    t4 <- sum(Lambda ^ 4)
     EF <- (t1 ^ 2 + (n + 1) * t2) / (n * t1 ^ 2 + 2 * t2) -
           8 * ((n + 2) * (n - 1) * (3 * t4 * t1 ^ 2 - 2 * t3 * t2 * t1 - t2 ^ 3
                                     + n * t3 * t1 ^ 3 - n * t2 ^ 2 * t1 ^ 2)) /
@@ -226,23 +226,23 @@ Exv.VRv <- function(V, n = 100, L, drop_0 = FALSE,
 #'
 #' @export
 #'
-Exv.VEr <- function(R, n = 100, L, tol = .Machine$double.eps * 100,
+Exv.VEr <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
                     tol.hg = 0, maxiter.hg = 2000, ...) {
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
-    exv.VRr <- Exv.VRr(R = R, n = n, tol = tol,
+    p <- ncol(Rho)
+    exv.VRr <- Exv.VRr(Rho = Rho, n = n, tol = tol,
                        tol.hg = tol.hg, maxiter.hg = maxiter.hg, ...)
     exv.VRr * (p - 1)
 }
@@ -257,23 +257,23 @@ Exv.VEr <- function(R, n = 100, L, tol = .Machine$double.eps * 100,
 #'
 #' @export
 #'
-Exv.VRr <- function(R, n = 100, L, tol = .Machine$double.eps * 100,
+Exv.VRr <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
                     tol.hg = 0, maxiter.hg = 2000, ...) {
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
-    R2 <- R[lower.tri(R)] ^ 2
+    p <- ncol(Rho)
+    R2 <- Rho[lower.tri(Rho)] ^ 2
     exv_r2 <- matrix(sapply(n, Exv.r2, x = R2, do.square = FALSE, tol = tol,
                             tol.hg = tol.hg, maxiter.hg = maxiter.hg),
                      ncol = length(n))
@@ -290,23 +290,23 @@ Exv.VRr <- function(R, n = 100, L, tol = .Machine$double.eps * 100,
 #'
 #' @export
 #'
-Var.VEv <- function(V, n = 100, L, divisor = c("UB", "ML"),
+Var.VEv <- function(Sigma, n = 100, Lambda, divisor = c("UB", "ML"),
                     m = switch(divisor, UB = n, ML = n + 1), drop_0 = FALSE,
                     tol = .Machine$double.eps * 100, ...) {
     divisor <- match.arg(divisor)
-    if(missing(L)) {
-        L <- svd(V, nu = 0, nv = 0)$d
+    if(missing(Lambda)) {
+        Lambda <- svd(Sigma, nu = 0, nv = 0)$d
     }
     if(drop_0) {
-        L <- L[L > tol]
+        Lambda <- Lambda[Lambda > tol]
     } else {
-        L[L < tol] <- 0
+        Lambda[Lambda < tol] <- 0
     }
-    p <- length(L)
-    t1 <- sum(L)
-    t2 <- sum(L ^ 2)
-    t3 <- sum(L ^ 3)
-    t4 <- sum(L ^ 4)
+    p <- length(Lambda)
+    t1 <- sum(Lambda)
+    t2 <- sum(Lambda ^ 2)
+    t3 <- sum(Lambda ^ 3)
+    t4 <- sum(Lambda ^ 4)
     4 * n * ((2 * p^2 * n^2 + 5 * p^2 * n + 5 * p^2 - 12 * p * n - 12 * p + 12)
              * t4 + 4 * (p - n) * (p * n + p - 2) * t3 * t1 +
              (p^2 * n + p^2 - 4 * p + 2 * n) * t2^2 +
@@ -323,22 +323,22 @@ Var.VEv <- function(V, n = 100, L, divisor = c("UB", "ML"),
 #'
 #' @export
 #'
-Var.VRv <- function(V, n = 100, L, drop_0 = FALSE,
+Var.VRv <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                     tol = .Machine$double.eps * 100, ...) {
-    if(missing(L)) {
-        L <- svd(V, nu = 0, nv = 0)$d
+    if(missing(Lambda)) {
+        Lambda <- svd(Sigma, nu = 0, nv = 0)$d
     }
     if(drop_0) {
-        L <- L[L > tol]
+        Lambda <- Lambda[Lambda > tol]
     } else {
-        L[L < tol] <- 0
+        Lambda[Lambda < tol] <- 0
     }
-    p <- length(L)
-    t1 <- sum(L)
-    t2 <- sum(L ^ 2)
-    t3 <- sum(L ^ 3)
-    t4 <- sum(L ^ 4)
-    if(isTRUE(all.equal(L / L[1], rep.int(1, p)))) {
+    p <- length(Lambda)
+    t1 <- sum(Lambda)
+    t2 <- sum(Lambda ^ 2)
+    t3 <- sum(Lambda ^ 3)
+    t4 <- sum(Lambda ^ 4)
+    if(isTRUE(all.equal(Lambda / Lambda[1], rep.int(1, p)))) {
         4 * p^2 * (p + 2) * (n - 1) * (n + 2) /
              (p - 1) / (p * n + 2)^2 / (p * n + 4) / (p * n + 6)
     } else {
@@ -361,22 +361,22 @@ Var.VRv <- function(V, n = 100, L, drop_0 = FALSE,
 #'
 #' @export
 #'
-Var.VEr <- function(R, n = 100, L, ...) {
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+Var.VEr <- function(Rho, n = 100, Lambda, ...) {
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
-    var.VRr <- Var.VRr(R = R, n = n, ...)
+    p <- ncol(Rho)
+    var.VRr <- Var.VRr(Rho = Rho, n = n, ...)
     var.VRr * (p - 1) ^ 2
 }
 
@@ -390,28 +390,28 @@ Var.VEr <- function(R, n = 100, L, ...) {
 #'
 #' @export
 #'
-Var.VRr <- function(R, n = 100, L,
+Var.VRr <- function(Rho, n = 100, Lambda,
                     fun = c("pfd", "pfv", "pfc", "pf",
                             "klv", "kl", "krv", "kr"), ...) {
     fun <- match.arg(fun)
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
-    if(isTRUE(all.equal(R, diag(p)))) {
+    p <- ncol(Rho)
+    if(isTRUE(all.equal(Rho, diag(p)))) {
         4 * (n - 1) / (p * (p - 1) * n^2 * (n + 2))
     } else if(p == 2) {
-        R2 <- R[lower.tri(R)] ^ 2
+        R2 <- Rho[lower.tri(Rho)] ^ 2
         var_r2 <- matrix(sapply(n, Var.r2, x = R2, do.square = FALSE),
                          ncol = length(n))
         4 * colSums(var_r2) / (p * (p - 1)) ^ 2
@@ -420,7 +420,7 @@ Var.VRr <- function(R, n = 100, L,
                       klv = AVar.VRr_klv, kl = AVar.VRr_kl, kr = AVar.VRr_kr,
                       krv = AVar.VRr_krv, pf = AVar.VRr_pf, pfv = AVar.VRr_pfv,
                       pfd = AVar.VRr_pfd, pfc = AVar.VRr_pfc)
-        Fun(R = R, n = n, ...)
+        Fun(Rho = Rho, n = n, ...)
     }
 }
 
@@ -593,7 +593,7 @@ Var.VRr <- function(R, n = 100, L,
 #' N <- 20
 #' Lambda <- c(4, 2, 1, 1)
 #' (Rho <- GenCov(evalues = Lambda / sum(Lambda) * 4, evectors = "Givens"))
-#' VE(V = Rho)$VR
+#' VE(S = Rho)$VR
 #' # Population value of Vrel(Rho)
 #'
 #' # Different choices for asymptotic variance of Vrel(R)
@@ -635,7 +635,7 @@ NULL
 #'
 #' @rdname AVar.VRr_xx
 #'
-AVar.VRr_pf <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
+AVar.VRr_pf <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic"),
                         var1.mode = "asymptotic",
                         var2.mode = c("exact", "asymptotic"),
                         order.exv1 = 2, order.var2 = 2,
@@ -677,7 +677,7 @@ AVar.VRr_pf <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
         l <- pI[4]
         Eij <- exv_r1[(j - 1) * p + i - (j - 1) * (2 * p - j + 2) / 2, ]
         Ekl <- exv_r1[(l - 1) * p + k - (l - 1) * (2 * p - l + 2) / 2, ]
-        Cijkl <- v1fun(n = n, R = R, i = i, j = j, k = k, l = l)
+        Cijkl <- v1fun(n = n, Rho = Rho, i = i, j = j, k = k, l = l)
         (4 * Eij * Ekl + 2 * Cijkl) * Cijkl
     }
     e1fun <- switch(exv1.mode,
@@ -689,23 +689,23 @@ AVar.VRr_pf <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
                     exact = function(n, x) Var.r2(n, x, do.square = TRUE, ...),
                     asymptotic = function(n, x) AVar.r2(n, x,
                                                         order. = order.var2))
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
 
-    p <- ncol(R)
+    p <- ncol(Rho)
     l_n <- length(n)
-    R_u <- R[upper.tri(R)]
+    R_u <- Rho[upper.tri(Rho)]
     var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
     exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
     d <- digit(p)
@@ -720,7 +720,7 @@ AVar.VRr_pf <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
                                       i - (j - 1) * (2 * p - j + 2) / 2, ]
                         Ekl <- exv_r1[(l - 1) * p +
                                       k - (l - 1) * (2 * p - l + 2) / 2, ]
-                        Cijkl <- sapply(n, v1fun, R = R,
+                        Cijkl <- sapply(n, v1fun, Rho = Rho,
                                         i = i, j = j, k = k, l = l)
                         cov_r2 <- cov_r2 + (4 * Eij * Ekl + 2 * Cijkl) * Cijkl
                     }
@@ -778,7 +778,7 @@ AVar.VRr_pf <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
 #'
 #' @rdname AVar.VRr_xx
 #'
-AVar.VRr_pfv <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
+AVar.VRr_pfv <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic"),
                        var1.mode = "asymptotic",
                        var2.mode = c("exact", "asymptotic"),
                        order.exv1 = 2, order.var2 = 2, ...) {
@@ -804,22 +804,22 @@ AVar.VRr_pfv <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
                     exact = function(n, x) Var.r2(n, x, do.square = TRUE, ...),
                     asymptotic = function(n, x) AVar.r2(n, x,
                                                         order. = order.var2))
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
+    p <- ncol(Rho)
     l_n <- length(n)
-    R_u <- R[upper.tri(R)]
+    R_u <- Rho[upper.tri(Rho)]
     var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
     d <- digit(p)
     a <- seq_len(p)
@@ -837,12 +837,12 @@ AVar.VRr_pfv <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
     Ekl <- exv_r1[(Ls - 1) * p + Ks - (Ls - 1) * (2 * p - Ls + 2) / 2, ]
     Eij_Ekl <- Eij * Ekl
     rm(exv_r1, Eij, Ekl)
-    Rij <- R[(Js - 1) * p + Is]
-    Rkl <- R[(Ls - 1) * p + Ks]
-    Rik <- R[(Ks - 1) * p + Is]
-    Rjl <- R[(Ls - 1) * p + Js]
-    Ril <- R[(Ls - 1) * p + Is]
-    Rjk <- R[(Ks - 1) * p + Js]
+    Rij <- Rho[(Js - 1) * p + Is]
+    Rkl <- Rho[(Ls - 1) * p + Ks]
+    Rik <- Rho[(Ks - 1) * p + Is]
+    Rjl <- Rho[(Ls - 1) * p + Js]
+    Ril <- Rho[(Ls - 1) * p + Is]
+    Rjk <- Rho[(Ks - 1) * p + Js]
     rm(Is, Js, Ks, Ls)
     Cijkl <- c1fun(n, Rij, Rkl, Rik, Rjl, Ril, Rjk)
     rm(Rij, Rkl, Rik, Rjl, Ril, Rjk)
@@ -861,7 +861,7 @@ AVar.VRr_pfv <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
 #'
 #' @rdname AVar.VRr_xx
 #'
-AVar.VRr_pfd <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
+AVar.VRr_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic"),
                          var1.mode = "asymptotic",
                          var2.mode = c("exact", "asymptotic"),
                          order.exv1 = 2, order.var2 = 2,
@@ -928,34 +928,34 @@ AVar.VRr_pfd <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
         Ekl <- exv_r1[(Ls - 1) * p + Ks - (Ls - 1) * (2 * p - Ls + 2) / 2, ]
         Eij_Ekl <- Eij * Ekl
         # rm(Eij, Ekl)
-        Rij <- R[(Js - 1) * p + Is]
-        Rkl <- R[(Ls - 1) * p + Ks]
-        Rik <- R[(Ks - 1) * p + Is]
-        Rjl <- R[(Ls - 1) * p + Js]
-        Ril <- R[(Ls - 1) * p + Is]
-        Rjk <- R[(Ks - 1) * p + Js]
+        Rij <- Rho[(Js - 1) * p + Is]
+        Rkl <- Rho[(Ls - 1) * p + Ks]
+        Rik <- Rho[(Ks - 1) * p + Is]
+        Rjl <- Rho[(Ls - 1) * p + Js]
+        Ril <- Rho[(Ls - 1) * p + Is]
+        Rjk <- Rho[(Ks - 1) * p + Js]
         # rm(Is, Js, Ks, Ls)
         Cijkl <- c1fun(n, Rij, Rkl, Rik, Rjl, Ril, Rjk)
         # return(colSums(8 * Eij_Ekl * Cijkl + 4 * Cijkl ^ 2))
         return(4 * diag(2 * crossprod(Eij_Ekl, Cijkl) + crossprod(Cijkl)))
         # rm(Eij_Ekl, Cijkl)
     }
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
+    p <- ncol(Rho)
     l_n <- length(n)
-    R_u <- R[upper.tri(R)]
+    R_u <- Rho[upper.tri(Rho)]
     var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
     exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
     d <- digit(p)
@@ -1022,7 +1022,7 @@ AVar.VRr_pfd <- function(R, n = 100, L, exv1.mode = c("exact", "asymptotic"),
 #'
 #' @rdname AVar.VRr_xx
 #'
-AVar.VRr_pfc <- function(R, n = 100, L, cppfun = "Cov_r2C",
+AVar.VRr_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
                          exv1.mode = c("exact", "asymptotic"),
                          # var1.mode = "asymptotic",
                          var2.mode = c("exact", "asymptotic"),
@@ -1048,25 +1048,25 @@ AVar.VRr_pfc <- function(R, n = 100, L, cppfun = "Cov_r2C",
                     exact = function(n, x) Var.r2(n, x, do.square = TRUE, ...),
                     asymptotic = function(n, x) AVar.r2(n, x,
                                                         order. = order.var2))
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
+    p <- ncol(Rho)
     l_n <- length(n)
-    R_u <- R[upper.tri(R)]
+    R_u <- Rho[upper.tri(Rho)]
     var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
     exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
-    cov_r2 <- c(c1fun(n, R, exv_r1))
+    cov_r2 <- c(c1fun(n, Rho, exv_r1))
     ans <- colSums(var_r2) + cov_r2
     4 * ans / (p * (p - 1))^2
 }
@@ -1079,25 +1079,25 @@ AVar.VRr_pfc <- function(R, n = 100, L, cppfun = "Cov_r2C",
 #'
 #' @rdname AVar.VRr_xx
 #'
-AVar.VRr_kl <- function(R, n = 100, L, ...) {
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+AVar.VRr_kl <- function(Rho, n = 100, Lambda, ...) {
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
-    svd.R <- svd(R, nu = 0)
-    d <- svd.R$d
-    V2 <- svd.R$v ^ 2
-    R2 <- R ^ 2
+    p <- ncol(Rho)
+    svd.Rho <- svd(Rho, nu = 0)
+    d <- svd.Rho$d
+    V2 <- svd.Rho$v ^ 2
+    R2 <- Rho ^ 2
     ans <- numeric(1)
     for(i in 1:p) {
         for(j in 1:p) {
@@ -1116,26 +1116,26 @@ AVar.VRr_kl <- function(R, n = 100, L, ...) {
 #'
 #' @rdname AVar.VRr_xx
 #'
-AVar.VRr_klv <- function(R, n = 100, L, ...) {
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+AVar.VRr_klv <- function(Rho, n = 100, Lambda, ...) {
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
-    svd.R <- svd(R, nu = 0)
-    d <- svd.R$d
+    p <- ncol(Rho)
+    svd.Rho <- svd(Rho, nu = 0)
+    d <- svd.Rho$d
     d2 <- d ^ 2
-    V2 <- svd.R$v ^ 2
-    R2 <- R ^ 2
+    V2 <- svd.Rho$v ^ 2
+    R2 <- Rho ^ 2
     G <- diag(p) - outer(d, d, "+") * crossprod(V2) +
          crossprod(V2, crossprod(R2, V2))
     F <- (d2 %*% t(d2)) * G
@@ -1151,29 +1151,29 @@ AVar.VRr_klv <- function(R, n = 100, L, ...) {
 #'
 #' @rdname AVar.VRr_xx
 #'
-AVar.VRr_kr <- function(R, n = 100, L, ...) {
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+AVar.VRr_kr <- function(Rho, n = 100, Lambda, ...) {
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
+    p <- ncol(Rho)
     ans <- numeric(1)
     for(i in 1:p) {
         for(j in (1:p)[-i]) {
             for(k in i:p) {
                 for(l in (1:p)[-k]) {
-                    ans <- ans + (R[j, k] - R[i, j] * R[i, k]) *
-                                 (R[i, l] - R[i, k] * R[k, l]) *
-                                 R[i, j] * R[k, l]
+                    ans <- ans + (Rho[j, k] - Rho[i, j] * Rho[i, k]) *
+                                 (Rho[i, l] - Rho[i, k] * Rho[k, l]) *
+                                 Rho[i, j] * Rho[k, l]
                 }
             }
         }
@@ -1188,7 +1188,7 @@ AVar.VRr_kr <- function(R, n = 100, L, ...) {
 #'
 #' @rdname AVar.VRr_xx
 #'
-AVar.VRr_krv <- function(R, n = 100, L, ...) {
+AVar.VRr_krv <- function(Rho, n = 100, Lambda, ...) {
     # digit <- function(x) {
     #     i <- 1L
     #     while(x %/% 10 >= 1) {
@@ -1197,20 +1197,20 @@ AVar.VRr_krv <- function(R, n = 100, L, ...) {
     #     }
     #     return(i)
     # }
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
+    p <- ncol(Rho)
     d <- digit(p)
     a <- seq_len(p)
     A <- outer(as.integer(10 ^ d) * a, a, "+")
@@ -1222,12 +1222,12 @@ AVar.VRr_krv <- function(R, n = 100, L, ...) {
     Js <- as.integer(IJ %% 10 ^ d)
     Ks <- as.integer((KL %/% 10 ^ d) %% 10 ^ d)
     Ls <- as.integer(KL %% 10 ^ d)
-    Rij <- R[(Js - 1) * p + Is]
-    Rkl <- R[(Ls - 1) * p + Ks]
-    Rik <- R[(Ks - 1) * p + Is]
-    Rjl <- R[(Ls - 1) * p + Js]
-    Ril <- R[(Ls - 1) * p + Is]
-    Rjk <- R[(Ks - 1) * p + Js]
+    Rij <- Rho[(Js - 1) * p + Is]
+    Rkl <- Rho[(Ls - 1) * p + Ks]
+    Rik <- Rho[(Ks - 1) * p + Is]
+    Rjl <- Rho[(Ls - 1) * p + Js]
+    Ril <- Rho[(Ls - 1) * p + Is]
+    Rjk <- Rho[(Ks - 1) * p + Js]
     ans <- (Rjk - Rij * Rik) * (Ril - Rik * Rkl) * Rij * Rkl
     ans <- sum(ans)
     16 * ans / (p * (p - 1)) ^ 2 / n
@@ -1264,8 +1264,8 @@ AVar.VRr_krv <- function(R, n = 100, L, ...) {
 #' N <- 20
 #' Lambda <- c(4, 2, 1, 1)
 #' (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
-#' VE(V = Sigma)$VE
-#' VE(V = Sigma)$VR
+#' VE(S = Sigma)$VE
+#' VE(S = Sigma)$VR
 #' # Population values of V(Sigma) and Vrel(Sigma)
 #'
 #' # Moments of bias-corrected eigenvalue variance of covariance matrix
@@ -1277,11 +1277,11 @@ AVar.VRr_krv <- function(R, n = 100, L, ...) {
 #' Exv.VRav(Sigma, n = N - 1)
 #' Var.VRav(Sigma, n = N - 1)
 #' # Slight underestimation is expected
-#' # All these are the same with L = Lambda is specified instead of Sigma.
+#' # All these are the same with Lambda = Lambda is specified instead of Sigma.
 #'
 #' # Correlation matrix
 #' (Rho <- GenCov(evalues = Lambda / sum(Lambda) * 4, evectors = "Givens"))
-#' VE(V = Rho)$VR
+#' VE(S = Rho)$VR
 #' # Population value of Vrel(Rho), identical to Vrel(Sigma) as it should be
 #'
 #' Exv.VRar(Rho, n = N - 1)
@@ -1307,19 +1307,19 @@ NULL
 #'
 #' @export
 #'
-Exv.VEav <- function(V, n = 100, L, drop_0 = FALSE,
+Exv.VEav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                      tol = .Machine$double.eps * 100, ...) {
-    if(missing(L)) {
-        L <- svd(V, nu = 0, nv = 0)$d
+    if(missing(Lambda)) {
+        Lambda <- svd(Sigma, nu = 0, nv = 0)$d
     }
     if(drop_0) {
-        L <- L[L > tol]
+        Lambda <- Lambda[Lambda > tol]
     } else {
-        L[L < tol] <- 0
+        Lambda[Lambda < tol] <- 0
     }
-    p <- length(L)
-    t1 <- sum(L)
-    t2 <- sum(L ^ 2)
+    p <- length(Lambda)
+    t1 <- sum(Lambda)
+    t2 <- sum(Lambda ^ 2)
     t2 / p - t1 ^ 2 / p^2
 }
 
@@ -1333,18 +1333,18 @@ Exv.VEav <- function(V, n = 100, L, drop_0 = FALSE,
 #'
 #' @export
 #'
-Exv.VRav <- function(V, n = 100, L, drop_0 = FALSE,
+Exv.VRav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                      tol = .Machine$double.eps * 100, ...) {
-    if(missing(L)) {
-        L <- svd(V, nu = 0, nv = 0)$d
+    if(missing(Lambda)) {
+        Lambda <- svd(Sigma, nu = 0, nv = 0)$d
     }
     if(drop_0) {
-        L <- L[L > tol]
+        Lambda <- Lambda[Lambda > tol]
     } else {
-        L[L < tol] <- 0
+        Lambda[Lambda < tol] <- 0
     }
-    p <- length(L)
-    E <- Exv.VRv(L = L, n = n, drop_0 = drop_0, tol = tol, ...)
+    p <- length(Lambda)
+    E <- Exv.VRv(Lambda = Lambda, n = n, drop_0 = drop_0, tol = tol, ...)
     En <- (p + 2) / (p * n + 2)
     1 - (1 - E) / (1 - En)
 }
@@ -1359,23 +1359,23 @@ Exv.VRav <- function(V, n = 100, L, drop_0 = FALSE,
 #'
 #' @export
 #'
-Exv.VRar <- function(R, n = 100, L, tol = .Machine$double.eps * 100,
+Exv.VRar <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
                      tol.hg = 0, maxiter.hg = 2000, ...) {
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
-    E <- Exv.VRr(R = R, n = n, tol = tol,
+    p <- ncol(Rho)
+    E <- Exv.VRr(Rho = Rho, n = n, tol = tol,
                  tol.hg = tol.hg, maxiter.hg = maxiter.hg, ...)
     En <- 1 / n
     1 - (1 - E) / (1 - En)
@@ -1391,21 +1391,21 @@ Exv.VRar <- function(R, n = 100, L, tol = .Machine$double.eps * 100,
 #'
 #' @export
 #'
-Var.VEav <- function(V, n = 100, L, drop_0 = FALSE,
+Var.VEav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                      tol = .Machine$double.eps * 100, ...) {
-    if(missing(L)) {
-        L <- svd(V, nu = 0, nv = 0)$d
+    if(missing(Lambda)) {
+        Lambda <- svd(Sigma, nu = 0, nv = 0)$d
     }
     if(drop_0) {
-        L <- L[L > tol]
+        Lambda <- Lambda[Lambda > tol]
     } else {
-        L[L < tol] <- 0
+        Lambda[Lambda < tol] <- 0
     }
-    p <- length(L)
-    t1 <- sum(L)
-    t2 <- sum(L ^ 2)
-    t3 <- sum(L ^ 3)
-    t4 <- sum(L ^ 4)
+    p <- length(Lambda)
+    t1 <- sum(Lambda)
+    t2 <- sum(Lambda ^ 2)
+    t3 <- sum(Lambda ^ 3)
+    t4 <- sum(Lambda ^ 4)
     4 * ((2 * p^2 * n^2 + 3 * p^2 * n - 6 * p^2 - 4 * p * n - 4) * t4 +
          - 4 * p * (n - 1) * (n + 2) * t3 * t1 +
          (p^2 * n + 4 * p + 2 * n + 2) * t2^2 +
@@ -1422,19 +1422,19 @@ Var.VEav <- function(V, n = 100, L, drop_0 = FALSE,
 #'
 #' @export
 #'
-Var.VRav <- function(V, n = 100, L, drop_0 = FALSE,
+Var.VRav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                  tol = .Machine$double.eps * 100, ...) {
     # divisor <- match.arg(divisor)
-    if(missing(L)) {
-        L <- svd(V, nu = 0, nv = 0)$d
+    if(missing(Lambda)) {
+        Lambda <- svd(Sigma, nu = 0, nv = 0)$d
     }
     if(drop_0) {
-        L <- L[L > tol]
+        Lambda <- Lambda[Lambda > tol]
     } else {
-        L[L < tol] <- 0
+        Lambda[Lambda < tol] <- 0
     }
-    p <- length(L)
-    V <- Var.VRv(L = L, n = n, drop_0 = drop_0, tol = tol, ...)
+    p <- length(Lambda)
+    V <- Var.VRv(Lambda = Lambda, n = n, drop_0 = drop_0, tol = tol, ...)
     En <- (p + 2) / (p * n + 2)
     V / (1 - En)^2
 }
@@ -1449,23 +1449,23 @@ Var.VRav <- function(V, n = 100, L, drop_0 = FALSE,
 #'
 #' @export
 #'
-Var.VRar <- function(R, n = 100, L, tol = .Machine$double.eps * 100,
+Var.VRar <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
                      tol.hg = 0, maxiter.hg = 2000, ...) {
-    if(missing(R)) {
-        R <- GenCov(evalues = L, evectors = "Givens")
-        if(L[2] != L[length(L)]) {
-            warning("R was generated from the eigenvalues provided \n  ",
+    if(missing(Rho)) {
+        Rho <- GenCov(evalues = Lambda, evectors = "Givens")
+        if(Lambda[2] != Lambda[length(Lambda)]) {
+            warning("Rho was generated from the eigenvalues provided \n  ",
                     "Expectation may vary even if eigenvalues are fixed")
         }
-    } else if(any(diag(R) != 1)) {
-        R <- R / R[1, 1]
-        if(any(diag(R) != 1)) {
+    } else if(any(diag(Rho) != 1)) {
+        Rho <- Rho / Rho[1, 1]
+        if(any(diag(Rho) != 1)) {
             stop("Provide a valid correlation matrix, or its eigenvalues")
         }
-        warning("R was scaled to have diagonal elements of unity")
+        warning("Rho was scaled to have diagonal elements of unity")
     }
-    p <- ncol(R)
-    V <- Var.VRr(R = R, n = n, tol = tol,
+    p <- ncol(Rho)
+    V <- Var.VRr(Rho = Rho, n = n, tol = tol,
                  tol.hg = tol.hg, maxiter.hg = maxiter.hg, ...)
     En <- 1 / n
     V / (1 - En)^2

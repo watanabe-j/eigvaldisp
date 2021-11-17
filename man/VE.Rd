@@ -6,7 +6,7 @@
 \usage{
 VE(
   X,
-  V,
+  S,
   L,
   center = TRUE,
   scale. = FALSE,
@@ -21,7 +21,7 @@ VE(
 \arguments{
 \item{X}{Data matrix from which covariance/corrrelation matrix is obtained.}
 
-\item{V}{Covariance/correlation matrix.}
+\item{S}{Covariance/correlation matrix.}
 
 \item{L}{Vector of eigenvalues.}
 
@@ -29,7 +29,7 @@ VE(
 
 \item{scale.}{Logical to specify whether SD-scaling should be done
 (that is, when \code{TRUE}, the analysis is on the correlation matrix).
-When \code{V} is provided (but \code{X} is not), this is converted to
+When \code{S} is provided (but \code{X} is not), this is converted to
 a correlation matrix.}
 
 \item{divisor}{Either \code{"UB"} (default) or \code{"ML"},
@@ -60,11 +60,11 @@ A list containing the following:
 Function to calculate eigenvalue variance \eqn{V} and
 relative eigenvalue variance \eqn{V_{rel}}
 of a covariance/correlation matrix, either from a data matrix \code{X}
-or a covariance/correlation matrix \code{V}.
+or a covariance/correlation matrix \code{S}.
 }
 \details{
-Provide either a data matrix (\code{X}), cov matrix (\code{V}),
-or vector of eigenvalues (\code{L}).
+Provide either a data matrix (\code{X}), covariance/correlation matrix
+(\code{S}), or vector of eigenvalues (\code{L}).
 When \code{X} is given, the default divisor is \eqn{N - 1} where \eqn{N}
 is sample size.
 
@@ -84,15 +84,15 @@ set.seed(6835)
 Lambda <- c(4, 2, 1, 1)
 (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
 VE(L = Lambda)
-VE(V = Sigma) # Same
+VE(S = Sigma) # Same
 
 # For a random sample, sample covariance matrix or its eigenvalues
 N <- 20
-X <- eigvaldisp:::rmvn(N = N, V = Sigma)
+X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
 S <- cov(X)
 L <- eigen(S)$values
 VE(X = X)
-VE(V = S) # Same
+VE(S = S) # Same
 VE(L = L) # Same
 # Thus, providing X is usually the most straightforward for a sample
 # (and this is usally quicker for p > 30-50 or so).
@@ -101,13 +101,13 @@ VE(L = L) # Same
 # Same for maximum likelihood estimator (divisor m = N)
 VE(X = X, divisor = "ML")
 VE(X = X, m = N)        # Same, but any divisor can be specified
-VE(V = S * (N - 1) / N) # Same
+VE(S = S * (N - 1) / N) # Same
 # L and meanL are (N - 1) / N times the above,
 # VE is ((N - 1) / N) ^ 2 times the above, whereas VR remains the same.
 
 # For a sample correlation matrix
 R <- cor(X)
-VE(V = R)
+VE(S = R)
 VE(X = X, scale. = TRUE) # Same, hence is usually quicker when p is large
 
 # Interested in eigenvectors?
@@ -116,12 +116,12 @@ VE(X = X, nv = 2)
 # Singular covariance matrix
 Lambda2 <- c(4, 2, 1, 0)
 (Sigma2 <- GenCov(evalues = Lambda2, evectors = "random"))
-VE(V = Sigma2)                # Calculated in the full space
-VE(V = Sigma2, sub = 1:3)     # In the subspace of the first 3 PCs
-VE(V = Sigma2, drop_0 = TRUE) # Dropping zero eigenvalues (same in this case)
+VE(S = Sigma2)                # Calculated in the full space
+VE(S = Sigma2, sub = 1:3)     # In the subspace of the first 3 PCs
+VE(S = Sigma2, drop_0 = TRUE) # Dropping zero eigenvalues (same in this case)
 
 # Sample from singular covariance
-X2 <- eigvaldisp:::rmvn(N = N, V = Sigma2, sqrt_method = "pivot")
+X2 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma2, sqrt_method = "pivot")
 VE(X = X2)                    # In the full space
 VE(X = X2, sub = 1:3)         # In the subspace of the first 3 PCs
 VE(X = X2, drop_0 = TRUE)     # Practically the same
@@ -135,7 +135,7 @@ eigen(cov(X2))$vectors[, 4]
 # a sample null space always encompasses the population null space.
 Lambda3 <- 9:0
 Sigma3 <- GenCov(evalues = Lambda3, evectors = "random")
-X3 <- eigvaldisp:::rmvn(N = 6, V = Sigma3, sqrt_method = "pivot")
+X3 <- eigvaldisp:::rmvn(N = 6, Sigma = Sigma3, sqrt_method = "pivot")
 eigS3 <- eigen(cov(X3))
 (Popul_null <- eigen(Sigma3)$vectors[, Lambda3 < 1e-12])
 (Sample_null <-eigS3$vectors[, eigS3$values < 1e-12])

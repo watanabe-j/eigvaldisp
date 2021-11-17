@@ -93,19 +93,19 @@ AVar.r2(n, x, order. = 2, return_terms = FALSE, ...)
 
 ACov.r1(
   n,
-  R,
+  Rho,
   ind1 = c(1, 2),
   ind2 = c(1, 2),
   i = ind1[1],
   j = ind1[2],
   k = ind2[1],
   l = ind2[2],
-  rij = R[i, j],
-  rik = R[i, k],
-  ril = R[i, l],
-  rjk = R[j, k],
-  rjl = R[j, l],
-  rkl = R[k, l],
+  rij = Rho[i, j],
+  rik = Rho[i, k],
+  ril = Rho[i, l],
+  rjk = Rho[j, k],
+  rjl = Rho[j, l],
+  rkl = Rho[k, l],
   ...
 )
 }
@@ -135,7 +135,7 @@ for asymptotic expressions only).}
 Retained mainly for debugging purposes, but could be used to
 track the order in derived statistics.}
 
-\item{R}{Correlation matrix; assumed to be validly constructed.}
+\item{Rho}{Correlation matrix; assumed to be validly constructed.}
 
 \item{ind1, ind2}{Indices for the two focal coefficients (vectors of length 2).
 Superseded by \code{i, j, k, l}.}
