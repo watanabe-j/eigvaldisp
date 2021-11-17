@@ -1,33 +1,33 @@
-##### Exv.VXx #####
+##### Exv.VXX #####
 #' Moments of eigenvalue dispersion indices
 #'
 #' Functions to calculate expectation/variance of (relative) eigenvalue variance
 #' of sample covariance/correlation matrices for a given population
 #' covariance/correlation matrix and degrees of freedom \eqn{n}.
 #'
-#' \code{Exv.VEv()}, \code{Var.VEv()}, and \code{Exv.VRr()} return exact
+#' \code{Exv.VES()}, \code{Var.VES()}, and \code{Exv.VRR()} return exact
 #' moments.
-#' \code{Exv.VRv()} and \code{Var.VRv()} return approximations based
+#' \code{Exv.VRS()} and \code{Var.VRS()} return approximations based
 #' on the delta method, except under the null condition
 #' (\eqn{\Sigma} proportional to the identity matrix)
 #' where exact moments are returned.
 #'
-#' \code{Var.VRr()} returns the exact variance when \eqn{p = 2} or
+#' \code{Var.VRR()} returns the exact variance when \eqn{p = 2} or
 #' under the null condition (\eqn{\Rho} is the identity matrix).
 #' Otherwise, asymptotic variance is calculated with a function of choice,
-#' \code{AVar.VRr_xx}, with the suffix specified by the argument \code{fun}:
+#' \code{AVar.VRR_xx}, with the suffix specified by the argument \code{fun}:
 #' \code{pfd}, \code{pfv}, \code{pfc}, \code{pf} are options for
 #' the Pan--Frank approach
 #' (usually, \code{pfd} or \code{pfc} will be the choice);
 #' \code{klv}, \code{kl}, \code{krv}, \code{kr} are equivalent variants
 #' from Konishi's asymptotic theory (usually, \code{klv} is the choice).
-#' See \link{AVar.VRr_xx} for details of these functions.
+#' See \link{AVar.VRR_xx} for details of these functions.
 #'
 #' Since the eigenvalue variance of a correlation matrix \eqn{V(R)} is simply
 #' \eqn{(p - 1)} times the relative eigenvalue variance \eqn{Vrel(R)} of
 #' the same matrix, their distributions are identical up to this scaling.
-#' Hence, \code{Exv.VEr()} and \code{Var.VEr()} calls \code{Exv.VRr()} and
-#' \code{Var.VRr()} (respectively), whose outputs are scaled and returned.
+#' Hence, \code{Exv.VER()} and \code{Var.VER()} calls \code{Exv.VRR()} and
+#' \code{Var.VRR()} (respectively), whose outputs are scaled and returned.
 #' These functions are provided for completeness, although there will be little
 #' practical demand for these functions (and \eqn{V(R)} itself).
 #'
@@ -52,10 +52,10 @@
 # #' For covariance matrices, the divisor of \eqn{n}
 # #' (which gives the ordinary unbiased estimator) is assumed by default.
 # #'
-# #' \code{Exv.VRr()} calls \code{Exv.r2()}, which in turn calls \code{hgf()}.
+# #' \code{Exv.VRR()} calls \code{Exv.r2()}, which in turn calls \code{hgf()}.
 # #' (see \link{Exv.rx}).
 # #'
-#' @name Exv.VXx
+#' @name Exv.VXX
 #'
 #' @param Sigma
 #'   Population covariance matrix; assumed to be validly constructed.
@@ -81,12 +81,12 @@
 #' @param tol.hg,maxiter.hg
 #'   Passed to \code{Exv.r2()}; see description of that function.
 #' @param fun
-#'   For \code{Var.VRr()} (and \code{Var.VEr()}), determines the function
+#'   For \code{Var.VRR()} (and \code{Var.VER()}), determines the function
 #'   to be used to evaluate approximate variance. See Details.
 #'   Options allowed are: \code{pfd}, \code{pfv}, \code{pfc}, \code{pf},
 #'   \code{klv}, \code{kl}, \code{krv}, and \code{kr}.
 #' @param ...
-#'   In \code{Var.VRr()}, additional arguments are passed to an internal
+#'   In \code{Var.VRR()}, additional arguments are passed to an internal
 #'   function which it in turn calls. Otherwise ignored.
 #'
 #' @return
@@ -99,9 +99,9 @@
 #'
 #' @seealso
 #' \link{VE} for estimation;
-#' \link{AVar.VRr_xx} for internal functions of Var.VRr;
+#' \link{AVar.VRR_xx} for internal functions of Var.VRR;
 #' \link{Exv.rx} for internal functions for moments of correlation coefficients;
-#' \link{Exv.VXax} for moments of ``bias-corrected'' versions.
+#' \link{Exv.VXXa} for moments of ``bias-corrected'' versions.
 #'
 #' @examples
 #' # Covariance matrix
@@ -113,17 +113,17 @@
 #' # Population values of V(Sigma) and Vrel(Sigma)
 #'
 #' # From population covariance matrix
-#' Exv.VEv(Sigma, N - 1)
-#' Var.VEv(Sigma, N - 1)
-#' Exv.VRv(Sigma, N - 1)
-#' Var.VRv(Sigma, N - 1)
+#' Exv.VES(Sigma, N - 1)
+#' Var.VES(Sigma, N - 1)
+#' Exv.VRS(Sigma, N - 1)
+#' Var.VRS(Sigma, N - 1)
 #' # Note the amount of bias from the population value obtained above
 #'
 #' # From population eigenvalues
-#' Exv.VEv(Lambda = Lambda, n = N - 1)
-#' Var.VEv(Lambda = Lambda, n = N - 1)
-#' Exv.VRv(Lambda = Lambda, n = N - 1)
-#' Var.VRv(Lambda = Lambda, n = N - 1)
+#' Exv.VES(Lambda = Lambda, n = N - 1)
+#' Var.VES(Lambda = Lambda, n = N - 1)
+#' Exv.VRS(Lambda = Lambda, n = N - 1)
+#' Var.VRS(Lambda = Lambda, n = N - 1)
 #' # Same, regardless of the random choice of eigenvectors
 #'
 #' # Correlation matrix
@@ -131,42 +131,42 @@
 #' VE(S = Rho)$VR
 #' # Population value of Vrel(Rho)
 #'
-#' Exv.VRr(Rho, N - 1)
-#' Var.VRr(Rho, N - 1)
+#' Exv.VRR(Rho, N - 1)
+#' Var.VRR(Rho, N - 1)
 #' # These results vary with the choice of eigenvalues
 #' # If interested, repeat from the definition of Rho
 #'
 #' # Different choices for asymptotic variance of Vrel(R)
 #' # Variance from Pan-Frank method
-#' Var.VRr(Rho, N - 1, fun = "pfd") # Default
-#' Var.VRr(Rho, N - 1, fun = "pf")  # Slow for large p
-#' Var.VRr(Rho, N - 1, fun = "pfv") # Requires too much RAM for large p
-#' \dontrun{Var.VRr(Rho, n = N - 1, fun = "pfc")}
+#' Var.VRR(Rho, N - 1, fun = "pfd") # Default
+#' Var.VRR(Rho, N - 1, fun = "pf")  # Slow for large p
+#' Var.VRR(Rho, N - 1, fun = "pfv") # Requires too much RAM for large p
+#' \dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc")}
 #' # Try to run the last one if you have Rcpp
 #' # These are identical
 #'
 #' # Variance from Konishi's theory
-#' Var.VRr(Rho, N - 1, fun = "klv") # Best choice
-#' Var.VRr(Rho, N - 1, fun = "kl")
-#' Var.VRr(Rho, N - 1, fun = "krv")
-#' Var.VRr(Rho, N - 1, fun = "kr")
+#' Var.VRR(Rho, N - 1, fun = "klv") # Best choice
+#' Var.VRR(Rho, N - 1, fun = "kl")
+#' Var.VRR(Rho, N - 1, fun = "krv")
+#' Var.VRR(Rho, N - 1, fun = "kr")
 #' # These are identical, but the first one is fast
 #' # On the other hand, these differ from that obtained with
 #' # the Pan-Frank method above
 #'
 NULL
 
-##### Exv.VEv #####
+##### Exv.VES #####
 #' Expectation of eigenvalue variance of covariance matrix
 #'
-#' \code{Exv.VEv()}: expectation of eigenvalue variance of covariance matrix
+#' \code{Exv.VES()}: expectation of eigenvalue variance of covariance matrix
 #' \eqn{E[V(S)]}.
 #'
-#' @rdname Exv.VXx
+#' @rdname Exv.VXX
 #'
 #' @export
 #'
-Exv.VEv <- function(Sigma, n = 100, Lambda, divisor = c("UB", "ML"),
+Exv.VES <- function(Sigma, n = 100, Lambda, divisor = c("UB", "ML"),
                     m = switch(divisor, UB = n, ML = n + 1), drop_0 = FALSE,
                     tol = .Machine$double.eps * 100, ...) {
     divisor <- match.arg(divisor)
@@ -184,17 +184,17 @@ Exv.VEv <- function(Sigma, n = 100, Lambda, divisor = c("UB", "ML"),
     n * ((p - n) * t1 ^ 2 + (p * n + p - 2) * t2) / (p ^ 2 * m ^ 2)
 }
 
-##### Exv.VRv #####
+##### Exv.VRS #####
 #' Expectation of relative eigenvalue variance of covariance matrix
 #'
-#' \code{Exv.VRv()}: expectation of relative eigenvalue variance of
+#' \code{Exv.VRS()}: expectation of relative eigenvalue variance of
 #' covariance matrix \eqn{E[Vrel(S)]}.
 #'
-#' @rdname Exv.VXx
+#' @rdname Exv.VXX
 #'
 #' @export
 #'
-Exv.VRv <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
+Exv.VRS <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                     tol = .Machine$double.eps * 100, ...) {
     if(missing(Lambda)) {
         Lambda <- svd(Sigma, nu = 0, nv = 0)$d
@@ -216,17 +216,17 @@ Exv.VRv <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
     (p * EF - 1) / (p - 1)
 }
 
-##### Exv.VEr #####
+##### Exv.VER #####
 #' Expectation of eigenvalue variance of correlation matrix
 #'
-#' \code{Exv.VEr()}: expectation of eigenvalue variance of correlation
+#' \code{Exv.VER()}: expectation of eigenvalue variance of correlation
 #' matrix \eqn{E[V(R)]}.
 #'
-#' @rdname Exv.VXx
+#' @rdname Exv.VXX
 #'
 #' @export
 #'
-Exv.VEr <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
+Exv.VER <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
                     tol.hg = 0, maxiter.hg = 2000, ...) {
     if(missing(Rho)) {
         Rho <- GenCov(evalues = Lambda, evectors = "Givens")
@@ -242,22 +242,22 @@ Exv.VEr <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
         warning("Rho was scaled to have diagonal elements of unity")
     }
     p <- ncol(Rho)
-    exv.VRr <- Exv.VRr(Rho = Rho, n = n, tol = tol,
+    exv.VRR <- Exv.VRR(Rho = Rho, n = n, tol = tol,
                        tol.hg = tol.hg, maxiter.hg = maxiter.hg, ...)
-    exv.VRr * (p - 1)
+    exv.VRR * (p - 1)
 }
 
-##### Exv.VRr #####
+##### Exv.VRR #####
 #' Expectation of relative eigenvalue variance of correlation matrix
 #'
-#' \code{Exv.VRr()}: expectation of relative eigenvalue variance of
+#' \code{Exv.VRR()}: expectation of relative eigenvalue variance of
 #' correlation matrix \eqn{E[Vrel(R)]}.
 #'
-#' @rdname Exv.VXx
+#' @rdname Exv.VXX
 #'
 #' @export
 #'
-Exv.VRr <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
+Exv.VRR <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
                     tol.hg = 0, maxiter.hg = 2000, ...) {
     if(missing(Rho)) {
         Rho <- GenCov(evalues = Lambda, evectors = "Givens")
@@ -280,17 +280,17 @@ Exv.VRr <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
     2 * colSums(exv_r2) / (p * (p - 1))
 }
 
-##### Var.VEv #####
+##### Var.VES #####
 #' Variance of eigenvalue variance of covariance matrix
 #'
-#' \code{Var.VEv()}: variance of eigenvalue variance of
+#' \code{Var.VES()}: variance of eigenvalue variance of
 #' covariance matrix \eqn{Var[V(S)]}.
 #'
-#' @rdname Exv.VXx
+#' @rdname Exv.VXX
 #'
 #' @export
 #'
-Var.VEv <- function(Sigma, n = 100, Lambda, divisor = c("UB", "ML"),
+Var.VES <- function(Sigma, n = 100, Lambda, divisor = c("UB", "ML"),
                     m = switch(divisor, UB = n, ML = n + 1), drop_0 = FALSE,
                     tol = .Machine$double.eps * 100, ...) {
     divisor <- match.arg(divisor)
@@ -313,17 +313,17 @@ Var.VEv <- function(Sigma, n = 100, Lambda, divisor = c("UB", "ML"),
              2 * (p - n)^2 * t2 * t1^2) / (p ^ 4 * m ^ 4)
 }
 
-##### Var.VRv #####
+##### Var.VRS #####
 #' Variance of relative eigenvalue variance of covariance matrix
 #'
-#' \code{Var.VRv()}: variance of relative eigenvalue variance of
+#' \code{Var.VRS()}: variance of relative eigenvalue variance of
 #' covariance matrix \eqn{Var[Vrel(S)]}.
 #'
-#' @rdname Exv.VXx
+#' @rdname Exv.VXX
 #'
 #' @export
 #'
-Var.VRv <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
+Var.VRS <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                     tol = .Machine$double.eps * 100, ...) {
     if(missing(Lambda)) {
         Lambda <- svd(Sigma, nu = 0, nv = 0)$d
@@ -351,17 +351,17 @@ Var.VRv <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
     }
 }
 
-##### Var.VEr #####
+##### Var.VER #####
 #' Variance of eigenvalue variance of correlation matrix
 #'
-#' \code{Var.VEr()}: variance of eigenvalue variance of
+#' \code{Var.VER()}: variance of eigenvalue variance of
 #' correlation matrix \eqn{Var[V(R)]}.
 #'
-#' @rdname Exv.VXx
+#' @rdname Exv.VXX
 #'
 #' @export
 #'
-Var.VEr <- function(Rho, n = 100, Lambda, ...) {
+Var.VER <- function(Rho, n = 100, Lambda, ...) {
     if(missing(Rho)) {
         Rho <- GenCov(evalues = Lambda, evectors = "Givens")
         if(Lambda[2] != Lambda[length(Lambda)]) {
@@ -376,21 +376,21 @@ Var.VEr <- function(Rho, n = 100, Lambda, ...) {
         warning("Rho was scaled to have diagonal elements of unity")
     }
     p <- ncol(Rho)
-    var.VRr <- Var.VRr(Rho = Rho, n = n, ...)
-    var.VRr * (p - 1) ^ 2
+    var.VRR <- Var.VRR(Rho = Rho, n = n, ...)
+    var.VRR * (p - 1) ^ 2
 }
 
-##### Var.VRr #####
+##### Var.VRR #####
 #' Variance of relative eigenvalue variance of correlation matrix
 #'
-#' \code{Var.VRr()}: variance of relative eigenvalue variance for a
+#' \code{Var.VRR()}: variance of relative eigenvalue variance for a
 #' correlation matrix \eqn{Var[Vrel(R)]}.
 #'
-#' @rdname Exv.VXx
+#' @rdname Exv.VXX
 #'
 #' @export
 #'
-Var.VRr <- function(Rho, n = 100, Lambda,
+Var.VRR <- function(Rho, n = 100, Lambda,
                     fun = c("pfd", "pfv", "pfc", "pf",
                             "klv", "kl", "krv", "kr"), ...) {
     fun <- match.arg(fun)
@@ -417,14 +417,14 @@ Var.VRr <- function(Rho, n = 100, Lambda,
         4 * colSums(var_r2) / (p * (p - 1)) ^ 2
     } else {
         Fun <- switch(fun,
-                      klv = AVar.VRr_klv, kl = AVar.VRr_kl, kr = AVar.VRr_kr,
-                      krv = AVar.VRr_krv, pf = AVar.VRr_pf, pfv = AVar.VRr_pfv,
-                      pfd = AVar.VRr_pfd, pfc = AVar.VRr_pfc)
+                      klv = AVar.VRR_klv, kl = AVar.VRR_kl, kr = AVar.VRR_kr,
+                      krv = AVar.VRR_krv, pf = AVar.VRR_pf, pfv = AVar.VRR_pfv,
+                      pfd = AVar.VRR_pfd, pfc = AVar.VRR_pfc)
         Fun(Rho = Rho, n = n, ...)
     }
 }
 
-##### AVar.VRr_xx #####
+##### AVar.VRR_xx #####
 #' Approximate variance of relative eigenvalue variance of correlation matrix
 #'
 #' Functions to obtain approximate variance of relative eigenvalue variance
@@ -445,14 +445,14 @@ Var.VRr <- function(Rho, n = 100, Lambda,
 #' The Pan--Frank approach is at present implemented in several functions
 #' which yield (almost) identical results:
 #' \describe{
-#'   \item{\code{AVar.VRr_pf()}}{Prototype version. Simplest implementation.}
-#'   \item{\code{AVar.VRr_pfv()}}{Vectorized version  Much faster, but
+#'   \item{\code{AVar.VRR_pf()}}{Prototype version. Simplest implementation.}
+#'   \item{\code{AVar.VRR_pfv()}}{Vectorized version  Much faster, but
 #'     requires a large RAM space as \code{p} grows.}
-#'   \item{\code{AVar.VRr_pfd()}}{Improvement over \code{AVar.VRr_pfv()}.
+#'   \item{\code{AVar.VRR_pfd()}}{Improvement over \code{AVar.VRR_pfv()}.
 #'     Usually the best choice if pure \code{R} implementation is favored.}
-#'   \item{\code{AVar.VRr_pfc()}}{Fast version using \code{Rcpp}.}
+#'   \item{\code{AVar.VRR_pfc()}}{Fast version using \code{Rcpp}.}
 #' }
-#' \code{AVar.VRr_pfc()} implements the same algorithm as the others,
+#' \code{AVar.VRR_pfc()} implements the same algorithm as the others,
 #' but makes use of \code{C++} API via the package \code{Rcpp} for evaluation of
 #' the sum of covariance across pairs of squared correlation coefficients.
 #' This version works much faster than vectorized \code{R} codes.
@@ -461,24 +461,24 @@ Var.VRr <- function(Rho, n = 100, Lambda,
 #'
 #' The Konishi approach is implemented in several functions:
 #' \describe{
-#'   \item{\code{AVar.VRr_kl()}}{From Konishi (1979: corollary 2.2):
+#'   \item{\code{AVar.VRR_kl()}}{From Konishi (1979: corollary 2.2):
 #'     \eqn{Vrel(R)} as function of eigenvalues. Prototype version.}
-#'   \item{\code{AVar.VRr_klv()}}{Vectorized version of \code{AVar.VRr_kl()}.
+#'   \item{\code{AVar.VRR_klv()}}{Vectorized version of \code{AVar.VRR_kl()}.
 #'     The best choice.}
-#'   \item{\code{AVar.VRr_kr()}}{From Konishi (1979: theorem 6.2):
+#'   \item{\code{AVar.VRR_kr()}}{From Konishi (1979: theorem 6.2):
 #'     \eqn{Vrel(R)} as function of correlation coefficients.}
-#'   \item{\code{AVar.VRr_krv()}}{Vectorized version of \code{AVar.VRr_kr()};
+#'   \item{\code{AVar.VRR_krv()}}{Vectorized version of \code{AVar.VRR_kr()};
 #'     slightly faster for moderate \eqn{p}, but not particularly fast
 #'     for large \eqn{p} as the number of elements to be summed becomes large.}
 #' }
 #' Empirically, these all yield the same result, but
-#' \code{AVar.VRr_klv()} is by far the fastest.
+#' \code{AVar.VRR_klv()} is by far the fastest.
 #'
 #' The choice between different functions does not matter when \eqn{p = 2},
 #' when the exact variance is returned by default.
 #' If asymptotic result is desired, use \code{mode.var2 = "asymptotic"}.
 #'
-#' Options for \code{mode} in \code{AVar.VRr_pf()} \code{AVar.VRr_pfd()}:
+#' Options for \code{mode} in \code{AVar.VRR_pf()} \code{AVar.VRR_pfd()}:
 #' \describe{
 #'   \item{\code{nested.for}}{Uses nested for loops, which is straifhgforward
 #'     and RAM efficient.}
@@ -491,12 +491,12 @@ Var.VRr <- function(Rho, n = 100, Lambda,
 #'     Windows environment. See \code{vignette("parallel")} for details.}
 #' }
 #'
-#' \code{AVar.VRr_pf()} internally generates vectors and matrices
+#' \code{AVar.VRR_pf()} internally generates vectors and matrices
 #' whose lengths are about p^4 / 8 and p^4 / 4. These take RAM of ~2*p^4 bytes;
 #' this could be prohibitively large for large p.
 #'
-#' \code{AVar.VRr_pfd()} divides the index vector \code{b} (used in
-#' \code{AVar.VRr_pfv()}) into a list \code{bd} using the internal function
+#' \code{AVar.VRR_pfd()} divides the index vector \code{b} (used in
+#' \code{AVar.VRR_pfv()}) into a list \code{bd} using the internal function
 #' \code{eigvaldisp:::divInd()}. The calculations are then done on each element
 #' of this list to save RAM space.
 #' This process takes some time when \eqn{p} is large (~10 sec
@@ -513,9 +513,9 @@ Var.VRr <- function(Rho, n = 100, Lambda,
 #' The iteration can be parallelized with \code{mode = "mclapply"} or
 #' \code{"parLapply"}, but be careful about RAM limitations.
 #'
-#' @name AVar.VRr_xx
+#' @name AVar.VRR_xx
 #'
-#' @inheritParams Exv.VXx
+#' @inheritParams Exv.VXX
 #'
 #' @param exv1.mode
 #'   Whether \code{"exact"} or \code{"asymptotic"} expression is used for
@@ -531,7 +531,7 @@ Var.VRr <- function(Rho, n = 100, Lambda,
 #'   \eqn{E(r)}/\eqn{Var(r^2)} when \code{exv1.mode}/\code{var2.mode} is
 #'   \code{"asymptotic"}; see \link{Exv.rx}.
 #' @param mode
-#'   In \code{AVar.VRr_pf} and \code{AVar.VRr_pfd},
+#'   In \code{AVar.VRR_pf} and \code{AVar.VRR_pfd},
 #'   specifies the mode of iterations (see Details).
 #' @param mc.cores
 #'   Number of cores to be used (numeric/integer). When \code{"auto"} (default),
@@ -585,10 +585,10 @@ Var.VRr <- function(Rho, n = 100, Lambda,
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
 #'  doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
-#' @seealso \link{Exv.VXx} for main moment functions.
+#' @seealso \link{Exv.VXX} for main moment functions.
 #'
 #' @examples
-#' # See also examples of Exv.VXx
+#' # See also examples of Exv.VXX
 #' # Correlation matrix
 #' N <- 20
 #' Lambda <- c(4, 2, 1, 1)
@@ -598,44 +598,44 @@ Var.VRr <- function(Rho, n = 100, Lambda,
 #'
 #' # Different choices for asymptotic variance of Vrel(R)
 #' # Variance from Pan-Frank method
-#' eigvaldisp:::AVar.VRr_pfd(Rho, n = N - 1) # Default
-#' eigvaldisp:::AVar.VRr_pf(Rho, n = N - 1)  # Slow for large p
-#' eigvaldisp:::AVar.VRr_pfv(Rho, n = N - 1) # Requires too much RAM for large p
-#' \dontrun{eigvaldisp:::AVar.VRr_pfc(Rho, n = N - 1)}
+#' eigvaldisp:::AVar.VRR_pfd(Rho, n = N - 1) # Default
+#' eigvaldisp:::AVar.VRR_pf(Rho, n = N - 1)  # Slow for large p
+#' eigvaldisp:::AVar.VRR_pfv(Rho, n = N - 1) # Requires too much RAM for large p
+#' \dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1)}
 #' # Try to run the last one if you have Rcpp
 #' # These are identical
 #'
 #' # Variance from Konishi's theory
-#' eigvaldisp:::AVar.VRr_klv(Rho, n = N - 1) # Best choice
-#' eigvaldisp:::AVar.VRr_kl(Rho, n = N - 1)
-#' eigvaldisp:::AVar.VRr_krv(Rho, n = N - 1)
-#' eigvaldisp:::AVar.VRr_kr(Rho, n = N - 1)
+#' eigvaldisp:::AVar.VRR_klv(Rho, n = N - 1) # Best choice
+#' eigvaldisp:::AVar.VRR_kl(Rho, n = N - 1)
+#' eigvaldisp:::AVar.VRR_krv(Rho, n = N - 1)
+#' eigvaldisp:::AVar.VRR_kr(Rho, n = N - 1)
 #' # These are identical, but the first one is fast
 #' # On the other hand, these differ from that obtained with the Pan-Frank method
 #'
 #' # Example with p = 2
 #' Rho2 <- GenCov(evalues = c(1.5, 0.5), evectors = "Givens")
-#' Var.VRr(Rho2, n = N - 1)
-#' eigvaldisp:::AVar.VRr_pfd(Rho2, n = N - 1)
-#' eigvaldisp:::AVar.VRr_klv(Rho2, n = N - 1)
+#' Var.VRR(Rho2, n = N - 1)
+#' eigvaldisp:::AVar.VRR_pfd(Rho2, n = N - 1)
+#' eigvaldisp:::AVar.VRR_klv(Rho2, n = N - 1)
 #' # Same (ane exact) by default
 #'
-#' eigvaldisp:::AVar.VRr_pfd(Rho2, n = N - 1, var2.mode = "asymptotic")
-#' eigvaldisp:::AVar.VRr_klv(Rho2, n = N - 1, var2.mode = "asymptotic")
+#' eigvaldisp:::AVar.VRR_pfd(Rho2, n = N - 1, var2.mode = "asymptotic")
+#' eigvaldisp:::AVar.VRR_klv(Rho2, n = N - 1, var2.mode = "asymptotic")
 #' # These return different asymptotic expressions
 #'
 #'
 NULL
 
-##### AVar.VRr_pf #####
+##### AVar.VRR_pf #####
 #' Approximate variance of relative eigenvalue variance of correlation matrix
 #'
-#' \code{AVar.VRr_pf()}: asymptotic and approximate variance of \eqn{Vrel(R)}
+#' \code{AVar.VRR_pf()}: asymptotic and approximate variance of \eqn{Vrel(R)}
 #' based on Pan & Frank's (2004) approach.  Prototype version.
 #'
-#' @rdname AVar.VRr_xx
+#' @rdname AVar.VRR_xx
 #'
-AVar.VRr_pf <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic"),
+AVar.VRR_pf <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic"),
                         var1.mode = "asymptotic",
                         var2.mode = c("exact", "asymptotic"),
                         order.exv1 = 2, order.var2 = 2,
@@ -769,16 +769,16 @@ AVar.VRr_pf <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic
     4 * ans / (p * (p - 1))^2
 }
 
-##### AVar.VRr_pfv #####
+##### AVar.VRR_pfv #####
 #' Approximate variance of relative eigenvalue variance of correlation matrix,
 #' vectorized
 #'
-#' \code{AVar.VRr_pfv()}: vectorized version of \code{AVar.VRr_pf()}.
+#' \code{AVar.VRR_pfv()}: vectorized version of \code{AVar.VRR_pf()}.
 #' Much faster, but requires a large RAM space as \code{p} grows.
 #'
-#' @rdname AVar.VRr_xx
+#' @rdname AVar.VRR_xx
 #'
-AVar.VRr_pfv <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic"),
+AVar.VRR_pfv <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic"),
                        var1.mode = "asymptotic",
                        var2.mode = c("exact", "asymptotic"),
                        order.exv1 = 2, order.var2 = 2, ...) {
@@ -853,15 +853,15 @@ AVar.VRr_pfv <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
     4 * ans / (p * (p - 1))^2
 }
 
-##### AVar.VRr_pfd #####
+##### AVar.VRR_pfd #####
 #' Approximate variance of relative eigenvalue variance of correlation matrix,
 #' vectorized
 #'
-#' \code{AVar.VRr_pfd()}: further improvement over \code{AVar.VRr_pfv()}.
+#' \code{AVar.VRR_pfd()}: further improvement over \code{AVar.VRR_pfv()}.
 #'
-#' @rdname AVar.VRr_xx
+#' @rdname AVar.VRR_xx
 #'
-AVar.VRr_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic"),
+AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic"),
                          var1.mode = "asymptotic",
                          var2.mode = c("exact", "asymptotic"),
                          order.exv1 = 2, order.var2 = 2,
@@ -1009,20 +1009,20 @@ AVar.VRr_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
     4 * ans / (p * (p - 1))^2
 }
 
-##### AVar.VRr_pfc #####
+##### AVar.VRR_pfc #####
 #' Approximate variance of relative eigenvalue variance of correlation matrix,
 #' with Rcpp
 #'
-#' \code{AVar.VRr_pfc()}: fast version using \code{Rcpp}.
+#' \code{AVar.VRR_pfc()}: fast version using \code{Rcpp}.
 #'
 # #' When the function to be used (specified by cppfun) is not found,
 # #' an attempt is made to sourceCpp() the .cpp file in the present directory.
 # #' It is recommended to do, e.g., sourceCpp("Cov.r2C.cpp")
 # #' to compile the C++ code beforehand as this typically takes several seconds.
 #'
-#' @rdname AVar.VRr_xx
+#' @rdname AVar.VRR_xx
 #'
-AVar.VRr_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
+AVar.VRR_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
                          exv1.mode = c("exact", "asymptotic"),
                          # var1.mode = "asymptotic",
                          var2.mode = c("exact", "asymptotic"),
@@ -1036,7 +1036,7 @@ AVar.VRr_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
     #     sourceCpp(paste0(cppfun, ".cpp"))
     # }
     if(!requireNamespace("Rcpp", quietly = TRUE)) {
-        stop("Package 'Rcpp' is required for AVar.VRr_pfc() to run")
+        stop("Package 'Rcpp' is required for AVar.VRR_pfc() to run")
     }
     # c1fun <- switch(cppfun, Cov_r2C = Cov_r2C, Cov_r2V = Cov_r2V)
     c1fun <- Cov_r2C
@@ -1071,15 +1071,15 @@ AVar.VRr_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
     4 * ans / (p * (p - 1))^2
 }
 
-##### AVar.VRr_kl #####
+##### AVar.VRR_kl #####
 #' Asymptotic variance of relative eigenvalue variance of correlation matrix
 #'
-#' \code{AVar.VRr_kl()}: asymptotic variance from Konishi's theory:
+#' \code{AVar.VRR_kl()}: asymptotic variance from Konishi's theory:
 #' \eqn{Vrel(R)} as function of eigenvalues.
 #'
-#' @rdname AVar.VRr_xx
+#' @rdname AVar.VRR_xx
 #'
-AVar.VRr_kl <- function(Rho, n = 100, Lambda, ...) {
+AVar.VRR_kl <- function(Rho, n = 100, Lambda, ...) {
     if(missing(Rho)) {
         Rho <- GenCov(evalues = Lambda, evectors = "Givens")
         if(Lambda[2] != Lambda[length(Lambda)]) {
@@ -1109,14 +1109,14 @@ AVar.VRr_kl <- function(Rho, n = 100, Lambda, ...) {
     8 * ans / (p * (p - 1)) ^ 2 / n
 }
 
-##### AVar.VRr_klv #####
+##### AVar.VRR_klv #####
 #' Asymptotic variance of relative eigenvalue variance of correlation matrix
 #'
-#' \code{AVar.VRr_klv()}: vectorized version of \code{AVar.VRr_kl()}.
+#' \code{AVar.VRR_klv()}: vectorized version of \code{AVar.VRR_kl()}.
 #'
-#' @rdname AVar.VRr_xx
+#' @rdname AVar.VRR_xx
 #'
-AVar.VRr_klv <- function(Rho, n = 100, Lambda, ...) {
+AVar.VRR_klv <- function(Rho, n = 100, Lambda, ...) {
     if(missing(Rho)) {
         Rho <- GenCov(evalues = Lambda, evectors = "Givens")
         if(Lambda[2] != Lambda[length(Lambda)]) {
@@ -1143,15 +1143,15 @@ AVar.VRr_klv <- function(Rho, n = 100, Lambda, ...) {
     8 * ans / (p * (p - 1)) ^ 2 / n
 }
 
-##### AVar.VRr_kr #####
+##### AVar.VRR_kr #####
 #' Asymptotic variance of relative eigenvalue variance of correlation matrix
 #'
-#' \code{AVar.VRr_kr()}: asymptotic variance from Konishi's theory:
+#' \code{AVar.VRR_kr()}: asymptotic variance from Konishi's theory:
 #' \eqn{Vrel(R)} as function of correlation coefficients
 #'
-#' @rdname AVar.VRr_xx
+#' @rdname AVar.VRR_xx
 #'
-AVar.VRr_kr <- function(Rho, n = 100, Lambda, ...) {
+AVar.VRR_kr <- function(Rho, n = 100, Lambda, ...) {
     if(missing(Rho)) {
         Rho <- GenCov(evalues = Lambda, evectors = "Givens")
         if(Lambda[2] != Lambda[length(Lambda)]) {
@@ -1181,14 +1181,14 @@ AVar.VRr_kr <- function(Rho, n = 100, Lambda, ...) {
     16 * ans / (p * (p - 1)) ^ 2 / n
 }
 
-##### AVar.VRr_krv #####
+##### AVar.VRR_krv #####
 #' Asymptotic variance of relative eigenvalue variance of correlation matrix
 #'
-#' \code{AVar.VRr_krv()}: vectorized version of \code{AVar.VRr_kr()}.
+#' \code{AVar.VRR_krv()}: vectorized version of \code{AVar.VRR_kr()}.
 #'
-#' @rdname AVar.VRr_xx
+#' @rdname AVar.VRR_xx
 #'
-AVar.VRr_krv <- function(Rho, n = 100, Lambda, ...) {
+AVar.VRR_krv <- function(Rho, n = 100, Lambda, ...) {
     # digit <- function(x) {
     #     i <- 1L
     #     while(x %/% 10 >= 1) {
@@ -1233,18 +1233,18 @@ AVar.VRr_krv <- function(Rho, n = 100, Lambda, ...) {
     16 * ans / (p * (p - 1)) ^ 2 / n
 }
 
-##### Exv.VXax #####
+##### Exv.VXXa #####
 #' Moments of ``bias-corrected'' eigenvalue dispersion indices
 #'
 #' Functions to calculate expectation/variance of eigenvalue dispersion indices
 #' of covariance/correlation matrices.
 #'
 #' Usage is identical to that of the corresponding unadjusted versions
-#' (see \link{Exv.VXx}), which is in most cases called internally.
+#' (see \link{Exv.VXX}), which is in most cases called internally.
 #'
-#' @name Exv.VXax
+#' @name Exv.VXXa
 #'
-#' @inheritParams Exv.VXx
+#' @inheritParams Exv.VXX
 #'
 #' @return
 #' A numeric vector of the desired moment, corresponding to \code{n}.
@@ -1255,11 +1255,11 @@ AVar.VRr_krv <- function(Rho, n = 100, Lambda, ...) {
 #'  doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
 #' @seealso
-#' \link{VXax} for ``bias-corrected'' estimators;
-#' \link{Exv.VXx} for moments of unajusted versions.
+#' \link{VXXa} for ``bias-corrected'' estimators;
+#' \link{Exv.VXX} for moments of unajusted versions.
 #'
 #' @examples
-#' # See also examples of Exv.VXx
+#' # See also examples of Exv.VXX
 #' # Covariance matrix
 #' N <- 20
 #' Lambda <- c(4, 2, 1, 1)
@@ -1269,13 +1269,13 @@ AVar.VRr_krv <- function(Rho, n = 100, Lambda, ...) {
 #' # Population values of V(Sigma) and Vrel(Sigma)
 #'
 #' # Moments of bias-corrected eigenvalue variance of covariance matrix
-#' Exv.VEav(Sigma, n = N - 1)
-#' Var.VEav(Sigma, n = N - 1)
+#' Exv.VESa(Sigma, n = N - 1)
+#' Var.VESa(Sigma, n = N - 1)
 #' # The expectation is equal to the population value (as it should be)
 #'
 #' # Moments of adjusted relative eigenvalue variance of covariance matrix
-#' Exv.VRav(Sigma, n = N - 1)
-#' Var.VRav(Sigma, n = N - 1)
+#' Exv.VRSa(Sigma, n = N - 1)
+#' Var.VRSa(Sigma, n = N - 1)
 #' # Slight underestimation is expected
 #' # All these are the same with Lambda = Lambda is specified instead of Sigma.
 #'
@@ -1284,30 +1284,30 @@ AVar.VRr_krv <- function(Rho, n = 100, Lambda, ...) {
 #' VE(S = Rho)$VR
 #' # Population value of Vrel(Rho), identical to Vrel(Sigma) as it should be
 #'
-#' Exv.VRar(Rho, n = N - 1)
-#' Var.VRar(Rho, n = N - 1)
+#' Exv.VRRa(Rho, n = N - 1)
+#' Var.VRRa(Rho, n = N - 1)
 #' # Slight underestimation is expected
 #' # These results vary with the choice of eigenvalues
 #' # If interested, repeat from the definition of Rho
 #'
-#' # All options for Var.VRr() are accommodated
-#' Var.VRar(Rho, n = N - 1, fun = "pfd") # Pan-Frank method; default
-#' Var.VRar(Rho, n = N - 1, fun = "klv") # Konishi's theory
+#' # All options for Var.VRR() are accommodated
+#' Var.VRRa(Rho, n = N - 1, fun = "pfd") # Pan-Frank method; default
+#' Var.VRRa(Rho, n = N - 1, fun = "klv") # Konishi's theory
 #'
 NULL
 
-##### Exv.VEav #####
+##### Exv.VESa #####
 #' Expectation of bias-corrected eigenvalue variance of covariance matrix
 #'
-#' \code{Exv.VEav()}: expectation of unbiased eigenvalue variance of
+#' \code{Exv.VESa()}: expectation of unbiased eigenvalue variance of
 #' covariance matrix. Of little practical use because
 #' this is just the population value \eqn{V(\Sigma)}.
 #'
-#' @rdname Exv.VXax
+#' @rdname Exv.VXXa
 #'
 #' @export
 #'
-Exv.VEav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
+Exv.VESa <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                      tol = .Machine$double.eps * 100, ...) {
     if(missing(Lambda)) {
         Lambda <- svd(Sigma, nu = 0, nv = 0)$d
@@ -1323,17 +1323,17 @@ Exv.VEav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
     t2 / p - t1 ^ 2 / p^2
 }
 
-##### Exv.VRav #####
+##### Exv.VRSa #####
 #' Expectation of adjusted relative eigenvalue variance of covariance matrix
 #'
-#' \code{Exv.VRav()}: expectation of adjusted relative eigenvalue variance
+#' \code{Exv.VRSa()}: expectation of adjusted relative eigenvalue variance
 #' of covariance matrix.
 #'
-#' @rdname Exv.VXax
+#' @rdname Exv.VXXa
 #'
 #' @export
 #'
-Exv.VRav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
+Exv.VRSa <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                      tol = .Machine$double.eps * 100, ...) {
     if(missing(Lambda)) {
         Lambda <- svd(Sigma, nu = 0, nv = 0)$d
@@ -1344,22 +1344,22 @@ Exv.VRav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
         Lambda[Lambda < tol] <- 0
     }
     p <- length(Lambda)
-    E <- Exv.VRv(Lambda = Lambda, n = n, drop_0 = drop_0, tol = tol, ...)
+    E <- Exv.VRS(Lambda = Lambda, n = n, drop_0 = drop_0, tol = tol, ...)
     En <- (p + 2) / (p * n + 2)
     1 - (1 - E) / (1 - En)
 }
 
-##### Exv.VRar #####
+##### Exv.VRRa #####
 #' Expectation of adjusted relative eigenvalue variance of correlation matrix
 #'
-#' \code{Exv.VRar()}: expectation of adjusted relative eigenvalue variance
+#' \code{Exv.VRRa()}: expectation of adjusted relative eigenvalue variance
 #' of correlation matrix.
 #'
-#' @rdname Exv.VXax
+#' @rdname Exv.VXXa
 #'
 #' @export
 #'
-Exv.VRar <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
+Exv.VRRa <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
                      tol.hg = 0, maxiter.hg = 2000, ...) {
     if(missing(Rho)) {
         Rho <- GenCov(evalues = Lambda, evectors = "Givens")
@@ -1375,23 +1375,23 @@ Exv.VRar <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
         warning("Rho was scaled to have diagonal elements of unity")
     }
     p <- ncol(Rho)
-    E <- Exv.VRr(Rho = Rho, n = n, tol = tol,
+    E <- Exv.VRR(Rho = Rho, n = n, tol = tol,
                  tol.hg = tol.hg, maxiter.hg = maxiter.hg, ...)
     En <- 1 / n
     1 - (1 - E) / (1 - En)
 }
 
-##### Var.VEav #####
+##### Var.VESa #####
 #' Variance of bias-corrected eigenvalue variance of covariance matrix
 #'
-#' \code{Var.VEav()}: variance of unbiased eigenvalue variance of
+#' \code{Var.VESa()}: variance of unbiased eigenvalue variance of
 #' covariance matrix.
 #'
-#' @rdname Exv.VXax
+#' @rdname Exv.VXXa
 #'
 #' @export
 #'
-Var.VEav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
+Var.VESa <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                      tol = .Machine$double.eps * 100, ...) {
     if(missing(Lambda)) {
         Lambda <- svd(Sigma, nu = 0, nv = 0)$d
@@ -1412,17 +1412,17 @@ Var.VEav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
          2 * (n - 1) * (n + 2) * t2 * t1^2) / (p ^ 4 * n * (n - 1) * (n + 2))
 }
 
-##### Var.VRav #####
+##### Var.VRSa #####
 #' Variance of adjusted relative eigenvalue variance of covariance matrix
 #'
 #' \code{Var.VR.av()}: variance of adjusted relative eigenvalue variance of
 #' covariance matrix.
 #'
-#' @rdname Exv.VXax
+#' @rdname Exv.VXXa
 #'
 #' @export
 #'
-Var.VRav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
+Var.VRSa <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
                  tol = .Machine$double.eps * 100, ...) {
     # divisor <- match.arg(divisor)
     if(missing(Lambda)) {
@@ -1434,22 +1434,22 @@ Var.VRav <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
         Lambda[Lambda < tol] <- 0
     }
     p <- length(Lambda)
-    V <- Var.VRv(Lambda = Lambda, n = n, drop_0 = drop_0, tol = tol, ...)
+    V <- Var.VRS(Lambda = Lambda, n = n, drop_0 = drop_0, tol = tol, ...)
     En <- (p + 2) / (p * n + 2)
     V / (1 - En)^2
 }
 
-##### Var.VRar #####
+##### Var.VRRa #####
 #' Variance of adjusted relative eigenvalue variance of covariance matrix
 #'
-#' \code{Var.VRar()}: variance of adjusted relative eigenvalue variance
+#' \code{Var.VRRa()}: variance of adjusted relative eigenvalue variance
 #' of correlation matrix.
 #'
-#' @rdname Exv.VXax
+#' @rdname Exv.VXXa
 #'
 #' @export
 #'
-Var.VRar <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
+Var.VRRa <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
                      tol.hg = 0, maxiter.hg = 2000, ...) {
     if(missing(Rho)) {
         Rho <- GenCov(evalues = Lambda, evectors = "Givens")
@@ -1465,7 +1465,7 @@ Var.VRar <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
         warning("Rho was scaled to have diagonal elements of unity")
     }
     p <- ncol(Rho)
-    V <- Var.VRr(Rho = Rho, n = n, tol = tol,
+    V <- Var.VRR(Rho = Rho, n = n, tol = tol,
                  tol.hg = tol.hg, maxiter.hg = maxiter.hg, ...)
     En <- 1 / n
     V / (1 - En)^2

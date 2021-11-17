@@ -130,7 +130,7 @@
 #'  doi:[10.1093/biomet/11.4.328](https://doi.org/10.1093/biomet/11.4.328).
 #'
 #' @seealso
-#' \link{Exv.VXx}, \link{AVar.VRr_xx} for outer functions.
+#' \link{Exv.VXX}, \link{AVar.VRR_xx} for outer functions.
 #'
 #' @examples
 #' # Trivial examples

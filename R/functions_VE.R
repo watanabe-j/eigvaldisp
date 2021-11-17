@@ -92,8 +92,8 @@
 #' @export
 #'
 #' @seealso
-#' \link{Exv.VXx} for moments of sample eigenvalue dispersion indices;
-#' \link{VXax} for bias-corrected versions.
+#' \link{Exv.VXX} for moments of sample eigenvalue dispersion indices;
+#' \link{VXXa} for bias-corrected versions.
 #'
 #' @examples
 #' # For a population covariance matrix or population eigenvalues
@@ -197,7 +197,7 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 }
 
 
-##### VXax #####
+##### VXXa #####
 #' ``Bias-corrected'' eigenvalue dispersion indices
 #'
 #' These functions calculate bias-corrected or adjusted
@@ -227,7 +227,7 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' sample covariance/correlation matrix has larger variance than
 #' the unadjusted version.
 #'
-#' @name VXax
+#' @name VXXa
 #'
 #' @inheritParams VE
 #'
@@ -240,18 +240,18 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' @return
 #' A list similar to the output of \code{VE()}, with an additional element:
 #' \describe{
-#'   \item{\code{VEav()}}{\code{$VEav}: Bias-corrected eigenvalue
+#'   \item{\code{VESa()}}{\code{$VESa}: Bias-corrected eigenvalue
 #'     variance of covariance matrix.}
-#'   \item{\code{VRav()}}{\code{$VRav}: Adjusted relative
+#'   \item{\code{VRSa()}}{\code{$VRSa}: Adjusted relative
 #'     eigenvalue variance of covariance matrix}
-#'   \item{\code{VRar()}}{\code{$VRar}: Adjusted relative
+#'   \item{\code{VRRa()}}{\code{$VRRa}: Adjusted relative
 #'     eigenvalue variance of correlation matrix}
 #' }
 #'
 #' @seealso
 #' \link{VE} for the main function;
-#' \link{Exv.VXx} for expectation (bias) in the ordinary estimators;
-#' \link{Exv.VXax} for the expectation/variance of the adjusted estimators.
+#' \link{Exv.VXX} for expectation (bias) in the ordinary estimators;
+#' \link{Exv.VXXa} for the expectation/variance of the adjusted estimators.
 #'
 #' @references
 #' Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
@@ -270,21 +270,21 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' L <- eigen(S)$values
 #'
 #' # Bias-corrected eigenvalue variance of covariance matrix
-#' VEav(X = X)
-#' VEav(S = S, n = N - 1)$VEav # Same, but n is required
-#' VEav(L = L, n = N - 1)$VEav # Same
+#' VESa(X = X)
+#' VESa(S = S, n = N - 1)$VESa # Same, but n is required
+#' VESa(L = L, n = N - 1)$VESa # Same
 #' # Note the overestimation in VE and VR,
-#' # and (slightly) better performance of VEav
+#' # and (slightly) better performance of VESa
 #' # (although it does not always work this well)
 #'
 #' # Adjusted relative eigenvalue variance of covariance matrix
-#' VRav(X = X)$VRav
+#' VRSa(X = X)$VRSa
 #'
 #' # Population value for the correlation matrix (same to Sigma in this case)
 #' VE(S = stats::cov2cor(Sigma))
 #'
 #' # Adjusted relative eigenvalue variance of correlation matrix
-#' VRar(X = X)
+#' VRRa(X = X)
 #'
 #'
 #' # Covariance/correlation matrix with strong covariation (VR = 0.8)
@@ -294,25 +294,25 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' N <- 20
 #' X2 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma2)
 #'
-#' VEav(X = X2)
+#' VESa(X = X2)
 #' # This is better than the un-corrected version
 #'
-#' VRav(X = X2)
-#' VRar(X = X2)
+#' VRSa(X = X2)
+#' VRRa(X = X2)
 #' # But these are slightly worse (as expected)
 #'
 NULL
 
-##### VEav #####
+##### VESa #####
 #' Bias-corrected eigenvalue variance of covariance matrix
 #'
-#' \code{VEav}: bias-corrected eigenvalue variance of covariance matrix.
+#' \code{VESa}: bias-corrected eigenvalue variance of covariance matrix.
 #'
-#' @rdname VXax
+#' @rdname VXXa
 #'
 #' @export
 #'
-VEav <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
+VESa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
                  m = switch(divisor, UB = N - 1, ML = N),
                  center = TRUE, nv = 0, ...) {
     divisor <- match.arg(divisor)
@@ -339,22 +339,22 @@ VEav <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
     p <- length(ans$L)
     t1 <- sum(L0)
     t2 <- sum(L0 ^ 2)
-    ans$VEav <- ((p * n + 2) * t2 - (p + n + 1) * t1 ^ 2) /
+    ans$VESa <- ((p * n + 2) * t2 - (p + n + 1) * t1 ^ 2) /
                     (p ^ 2 * n * (n - 1) * (n + 2))
     if(nv > 0) ans <- c(ans, list(U = svd.X$v))
     return(ans)
 }
 
-##### VRav #####
+##### VRSa #####
 #' Adjusted relative eigenvalue variance of covariance matrix
 #'
-#' \code{VRav}: adjusted relative eigenvalue variance of covariance matrix.
+#' \code{VRSa}: adjusted relative eigenvalue variance of covariance matrix.
 #'
-#' @rdname VXax
+#' @rdname VXXa
 #'
 #' @export
 #'
-VRav <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
+VRSa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
                  m = switch(divisor, UB = N - 1, ML = N),
                  center = TRUE, nv = 0, ...) {
     divisor <- match.arg(divisor)
@@ -377,22 +377,22 @@ VRav <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
     }
     ans <- VE(L = L, nv = 0, ...)
     p <- length(ans$L)
-    ans$VRav <- (ans$VR * (p * n + 2) - (p + 2)) / p / (n - 1)
+    ans$VRSa <- (ans$VR * (p * n + 2) - (p + 2)) / p / (n - 1)
     if(nv > 0) ans <- c(ans, list(U = svd.X$v))
     return(ans)
 }
 
 
-##### VRar #####
+##### VRRa #####
 #' Adjusted relative eigenvalue variance of correlation matrix
 #'
-#' \code{VRar}: adjusted relative eigenvalue variance of correlation matrix.
+#' \code{VRRa}: adjusted relative eigenvalue variance of correlation matrix.
 #'
-#' @rdname VXax
+#' @rdname VXXa
 #'
 #' @export
 #'
-VRar <- function(X, S, L, n = N - as.numeric(center),
+VRRa <- function(X, S, L, n = N - as.numeric(center),
                  center = TRUE, nv = 0, ...) {
     if(!missing(X)) {
         X <- scale2(X, center = center, scale = TRUE)
@@ -413,34 +413,34 @@ VRar <- function(X, S, L, n = N - as.numeric(center),
     }
     ans <- VE(L = L, nv = 0, ...)
     # p <- length(ans$L)
-    ans$VRar <- (ans$VR * n - 1) / (n - 1)
+    ans$VRRa <- (ans$VR * n - 1) / (n - 1)
     if(nv > 0) ans <- c(ans, list(U = svd.X$v))
     return(ans)
 }
 
 
 
-##### Sim.VE #####
+##### simulateVE #####
 #' Simulate eigenvalue dispersion indices
 #'
-#' \code{Sim.VE()} iteratively generates multivariate normal variates,
+#' \code{simulateVE()} iteratively generates multivariate normal variates,
 #' from which eigenvalues, eigenvectors (optional, if \code{nv > 0}),
 #' and eigenvalue dispersion indices
 #' (both unstandardized \eqn{V} and standardized \eqn{V_{rel}}) of
 #' sample covariance and correlation matrices are obtained.
 #' These are returned as an invisible list.
 #'
-#' When \code{Sim.VE()} is called, either data (\code{X}),
+#' When \code{simulateVE()} is called, either data (\code{X}),
 #' a covariance matrix (\code{Sigma}),
 #' or its Cholesky factor (\code{cSigma}) should be given.
 #' Specify the sample size \code{N} as well, unless \code{X} is provided.
 #'
-#' \code{Sim.VE()} does not actually calculate sample covariance/correlation
+#' \code{simulateVE()} does not actually calculate sample covariance/correlation
 #' matrices, but instead directly obtain eigenvalues and eigenvectors of these
 #' from singular value decomposition \code{svd()} of normal variates
 #' generated with \code{rmvn()}.
 #'
-#' In the output of \code{Sim.VE()}, suffices \code{*v} and \code{*r}
+#' In the output of \code{simulateVE()}, suffices \code{*v} and \code{*r}
 #' denote covariance and correlation matrices, respectively.
 #'
 # #' @inheritParams rmvn
@@ -458,7 +458,7 @@ VRar <- function(X, S, L, n = N - as.numeric(center),
 #'   when \code{X} is provided.
 #'
 #' @return
-#'   \code{Sim.VE()} invisiblly returns a list containing the following:
+#'   \code{simulateVE()} invisiblly returns a list containing the following:
 #'   \describe{
 #'     \item{VEv}{Eigenvalue variance of cov matrix V(S) (b vector)}
 #'     \item{VRv}{Relative eigenvalue variance of cov matrix Vrel(S) (b vector)}
@@ -495,14 +495,14 @@ VRar <- function(X, S, L, n = N - as.numeric(center),
 #' # the same population covariance matrix.
 #'
 #' # A small simulation
-#' sim_result <- Sim.VE(b = 50L, Sigma = Sigma, N = N)
+#' sim_result <- simulateVE(b = 50L, Sigma = Sigma, N = N)
 #' str(sim_result)
 #' # Results are returned as a list (see "Value" for details)
 #'
 #' # Syntax for parametric bootstrapping
-#' param_boot <- Sim.VE(b = 50L, X = X1)
+#' param_boot <- simulateVE(b = 50L, X = X1)
 #'
-Sim.VE <- function(b = 100L, X, Sigma, cSigma = sqrtfun(Sigma), N = nrow(X),
+simulateVE <- function(b = 100L, X, Sigma, cSigma = sqrtfun(Sigma), N = nrow(X),
                    divisor = c("UB", "ML"),
                    m = switch(divisor, UB = N - 1, ML = N),
                    center = TRUE, scale. = FALSE, sub = seq_len(ncol(cSigma)),
@@ -589,7 +589,7 @@ Sim.VE <- function(b = 100L, X, Sigma, cSigma = sqrtfun(Sigma), N = nrow(X),
 #' \code{rmvn()} is an internal function to generate
 #' multivariate normal variates.
 #'
-#' @rdname Sim.VE
+#' @rdname simulateVE
 #'
 #' @param N
 #'   Sample size in each iteration or each run of \code{rmvn()}.
@@ -606,7 +606,7 @@ Sim.VE <- function(b = 100L, X, Sigma, cSigma = sqrtfun(Sigma), N = nrow(X),
 #'   Cholesky factor of \code{Sigma}; this can be specified instead of \code{Sigma}.
 #'   Potentially useful when multiple simulations are run for the same \code{Sigma}
 #'   (although this will not substantially improve speed for a single call of
-#'   \code{Sim.VE(Sigma = ...)}, where \code{sqrtfun(Sigma)} is called only once).
+#'   \code{simulateVE(Sigma = ...)}, where \code{sqrtfun(Sigma)} is called only once).
 #' @param mean
 #'   Population mean vector; default is a \eqn{p} vector of 0's.
 #' @param sqrt_method

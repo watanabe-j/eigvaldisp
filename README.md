@@ -51,7 +51,7 @@ Lambda <- c(4, 2, 1, 1)
 Sigma <- GenCov(evalues = Lambda, evectors = "random")
 
 # Calculating eigenvalue dispersion indices of this matrix
-EDI_pop <- VE( = Sigma)
+EDI_pop <- VE(S = Sigma)
 
 # Eigenvalue variance ("V(Sigma)"): 1.5
 EDI_pop$VE
@@ -95,46 +95,46 @@ population covariance/correlation matrices:
 ```
 # Expectation of eigenvalue variance ("E[V(S)]"): 2.487
 # The argument n is for the degree of freedom, hence N - 1
-(E_V_Sigma <- Exv.VEv(Sigma, N - 1))
+(E_V_Sigma <- Exv.VES(Sigma, N - 1))
 
 # Expected bias: 0.987
 E_V_Sigma - EDI_pop$VE
 
 # Error (sampling variance) of eigenvalue variance ("Var[V(S)]"): 3.127
-Var.VEv(Sigma, N - 1)
+Var.VES(Sigma, N - 1)
 
 # Same for relative eigenvalue variance ("E[Vrel(S)]", "Var[Vrel(S)]"):
 # 0.184, 0.059, and 0.008
-(E_Vrel_Sigma <- Exv.VRv(Sigma, N - 1))
+(E_Vrel_Sigma <- Exv.VRS(Sigma, N - 1))
 E_Vrel_Sigma - EDI_pop$VR
-Var.VRv(Sigma, N - 1)
+Var.VRS(Sigma, N - 1)
 ```
 
 "Bias-corrected" estimators are also implemented, although this is
 not globally unbiased for the relative eigenvalue variance:
 ```
 # Bias-corrected eigenvalue variance
-VEav(X = X)$VEav
+VESa(X = X)$VESa
 
 # Its expectation: 1.5 (as this is unbiased)
-Exv.VEav(Sigma, N - 1)
+Exv.VESa(Sigma, N - 1)
 
 # Its variance: 2.094 (smaller than that of the ordinary one)
-Var.VEav(Sigma, N - 1)
+Var.VESa(Sigma, N - 1)
 
 
 # Adjusted relative eigenvalue variance,
-VRav(X = X)$VRav
+VRSa(X = X)$VRSa
 
 # Its expectation: 0.116 (tendency for underestimation)
-Exv.VRav(Sigma, N - 1)
+Exv.VRSa(Sigma, N - 1)
 
 # Its variance: 0.009 (larger than that of the ordinary one)
-Var.VRav(Sigma, N - 1)
+Var.VRSa(Sigma, N - 1)
 ```
 
 The same functionalities are also available for correlation matrices,
-but via different functions (`Exv.VRr()`, `Var.VRr()`, `VRar()`, etc.)
+but via different functions (`Exv.VRR()`, `Var.VRR()`, `VRRa()`, etc.)
 since their distributions are different.
 
 Also involved in this package are:

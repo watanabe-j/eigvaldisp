@@ -31,7 +31,7 @@ using namespace Rcpp;
 //' A numeric vector of \eqn{\sum 2 Cov(r_{ij}, r_{kl})},
 //' corresponding to \code{n}.
 //'
-//' @seealso \link{Exv.VXx}, \link{AVar.VRr_xx}
+//' @seealso \link{Exv.VXX}, \link{AVar.VRR_xx}
 //'
 // [[Rcpp::export]]
 NumericVector Cov_r2C(NumericVector n, NumericVector R, NumericVector E) {

@@ -30,7 +30,7 @@
 #' A numeric vector of \eqn{\sum 2 Cov(r_{ij}, r_{kl})},
 #' corresponding to \code{n}.
 #'
-#' @seealso \link{Exv.VXx}, \link{AVar.VRr_xx}
+#' @seealso \link{Exv.VXX}, \link{AVar.VRR_xx}
 #'
 Cov_r2C <- function(n, R, E) {
     .Call(`_eigvaldisp_Cov_r2C`, n, R, E)

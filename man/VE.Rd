@@ -174,6 +174,6 @@ quantifying the magnitude of phenotypic integration. \emph{Evolution},
 doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
 }
 \seealso{
-\link{Exv.VXx} for moments of sample eigenvalue dispersion indices;
-\link{VXax} for bias-corrected versions.
+\link{Exv.VXX} for moments of sample eigenvalue dispersion indices;
+\link{VXXa} for bias-corrected versions.
 }

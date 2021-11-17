@@ -119,18 +119,18 @@ The expectation and variance of the eigenvalue dispersion indices are implemente
 ```{r}
 ## Expectation of eigenvalue variance ("E[V(S)]")
 ## The argument n is for the degree of freedom, hence N - 1 in this case
-(E_V_Sigma <- Exv.VEv(Sigma = Sigma, n = N - 1))
+(E_V_Sigma <- Exv.VES(Sigma = Sigma, n = N - 1))
 
 ## Expected bias
 E_V_Sigma - EDI_pop$VE
 
 ## Error (sampling variance) of eigenvalue variance ("Var[V(S)]")
-Var.VEv(Sigma, N - 1)
+Var.VES(Sigma, N - 1)
 
 ## Same for relative eigenvalue variance ("E[Vrel(S)]", "Var[Vrel(S)]")
-(E_Vrel_Sigma <- Exv.VRv(Sigma, N - 1))
+(E_Vrel_Sigma <- Exv.VRS(Sigma, N - 1))
 E_Vrel_Sigma - EDI_pop$VR
-Var.VRv(Sigma, N - 1)
+Var.VRS(Sigma, N - 1)
 ```
 
 Note how close the above sample estimators are to these theoretical expectations, given the sampling variance (perhaps too fortuitously close). These functions aim to facilitate correct appreciation of the amount of sampling bias/error and interpretation of empirical results.
@@ -138,27 +138,27 @@ Note how close the above sample estimators are to these theoretical expectations
 Also, "bias-corrected" estimators devised by @Watanabe2021 are also implemented, although this is not globally unbiased for $\Vr$:
 ```{r}
 ## Bias-corrected eigenvalue variance
-VEav(X = X)$VEav
+VESa(X = X)$VESa
 
 ## Its expectation (equals the population value)
-Exv.VEav(Sigma, N - 1)
+Exv.VESa(Sigma, N - 1)
 
 ## Its variance (smaller than that of the ordinary one)
-Var.VEav(Sigma, N - 1)
+Var.VESa(Sigma, N - 1)
 
 
 ## Adjusted relative eigenvalue variance
-VRav(X = X)$VRav
+VRSa(X = X)$VRSa
 
 ## Its expectation (underestimates the population value)
-Exv.VRav(Sigma, N - 1)
+Exv.VRSa(Sigma, N - 1)
 
 ## Its variance
-Var.VRav(Sigma, N - 1)
+Var.VRSa(Sigma, N - 1)
 ```
 
 The same functionalities are also available for correlation matrices,
-but via different functions (`Exv.VRr()`, `Var.VRr()`, `VRar()`, etc.)
+but via different functions (`Exv.VRR()`, `Var.VRR()`, `VRRa()`, etc.)
 since their distributions are different.
 
 
@@ -203,12 +203,12 @@ str(VE(X = X, nv = 2))
 Optionally, the calculation of eigenvalue dispersion can be restricted to the subspace corresponding to the nonzero eigenvalues (or indeed any arbitrary subspace can be specified). See the documentation of this function for details.
 
 
-### `VEav()`, `VRav()`, `VRar()`: "bias-corrected" dispersion indices
-These functions are similar to `VE()` (and actually call that function internally), but also returns bias-corrected or adjusted versions of eigenvalue dispersion indices: bias corrected eigenvalue variance of covariance matrix $\tilde V(\m{S})$ (`VEav()`), adjusted relative eigenvalue variance of covariance matrix $\bar V_\mathrm{rel}(\m{S})$ (`VRav()`), and adjusted relative eigenvalue variance of correlation matrix $\bar V_\mathrm{rel}(\m{R})$ (`VRar()`). The output is a similar list, but with the corresponding index appended: e.g., the output of `VRav()` has the element `$VRav`:
+### `VESa()`, `VRSa()`, `VRRa()`: "bias-corrected" dispersion indices
+These functions are similar to `VE()` (and actually call that function internally), but also returns bias-corrected or adjusted versions of eigenvalue dispersion indices: bias corrected eigenvalue variance of covariance matrix $\tilde V(\m{S})$ (`VESa()`), adjusted relative eigenvalue variance of covariance matrix $\bar V_\mathrm{rel}(\m{S})$ (`VRSa()`), and adjusted relative eigenvalue variance of correlation matrix $\bar V_\mathrm{rel}(\m{R})$ (`VRRa()`). The output is a similar list, but with the corresponding index appended: e.g., the output of `VRSa()` has the element `$VRSa`:
 ```{r}
-str(VEav(X = X))
-str(VRav(X = X))
-str(VRar(X = X)) ## Automatically sets scale. = TRUE
+str(VESa(X = X))
+str(VRSa(X = X))
+str(VRRa(X = X)) ## Automatically sets scale. = TRUE
 ```
 
 ### `Exv.*()` and `Var.*()` families: expectation and variance
@@ -218,20 +218,20 @@ Here is a list of the functions:
 
 Statistic                     | Expectation | Variance
 ------------------------------|-------------|------------
-$\V(\m{S})$                   | `Exv.VEv()` | `Var.VEv()`
-$\Vr(\m{S})$                  | `Exv.VRv()` | `Var.VRv()`
-$\V(\m{R})$                   | `Exv.VEr()` | `Var.VEr()`
-$\Vr(\m{R})$                  | `Exv.VRr()` | `Var.VRr()`
-$\tilde{V}(\m{S})$            | `Exv.VEav()` | `Var.VEav()`
-$\bar{V}_\mathrm{rel}(\m{S})$ | `Exv.VRav()` | `Var.VRav()`
-$\bar{V}_\mathrm{rel}(\m{R})$ | `Exv.VRav()` | `Var.VRav()`
+$\V(\m{S})$                   | `Exv.VES()` | `Var.VES()`
+$\Vr(\m{S})$                  | `Exv.VRS()` | `Var.VRS()`
+$\V(\m{R})$                   | `Exv.VER()` | `Var.VER()`
+$\Vr(\m{R})$                  | `Exv.VRR()` | `Var.VRR()`
+$\tilde{V}(\m{S})$            | `Exv.VESa()` | `Var.VESa()`
+$\bar{V}_\mathrm{rel}(\m{S})$ | `Exv.VRSa()` | `Var.VRSa()`
+$\bar{V}_\mathrm{rel}(\m{R})$ | `Exv.VRSa()` | `Var.VRSa()`
 *Note*: The functions for $\V(\m{R})$ are retained for completeness, but this statistic is almost redundant with $\Vr(\m{R})$ (above). No functions for "bias-corrected" version of this has been implemented.
 
 These functions typically take two arguments: the population covariance or correlation matrix (`Sigma` or `Rho`, as appropriate), and the degrees of freedom `n`. They are (pseudo-)vectorized with respect to `n`, so that the output is a vector with the same length as `n`.
 
 They can take a vector of population eigenvalues as the argument `Lambda`, instead of `Sigma` or `Rho`. For functions pertaining to $\V(\m{S})$ and $\Vr(\m{S})$, the results are identical (and indeed leads to slight improvement of speed when `Lambda` is already available). On the other hand, this is usually **not** recommended for those pertaining to $\Vr(\m{R})$, because the distribution of this index is also dependent on population eigenvectors as well as population eigenvalues, except in certain restrictive conditions [see @Watanabe2021]. If the latter functions are provided with `Lambda`, a population correlation matrix is generated with random eigenvectors, which in general leads to random fluctuation in the results (see examples below).
 
-All these functions return exact moments under the null condition of sphericity or no correlation ($\m{\Sigma} = \sigma^2\m{I}_p$ and $\m{P} = \m{I}_p$, respectively, with $\m{I}_p$ being the identity matrix). Otherwise, they return exact (`Exv.VEv()`, `Var.VEv()`, `Exv.VRr()`) or asymptotic moments (`Exv.VRv()`, `Var.VRv()`); the accuracy of the latter can be suboptimal when `n` is small (though they are the best implementations to my knowledge). `Var.VRr()` is tricky; it returns the exact variance when $p = 2$ or under the null condition, but otherwise returns an asymptotic variance with one of the functions described below.
+All these functions return exact moments under the null condition of sphericity or no correlation ($\m{\Sigma} = \sigma^2\m{I}_p$ and $\m{P} = \m{I}_p$, respectively, with $\m{I}_p$ being the identity matrix). Otherwise, they return exact (`Exv.VES()`, `Var.VES()`, `Exv.VRR()`) or asymptotic moments (`Exv.VRS()`, `Var.VRS()`); the accuracy of the latter can be suboptimal when `n` is small (though they are the best implementations to my knowledge). `Var.VRR()` is tricky; it returns the exact variance when $p = 2$ or under the null condition, but otherwise returns an asymptotic variance with one of the functions described below.
 
 Note that, throughout the package, the small `n` is used for the degrees of freedom, whereas the capital `N` is for the sample size, following the convention in some statistical literature [and @Watanabe2021]. The use of `n` is to enable flexibility, as well as to make the user aware of the distinction between these quantities. Most typically, `n` should be `N - 1`, but other choices are not uncommon in applications---e.g., when analyzing a pooled covariance matrix across different groups, analyzing regression residuals or partial correlations.
 
@@ -240,41 +240,41 @@ Examples for covariance matrices (also see the examples above):
 Ns <- c(10, 20, 50, 100)
 
 ## Moments for different sample sizes for the covariance matrix
-Exv.VEv(Sigma, Ns - 1)
-Var.VEv(Sigma, Ns - 1)
+Exv.VES(Sigma, Ns - 1)
+Var.VES(Sigma, Ns - 1)
 EDI_pop$VE ## Population value for comparison
 
-Exv.VRv(Sigma, Ns - 1)
-Var.VRv(Sigma, Ns - 1)
+Exv.VRS(Sigma, Ns - 1)
+Var.VRS(Sigma, Ns - 1)
 EDI_pop$VR ## Population value
 
 ## For the correlation matrix
 Rho <- cov2cor(Sigma)
-Exv.VRr(Rho, Ns - 1)
-Var.VRr(Rho, Ns - 1)
+Exv.VRR(Rho, Ns - 1)
+Var.VRR(Rho, Ns - 1)
 VE(S = Rho)$VR ## Population value
 
 ## Comparing results the covariance matrix
-Exv.VRv(Sigma = Sigma, n = Ns - 1)
-Exv.VRv(Lambda = Lambda, n = Ns - 1)
+Exv.VRS(Sigma = Sigma, n = Ns - 1)
+Exv.VRS(Lambda = Lambda, n = Ns - 1)
 ## These are equal (up to potential rounding error)
 
 ## With eigenvalues of the correlation matrix
-Exv.VRr(Rho = Rho, n = Ns - 1)
-Exv.VRr(Lambda = eigen(Rho)$values, n = Ns - 1)
+Exv.VRR(Rho = Rho, n = Ns - 1)
+Exv.VRR(Lambda = eigen(Rho)$values, n = Ns - 1)
 ## These are NOT equal. Note the warning
 ## Indeed, the latter's result varies from run to run
 
 
 ## Profile of E[Vrel(S)] in simple conditions; p = 4 and n = 10
 xseq <- seq(0, 1, 0.01)
-plot(xseq, sapply(xseq, function(x) Exv.VRv(GenCov(p = 4, VR = x), n = 10)),
+plot(xseq, sapply(xseq, function(x) Exv.VRS(GenCov(p = 4, VR = x), n = 10)),
      xlim = c(0, 1), ylim = c(0, 1), xlab = "Vrel(Sigma)", ylab = "E[Vrel(S)]",
      type = "l", asp = 1, col = "tomato")
 abline(a = 0, b = 1, col = "gray", lty = 2)
 
 ## Same, adjusted index
-plot(xseq, sapply(xseq, function(x) Exv.VRav(GenCov(p = 4, VR = x), n = 10)),
+plot(xseq, sapply(xseq, function(x) Exv.VRSa(GenCov(p = 4, VR = x), n = 10)),
      xlim = c(0, 1), ylim = c(0, 1), xlab = "Vrel(Sigma)", ylab = "E[Vrel_adj(S)]",
      type = "l", asp = 1, col = "tomato")
 abline(a = 0, b = 1, col = "gray", lty = 2)
@@ -282,22 +282,22 @@ abline(a = 0, b = 1, col = "gray", lty = 2)
 ```
 
 
-### `AVar.VRr_*()` families: asymptotic variance of $\Vr(\m{R})$
-There are several internal functions to calculate asymptotic variance of $\Vr(\m{R})$, which are primarily to be called by `Var.VRr()`.
+### `AVar.VRR_*()` families: asymptotic variance of $\Vr(\m{R})$
+There are several internal functions to calculate asymptotic variance of $\Vr(\m{R})$, which are primarily to be called by `Var.VRR()`.
 
 These are to accommodate two different approaches to obtain the asymptotic variance as described by @Watanabe2021: one based on the approach of @PanFrank2004, and the other based on the theory of @Konishi1979. Empirically, the former tends to be more accurate in various conditions but requires nontrivial computational time when there are many variables ($p>200$ or so), whereas the latter tends to be slightly inaccurate but can be instantly evaluated.
 
-At present, the approach of @PanFrank2004 is implemented with the functions `AVar.VRr_pf*()`. Of these, only `AVar.VRr_pfd()` and `AVar.VRr_pfc()` are of practical interest. The two other functions, `AVar.VRr_pf()` and `AVar.VRr_pfv()`, are equivalent but substantially slower or requires too much RAM. The latter are retained for demonstrative purposes, as they more clearly show how the algorithm is implemented. `AVar.VRr_pfc()` utilizes `C++` API via the package `Rcpp` and is by far faster (although it still takes ~1500 CPU seconds for $p=1024$ in my environment), whereas `AVar.VRr_pfd()` is a pure R implementation which should suffice for $p$ up to ~100 or so.
+At present, the approach of @PanFrank2004 is implemented with the functions `AVar.VRR_pf*()`. Of these, only `AVar.VRR_pfd()` and `AVar.VRR_pfc()` are of practical interest. The two other functions, `AVar.VRR_pf()` and `AVar.VRR_pfv()`, are equivalent but substantially slower or requires too much RAM. The latter are retained for demonstrative purposes, as they more clearly show how the algorithm is implemented. `AVar.VRR_pfc()` utilizes `C++` API via the package `Rcpp` and is by far faster (although it still takes ~1500 CPU seconds for $p=1024$ in my environment), whereas `AVar.VRR_pfd()` is a pure R implementation which should suffice for $p$ up to ~100 or so.
 
-The asymptotic variance from the theory of @Konishi1979 is also implemented in several functions, of which only `AVar.VRr_klv()` would be of practical use.
+The asymptotic variance from the theory of @Konishi1979 is also implemented in several functions, of which only `AVar.VRR_klv()` would be of practical use.
 
-By default, `Var.VRr()` internally calls `AVar.VRr_pfd()`. The function to be called can be chosen by providing the suffix of one of these functions as the argument `fun`; e.g., `Var.VRr(..., fun = "klv")` for `AVar.VRr_klv()`.
+By default, `Var.VRR()` internally calls `AVar.VRR_pfd()`. The function to be called can be chosen by providing the suffix of one of these functions as the argument `fun`; e.g., `Var.VRR(..., fun = "klv")` for `AVar.VRR_klv()`.
 
 
 ```{r}
 ## Two different approaches with slightly different outcomes (in this case)
-eigvaldisp:::AVar.VRr_pfd(Rho, Ns - 1)
-eigvaldisp:::AVar.VRr_klv(Rho, Ns - 1)
+eigvaldisp:::AVar.VRR_pfd(Rho, Ns - 1)
+eigvaldisp:::AVar.VRR_klv(Rho, Ns - 1)
 ```
 
 
@@ -310,7 +310,7 @@ For further details see `help(Exv.rx)`.
 
 
 
-### `Sim.VE()`: simulating eigenvalue dispersion indices
+### `simulateVE()`: simulating eigenvalue dispersion indices
 This function is to conduct Monte Carlo simulations of eigenvalue dispersion indices with multivariate normal populations (and was used in the simulations of @Watanabe2021).
 
 This function usually takes three arguments: `b`, the number of simulations, `Sigma`, the population covariance matrix, and `N`, sample size.
@@ -329,7 +329,7 @@ Optionally, eigenvectors can be calculated and returned, at the cost of computat
 
 Example with rather small `b`:
 ```{r}
-simres <- Sim.VE(10L, Sigma = Sigma, N = N)
+simres <- simulateVE(10L, Sigma = Sigma, N = N)
 str(simres)
 ```
 

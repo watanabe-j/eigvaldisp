@@ -36,5 +36,5 @@ It is assumed that \code{E} has the form of
 NumericMatrix to save a modest amount of time
 }
 \seealso{
-\link{Exv.VXx}, \link{AVar.VRr_xx}
+\link{Exv.VXX}, \link{AVar.VRR_xx}
 }
