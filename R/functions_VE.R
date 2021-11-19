@@ -2,14 +2,14 @@
 #' Calculate eigenvalue dispersion indices
 #'
 #' Function to calculate eigenvalue variance \eqn{V} and
-#' relative eigenvalue variance \eqn{V_{rel}}
+#' relative eigenvalue variance \eqn{Vrel}
 #' of a covariance/correlation matrix, either from a data matrix \code{X}
 #' or a covariance/correlation matrix \code{S}.
 #'
 #' Provide either a data matrix (\code{X}), covariance/correlation matrix
 #' (\code{S}), or vector of eigenvalues (\code{L}).
 #' When \code{X} is given, the default divisor is \eqn{N - 1} where \eqn{N}
-#' is sample size.
+#' is the sample size.
 #'
 #' Sometimes it might be desirable to evaluate eigenvalue dispersion
 #' in a selected subspace, rather than in the full space.
@@ -33,7 +33,7 @@
 #'   Logical to specify whether SD-scaling should be done
 #'   (that is, when \code{TRUE}, the analysis is on the correlation matrix).
 #'   When \code{S} is provided (but \code{X} is not), this is converted to
-#'   a correlation matrix.
+#'   a correlation matrix by \code{stats::cov2cor()}.
 #' @param divisor
 #'   Either \code{"UB"} (default) or \code{"ML"},
 #'   to decide the default value of \code{m}.
@@ -53,10 +53,10 @@
 #'   A list containing the following:
 #'   \describe{
 #'     \item{VE}{Eigenvalue variance (\eqn{V})}
-#'     \item{VR}{Relative eigenvalue variance (\eqn{V_{rel}})}
+#'     \item{VR}{Relative eigenvalue variance (\eqn{Vrel})}
 #'     \item{meanL}{Mean (average) of the eigenvalues}
 #'     \item{L}{Vector of eigenvalues}
-#'     \item{U}{Matrix of eigenvectors, only when \code{nv > 0}}
+#'     \item{U}{Matrix of eigenvectors, appended only when \code{nv > 0}}
 #'   }
 #'
 #' @references
@@ -426,9 +426,9 @@ VRRa <- function(X, S, L, n = N - as.numeric(center),
 #' \code{simulateVE()} iteratively generates multivariate normal variates,
 #' from which eigenvalues, eigenvectors (optional, if \code{nv > 0}),
 #' and eigenvalue dispersion indices
-#' (both unstandardized \eqn{V} and standardized \eqn{V_{rel}}) of
+#' (both unstandardized \eqn{V} and standardized \eqn{Vrel}) of
 #' sample covariance and correlation matrices are obtained.
-#' These are returned as an invisible list.
+#' These are invisibly returned as a list.
 #'
 #' When \code{simulateVE()} is called, either data (\code{X}),
 #' a covariance matrix (\code{Sigma}),
@@ -460,18 +460,22 @@ VRRa <- function(X, S, L, n = N - as.numeric(center),
 #' @return
 #'   \code{simulateVE()} invisiblly returns a list containing the following:
 #'   \describe{
-#'     \item{VEv}{Eigenvalue variance of cov matrix V(S) (b vector)}
-#'     \item{VRv}{Relative eigenvalue variance of cov matrix Vrel(S) (b vector)}
-#'     \item{Lv}{Eigenvalues of cov matrix (p * b matrix)}
-#'     \item{VEr}{Eigenvalue variance of cor matrix V(R) (b vector)}
-#'     \item{VRr}{Relative eigenvalue variance of cor matrix Vrel(R) (b vector)}
-#'     \item{Lr}{Eigenvalues of cor matrix (p * b matrix)}
-#'     (the rest are returned only when \code{nv > 0})
-#'     \item{Uv}{Eigenvectors of cov matrix (p * nv * b array)}
-#'     \item{Ur}{Eigenvectors of cor matrix (p * nv * b array)}
-#'     \item{Uv.org}{Eigenvectors of population cov matrix (p * nv matrix)}
-#'     \item{Ur.org}{Eigenvectors of population cor matrix (p * nv matrix)}
-#'     (\code{Uv.org} and \code{Ur.org} are provided
+#'     \item{VES}{Eigenvalue variance of covariance matrix V(S) (b vector)}
+#'     \item{VRS}{Relative eigenvalue variance of covariance matrix Vrel(S)
+#'       (b vector)}
+#'     \item{LS}{Eigenvalues of covariance matrix (p * b matrix)}
+#'     \item{VER}{Eigenvalue variance of correlation matrix V(R) (b vector)}
+#'     \item{VRR}{Relative eigenvalue variance of correlation matrix Vrel(R)
+#'       (b vector)}
+#'     \item{LR}{Eigenvalues of correlation matrix (p * b matrix)}
+#'     (the following elements are appended only when \code{nv > 0})
+#'     \item{US}{Eigenvectors of covariance matrix (p * nv * b array)}
+#'     \item{UR}{Eigenvectors of correlation matrix (p * nv * b array)}
+#'     \item{US.org}{Eigenvectors of population covariance matrix
+#'       (p * nv matrix)}
+#'     \item{UR.org}{Eigenvectors of population correlation matrix
+#'       (p * nv matrix)}
+#'     (\code{US.org} and \code{UR.org} are provided
 #'     as references for signs of eigenvectors)
 #'   }
 #' @seealso \link{VE}, \link{sqrt_methods}
@@ -527,58 +531,58 @@ simulateVE <- function(b = 100L, X, Sigma, cSigma = sqrtfun(Sigma), N = nrow(X),
     }
     p <- ncol(cSigma)
     ## Eigenvectors of the original cov matrix, taken from cSigma
-    Uv.org <- svd(cSigma, nu = 0, nv = nv)$v
-    Ur.org <- svd(cov2cor(crossprod(cSigma)), nu = 0, nv = nv)$v
+    US.org <- svd(cSigma, nu = 0, nv = nv)$v
+    UR.org <- svd(cov2cor(crossprod(cSigma)), nu = 0, nv = nv)$v
     ## Objects to store simulation results
-    ansv.L <- matrix(numeric(b * p), p, b)
-    ansr.L <- matrix(numeric(b * p), p, b)
-    ansv.VE <- numeric(b)
-    ansv.VR <- numeric(b)
-    ansr.VE <- numeric(b)
-    ansr.VR <- numeric(b)
-    ansv.U <- array(numeric(b * p * nv), dim = c(p, nv, b))
-    ansr.U <- array(numeric(b * p * nv), dim = c(p, nv, b))
-    dimnames(ansv.L)[[1]] <- paste0("L", seq_len(p))
-    dimnames(ansr.L)[[1]] <- paste0("L", seq_len(p))
-    dimnames(ansv.U)[[1]] <- paste0("v", seq_len(p))
-    dimnames(ansr.U)[[1]] <- paste0("v", seq_len(p))
+    ansS.L <- matrix(numeric(b * p), p, b)
+    ansR.L <- matrix(numeric(b * p), p, b)
+    ansS.VE <- numeric(b)
+    ansS.VR <- numeric(b)
+    ansR.VE <- numeric(b)
+    ansR.VR <- numeric(b)
+    ansS.U <- array(numeric(b * p * nv), dim = c(p, nv, b))
+    ansR.U <- array(numeric(b * p * nv), dim = c(p, nv, b))
+    dimnames(ansS.L)[[1]] <- paste0("L", seq_len(p))
+    dimnames(ansR.L)[[1]] <- paste0("L", seq_len(p))
+    dimnames(ansS.U)[[1]] <- paste0("v", seq_len(p))
+    dimnames(ansR.U)[[1]] <- paste0("v", seq_len(p))
     i <- 1L
     ## Simulation runs; a while loop and tryCatch() are used
     ## as svd() (in VE()) occationally returns an error.
     while(i <= b) {
         Xi <- rmvn(cSigma = cSigma, N = N, sqrt_method = sqrt_method)
-        ansv <- tryCatch(VE(Xi, center = center, scale. = FALSE, nv = nv,
+        ansS <- tryCatch(VE(Xi, center = center, scale. = FALSE, nv = nv,
                             sub = sub, divisor = divisor, m = m,
                             drop_0 = drop_0, tol = tol),
                          error = function(e) list(-1, numeric(p)))
-        ansr <- tryCatch(VE(Xi, center = center, scale. = TRUE, nv = nv,
+        ansR <- tryCatch(VE(Xi, center = center, scale. = TRUE, nv = nv,
                             sub = sub, divisor = divisor, m = m,
                             drop_0 = drop_0, tol = tol),
                          error = function(e) list(-1, numeric(p)))
-        if(ansv[[1]] < 0 || ansr[[1]] < 0) next
-        ansv.VE[i] <- ansv$VE
-        ansv.VR[i] <- ansv$VR
-        ansr.VE[i] <- ansr$VE
-        ansr.VR[i] <- ansr$VR
-        ansv.L[, i] <- ansv$L
-        ansr.L[, i] <- ansr$L
-        ansv.U[, , i] <- ansv$U
-        ansr.U[, , i] <- ansr$U
+        if(ansS[[1]] < 0 || ansR[[1]] < 0) next
+        ansS.VE[i] <- ansS$VE
+        ansS.VR[i] <- ansS$VR
+        ansR.VE[i] <- ansR$VE
+        ansR.VR[i] <- ansR$VR
+        ansS.L[, i] <- ansS$L
+        ansR.L[, i] <- ansR$L
+        ansS.U[, , i] <- ansS$U
+        ansR.U[, , i] <- ansR$U
         i <- i + 1L
     }
-    ans <- list(VEv = ansv.VE, VRv = ansv.VR, Lv = ansv.L, VEr = ansr.VE,
-                VRr = ansr.VR, Lr = ansr.L)
+    ans <- list(VES = ansS.VE, VRS = ansS.VR, LS = ansS.L, VER = ansR.VE,
+                VRR = ansR.VR, LR = ansR.L)
     if(nv > 0) {
         ## Simulated eigenvectors are aligned with the original eigenvectors
         ## so that the inner products are positive.
         for(i in seq_len(nv)) {
-            Indv <- crossprod(Uv.org[, i], ansv.U[, i, ]) < 0
-            Indr <- crossprod(Ur.org[, i], ansr.U[, i, ]) < 0
-            ansv.U[, i, Indv] <- -ansv.U[, i, Indv]
-            ansr.U[, i, Indr] <- -ansr.U[, i, Indr]
+            Indv <- crossprod(US.org[, i], ansS.U[, i, ]) < 0
+            Indr <- crossprod(UR.org[, i], ansR.U[, i, ]) < 0
+            ansS.U[, i, Indv] <- -ansS.U[, i, Indv]
+            ansR.U[, i, Indr] <- -ansR.U[, i, Indr]
         }
-        ans <- c(ans, list(Uv = ansv.U, Ur = ansr.U,
-                           Uv.org = Uv.org, Ur.org = Ur.org))
+        ans <- c(ans, list(US = ansS.U, UR = ansR.U,
+                           US.org = US.org, UR.org = UR.org))
     }
     invisible(ans)
 }

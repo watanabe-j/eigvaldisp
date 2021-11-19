@@ -30,7 +30,7 @@ VE(
 \item{scale.}{Logical to specify whether SD-scaling should be done
 (that is, when \code{TRUE}, the analysis is on the correlation matrix).
 When \code{S} is provided (but \code{X} is not), this is converted to
-a correlation matrix.}
+a correlation matrix by \code{stats::cov2cor()}.}
 
 \item{divisor}{Either \code{"UB"} (default) or \code{"ML"},
 to decide the default value of \code{m}.}
@@ -50,15 +50,15 @@ to be involved; used to exclude some subspace.}
 A list containing the following:
 \describe{
 \item{VE}{Eigenvalue variance (\eqn{V})}
-\item{VR}{Relative eigenvalue variance (\eqn{V_{rel}})}
+\item{VR}{Relative eigenvalue variance (\eqn{Vrel})}
 \item{meanL}{Mean (average) of the eigenvalues}
 \item{L}{Vector of eigenvalues}
-\item{U}{Matrix of eigenvectors, only when \code{nv > 0}}
+\item{U}{Matrix of eigenvectors, appended only when \code{nv > 0}}
 }
 }
 \description{
 Function to calculate eigenvalue variance \eqn{V} and
-relative eigenvalue variance \eqn{V_{rel}}
+relative eigenvalue variance \eqn{Vrel}
 of a covariance/correlation matrix, either from a data matrix \code{X}
 or a covariance/correlation matrix \code{S}.
 }
@@ -66,7 +66,7 @@ or a covariance/correlation matrix \code{S}.
 Provide either a data matrix (\code{X}), covariance/correlation matrix
 (\code{S}), or vector of eigenvalues (\code{L}).
 When \code{X} is given, the default divisor is \eqn{N - 1} where \eqn{N}
-is sample size.
+is the sample size.
 
 Sometimes it might be desirable to evaluate eigenvalue dispersion
 in a selected subspace, rather than in the full space.
