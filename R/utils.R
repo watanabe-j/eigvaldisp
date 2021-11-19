@@ -21,7 +21,7 @@
 #' and then conducting QR factorization of this (with pivoting).
 #' This allows for a correct Cholesky factorization of
 #' any positive semidefinite matrix, although for most simulation purposes
-#' the matrix square root usually suffices.
+#' the matrix square root by \code{matsqrt} usually suffices.
 #'
 #' @name sqrt_methods
 #' @param A

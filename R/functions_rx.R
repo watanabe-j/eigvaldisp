@@ -137,7 +137,7 @@
 #' n <- 10    # Which typically corresponds to sample size of 11
 #' eigvaldisp:::Exv.r1(n, 0)
 #' eigvaldisp:::Exv.r1(n, 0.5) # Underestimate
-#' eigvaldisp:::Exv.r2(n, 0)   # This is n^-2 for x = 0
+#' eigvaldisp:::Exv.r2(n, 0)   # This is 1/n for x = 0
 #'
 #' eigvaldisp:::AExv.r1(n, 0)
 #' eigvaldisp:::AExv.r1(n, 0.5)
