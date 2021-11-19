@@ -319,12 +319,12 @@ Alternatively, parametric bootstrapping can be performed by providing a data mat
 
 It returns a list of the following elements:
 
-* `VEv`: eigenvalue variance of covariance matrix $\V(\m{S})$
-* `VRv`: relative eigenvalue variance of covariance matrix $\Vr(\m{S})$
-* `Lv`: eigenvalues of covariance matrix $(l_1, \dotsc, l_p)$ of $\m{S}$
-* `VEr`: eigenvalue variance of correlation matrix $\V(\m{R})$
-* `VRr`: relative eigenvalue variance of correlation matrix $\Vr(\m{R})$
-* `Lr`: eigenvalues of correlation matrix $(l_1, \dotsc, l_p)$ of $\m{R}$
+* `VES`: eigenvalue variance of covariance matrix $\V(\m{S})$
+* `VRS`: relative eigenvalue variance of covariance matrix $\Vr(\m{S})$
+* `LS`: eigenvalues of covariance matrix $(l_1, \dotsc, l_p)$ of $\m{S}$
+* `VER`: eigenvalue variance of correlation matrix $\V(\m{R})$
+* `VRR`: relative eigenvalue variance of correlation matrix $\Vr(\m{R})$
+* `LR`: eigenvalues of correlation matrix $(l_1, \dotsc, l_p)$ of $\m{R}$
 
 Optionally, eigenvectors can be calculated and returned, at the cost of computational time and RAM.
 
