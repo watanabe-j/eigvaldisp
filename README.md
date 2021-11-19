@@ -17,8 +17,10 @@ See that paper for theoretical details.
 ## Installation
 ```
 # install.packages(devtools)
-devtools::install_github("watanabe-j/eigvaldisp")
+devtools::install_github("watanabe-j/eigvaldisp", build_vignettes = TRUE)
 ```
+`build_vignettes = TRUE` is not necessary, but recommended.
+Package `rmarkdown` is required for this option.
 
 This package has the following dependencies:
 ```
@@ -27,14 +29,17 @@ Imports:
     hypergeo,
     Rcpp
 Suggests:
+    parallel,
     testthat (>= 3.0.0),
-    parallel
+    knitr,
+    rmarkdown
 LinkingTo:
     Rcpp
 ```
 
-Most of the functionalities can be used without `Rcpp`, `parallel`,
-or `testthat`. If you want to try this package without installing them,
+`stats` and `hypergeo` are strictly necessary, whereas
+`Rcpp` is used only in a single function.
+If you want to try this package without installing `Rcpp`,
 simply `source()` the .R files in `R/`, except `eigvaldisp-package.R`,
 `RcppExports.R`, and `zzz.R`.
 
@@ -65,7 +70,8 @@ The problem is the presence of sampling bias (and error),
 which renders inferences from a sample rather difficult.
 
 To see this, simulate a small multivariate normal sample from
-the same population covariance matrix:
+the same population covariance matrix using
+the internal function `rmvn()`:
 ```
 # Simulate a multivariate normal sample
 N <- 20
@@ -83,7 +89,7 @@ EDI_sam$VR
 ```
 
 These are typically larger than the population values,
-although some random fluctuation is common. In other words,
+although there is always some random fluctuation. In other words,
 sample eigenvalue dispersion indices tend to overestimate
 the population values in this case
 (although underestimation can happen when the population value is large).
@@ -144,6 +150,8 @@ Also involved in this package are:
 
 There may be better R implementations for some of the functionalities,
 but this package is intended to be as much self-contained as possible.
+
+For more detailed descriptions, use `vignette("eigvaldisp")`.
 
 
 ## Copyright notice
