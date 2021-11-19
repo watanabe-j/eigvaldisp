@@ -115,7 +115,7 @@ Observe how these sample quantities overestimate the population values. The pres
 
 The main functionality of this package is to calculate the amount of estimation bias as well as error, based on the theoretical results of @Watanabe2021, who derived the first two moments (or approximation thereof) of $\V(\m{S})$, $\Vr(\m{S})$, and $\Vr(\m{R})$ under the multivariate normality (note that, for any correlation matrix, $\bar{\lambda} = \bar{l} = 1$ so that $\V(\m{R}) = (p-1)\Vr(\m{R})$, hence $\V(\m{R})$ does not require a separate treatment).
 
-The expectation and variance of the eigenvalue dispersion indices are implemented in the `Exv.*()` and `Var.*()` families of functions, which take suffices like `*.VEv` (for $\V(\m{S})$), `*.VRv` (for $\Vr(\m{S})$), `*.VRr` (for $\Vr(\m{R})$) (more details below). These can be used as follows:
+The expectation and variance of the eigenvalue dispersion indices are implemented in the `Exv.*()` and `Var.*()` families of functions, which take suffices like `*.VES` (for $\V(\m{S})$), `*.VRS` (for $\Vr(\m{S})$), `*.VRR` (for $\Vr(\m{R})$) (more details below). These can be used as follows:
 ```{r}
 ## Expectation of eigenvalue variance ("E[V(S)]")
 ## The argument n is for the degree of freedom, hence N - 1 in this case
@@ -135,7 +135,7 @@ Var.VRS(Sigma, N - 1)
 
 Note how close the above sample estimators are to these theoretical expectations, given the sampling variance (perhaps too fortuitously close). These functions aim to facilitate correct appreciation of the amount of sampling bias/error and interpretation of empirical results.
 
-Also, "bias-corrected" estimators devised by @Watanabe2021 are also implemented, although this is not globally unbiased for $\Vr$:
+Also, "bias-corrected" estimators devised by @Watanabe2021 are also implemented, although this is not globally unbiased except for $\V(\m{S})$:
 ```{r}
 ## Bias-corrected eigenvalue variance
 VESa(X = X)$VESa
@@ -189,7 +189,7 @@ str(VE(X = X))
 ## Of the sample correlation matrix
 str(VE(X = X, scale. = TRUE))
 
-## These are the same
+## The following pairs are equivalent to each other
 all.equal(VE(X = X), VE(S = cov(X)))
 all.equal(VE(X = X), VE(L = eigen(cov(X))$values))
 all.equal(VE(X = X, scale. = TRUE), VE(S = cor(X)))
@@ -254,19 +254,20 @@ Exv.VRR(Rho, Ns - 1)
 Var.VRR(Rho, Ns - 1)
 VE(S = Rho)$VR ## Population value
 
-## Comparing results the covariance matrix
+## Comparing results from the covariance matrix and its eigenvalues
 Exv.VRS(Sigma = Sigma, n = Ns - 1)
 Exv.VRS(Lambda = Lambda, n = Ns - 1)
 ## These are equal (up to potential rounding error)
 
-## With eigenvalues of the correlation matrix
+## From the correlation matrix and its eigenvalues
 Exv.VRR(Rho = Rho, n = Ns - 1)
 Exv.VRR(Lambda = eigen(Rho)$values, n = Ns - 1)
 ## These are NOT equal. Note the warning
 ## Indeed, the latter's result varies from run to run
 
 
-## Profile of E[Vrel(S)] in simple conditions; p = 4 and n = 10
+## Profile of E[Vrel(S)] in simple conditions; p = 4 and n = 10, 
+## and single large (spiked) population eigenvalue
 xseq <- seq(0, 1, 0.01)
 plot(xseq, sapply(xseq, function(x) Exv.VRS(GenCov(p = 4, VR = x), n = 10)),
      xlim = c(0, 1), ylim = c(0, 1), xlab = "Vrel(Sigma)", ylab = "E[Vrel(S)]",
@@ -285,13 +286,13 @@ abline(a = 0, b = 1, col = "gray", lty = 2)
 ### `AVar.VRR_*()` families: asymptotic variance of $\Vr(\m{R})$
 There are several internal functions to calculate asymptotic variance of $\Vr(\m{R})$, which are primarily to be called by `Var.VRR()`.
 
-These are to accommodate two different approaches to obtain the asymptotic variance as described by @Watanabe2021: one based on the approach of @PanFrank2004, and the other based on the theory of @Konishi1979. Empirically, the former tends to be more accurate in various conditions but requires nontrivial computational time when there are many variables ($p>200$ or so), whereas the latter tends to be slightly inaccurate but can be instantly evaluated.
+These are to accommodate two different approaches to obtain asymptotic variance of $\Vr(\m{R})$ as described by @Watanabe2021: one based on the approach of @PanFrank2004, and the other based on the theory of @Konishi1979. Empirically, the former tends to be more accurate in various conditions but requires nontrivial computational time when there are many variables ($p>200$ or so), whereas the latter tends to be slightly inaccurate but can be instantly evaluated.
 
-At present, the approach of @PanFrank2004 is implemented with the functions `AVar.VRR_pf*()`. Of these, only `AVar.VRR_pfd()` and `AVar.VRR_pfc()` are of practical interest. The two other functions, `AVar.VRR_pf()` and `AVar.VRR_pfv()`, are equivalent but substantially slower or requires too much RAM. The latter are retained for demonstrative purposes, as they more clearly show how the algorithm is implemented. `AVar.VRR_pfc()` utilizes `C++` API via the package `Rcpp` and is by far faster (although it still takes ~1500 CPU seconds for $p=1024$ in my environment), whereas `AVar.VRR_pfd()` is a pure R implementation which should suffice for $p$ up to ~100 or so.
+At present, the approach of @PanFrank2004 is implemented with the functions `AVar.VRR_pf*()`. Of these, only `AVar.VRR_pfd()` and `AVar.VRR_pfc()` will be of practical interest. The two other functions, `AVar.VRR_pf()` and `AVar.VRR_pfv()`, are equivalent but substantially slower or requires too much RAM space as $p$ grows. The latter are retained for demonstrative purposes, as they more clearly show how the algorithm is implemented. `AVar.VRR_pfc()` utilizes `C++` API via the package `Rcpp` and is by far faster (although it still takes ~1500 CPU seconds for $p=1024$ in my environment), whereas `AVar.VRR_pfd()` is a pure R implementation which should suffice for $p$ up to ~100 or so.
 
 The asymptotic variance from the theory of @Konishi1979 is also implemented in several functions, of which only `AVar.VRR_klv()` would be of practical use.
 
-By default, `Var.VRR()` internally calls `AVar.VRR_pfd()`. The function to be called can be chosen by providing the suffix of one of these functions as the argument `fun`; e.g., `Var.VRR(..., fun = "klv")` for `AVar.VRR_klv()`.
+By default, `Var.VRR()` internally calls `AVar.VRR_pfd()`. The function to be called can be chosen by providing the suffix of one of these functions as the argument `fun`; e.g., `Var.VRR(..., fun = "klv")` to use `AVar.VRR_klv()`.
 
 
 ```{r}
@@ -302,7 +303,7 @@ eigvaldisp:::AVar.VRR_klv(Rho, Ns - 1)
 
 
 ### `Exv.r*()` and the like: moments of the correlation coefficient
-Moments of $\Vr(\m{R})$ are typically calculated from those of of correlation coefficients, for which this package has >15 internal functions.
+Moments of $\Vr(\m{R})$ are usually calculated from those of of correlation coefficients, for which this package has >15 internal functions.
 
 These functions typically take as arguments the degrees of freedom `n` and the population correlation coefficient `x`. Asymptotic functions also takes the order of asymptotic approximation `order.` (which corresponds to the exponent $m$ in $O(n^m)$).
 
@@ -333,6 +334,7 @@ simres <- simulateVE(10L, Sigma = Sigma, N = N)
 str(simres)
 ```
 
+This function generates random normal variates with the function `rmvn()` described below, and calculate eigenvalue dispersion indices via `svd()`. The first skip could be skipped by use of `stats::rWishart()` for this relatively simple task, but this extra step is retained because there is a future plan to extend the algorithm to matrix-variate normal conditions (where both columns and rows are correlated).
 
 ### `rmvn()`: generating multivariate normal sample
 This is an internal function used to generate a multivariate normal sample with known parameters.
@@ -350,7 +352,7 @@ X1 <- eigvaldisp:::rmvn(10, Sigma = Sigma1)
 ## Singular covariance matrix (with only 1 eigenvalue equal to zero)
 Sigma2 <- GenCov(evalues = c(4, 2, 1, 0), evectors = "random")
 ## Not run: eigvaldisp:::rmvn(10, Sigma = Sigma2) ## Fails
-X2 <- eigvaldisp:::rmvn(10, Sigma = Sigma2, sqrt_method = "pivot")
+X2 <- eigvaldisp:::rmvn(10, Sigma = Sigma2, sqrt_method = "chol_piv")
 
 ## Singular covariance matrix (with >1 eigenvalue equal to zero)
 Sigma3 <- GenCov(evalues = c(4, 2, 0, 0), evectors = "random")
@@ -371,7 +373,7 @@ On the other hand, it is possible to show $\Vr({\m{R}}) = \frac{2}{p(p-1)} \sum_
 
 
 ## Moments
-The following symbols are used in the following:
+These symbols are used in what follows:
 
 * $p$: number of variables
 * $n$: degrees of freedom
@@ -429,12 +431,12 @@ $$
 \begin{align}
 \E\left[\frac{ \sum_{i=1}^p{l_i}^2 }{ \left(\sum_{i=1}^p{l_i}\right)^2 }\right]
 \approx & \frac{ (\tr\m{\Lambda})^2 + (n+1)\tr(\m{\Lambda}^2) }{ n(\tr\m{\Lambda})^2 + 2\tr(\m{\Lambda}^2) } - \frac{8(n-1)(n+2) }{ n\left[ n(\tr\m{\Lambda})^2 + 2\tr(\m{\Lambda}^2)\right]^3} \\ &
-\times \left\{ n(\tr\m{\Lambda})^3\tr(\m{\Lambda}^3)
+\times \Big\{ n(\tr\m{\Lambda})^3\tr(\m{\Lambda}^3)
 - n(\tr\m{\Lambda})^2\big[\tr(\m{\Lambda}^2)\big]^2
-- \big[\tr(\m{\Lambda}^2)\big]^3 \right. \\ & \quad \left.{}
+- \big[\tr(\m{\Lambda}^2)\big]^3  \\ & \quad {}
 - 2\tr\m{\Lambda}\tr(\m{\Lambda}^2)\tr(\m{\Lambda}^3)
 + 3(\tr\m{\Lambda})^2\tr(\m{\Lambda}^4)
-\right\}; \\
+\Big\}; \\
 \Var\left[\frac{\sum_{i=1}^p{l_i}^2}{\left(\sum_{i=1}^p{l_i}\right)^2}\right]
 \approx & \frac{4(n-1)(n+2)}{n\left[ n(\tr\m{\Lambda})^2 + 2\tr(\m{\Lambda}^2)\right]^4}  \\ &
 \times \left\{
@@ -460,7 +462,7 @@ $$
 
 
 ### $\Vr(\m{R})$
-The relevant moments can conveniently be obtained from the form of average squared correlation coefficients. The basic forms are:
+The relevant moments can conveniently be obtained from the form of average squared correlation. The basic forms are:
 $$
 \E[\Vr(\m{R})] = \frac{2}{p(p-1)}\sum_{i<j}^{p}{\E(r_{ij}^2)}; \\
 \Var[\Vr(\m{R})] = \frac{4}{p^2(p-1)^2} \left[ \sum_{i<j}^{p}{\Var(r_{ij}^2)} + \sum_{i<j, k<l, \\ (i,j)<(k,l)}^{p}{2\Cov(r_{ij}^2, r_{kl}^2)} \right],
@@ -480,9 +482,9 @@ We also have
 $$
 \begin{align}
 \Var(r_{ij}^2) =& \frac{(n - 1)(n + 1)(1 - \rho_{ij}^2)}{n}
-\left[\F\left(1, 1; \frac{n+2}{2}; \rho_{ij}^2 \right)
-- \frac{n}{n+2} \F\left(1, 2; \frac{n+4}{2}; \rho_{ij}^2 \right) \right. \\ & \qquad \left.{}
-- \frac{2(n - 1)(1 - \rho_{ij}^2)}{n(n+1)} \F\left(1, 1; \frac{n+2}{2}; \rho_{ij}^2 \right)^2 \right].
+\Bigg[\F\left(1, 1; \frac{n+2}{2}; \rho_{ij}^2 \right)
+- \frac{n}{n+2} \F\left(1, 2; \frac{n+4}{2}; \rho_{ij}^2 \right) \\ & \qquad {}
+- \frac{2(n - 1)(1 - \rho_{ij}^2)}{n(n+1)} \F\left(1, 1; \frac{n+2}{2}; \rho_{ij}^2 \right)^2 \Bigg].
 \end{align}
 $$
 
@@ -500,7 +502,7 @@ In general, however, $\Cov(r_{ij}^2, r_{kl}^2)$ can be nonzero, so this term can
 $$
  \Cov(r_{ij}^2, r_{kl}^2) \approx 4\E(r_{ij})\E(r_{kl})\Cov(r_{ij}, r_{kl}) + 2\left[\Cov(r_{ij}, r_{kl})\right]^2,
 $$
-where the following exact and asymptotic moments are used:
+where the following exact and asymptotic moments are inserted:
 $$
 \begin{align}
 \E(r_{ij}) =& \frac{2}{n} \left[ \Gamma\left(\frac{n+1}{2}\right) / \Gamma\left(\frac{n}{2}\right) \right]^2 \F\left(\frac{1}{2}, \frac{1}{2}; \frac{n +2}{2}; \rho_{ij}^2\right); \\
@@ -520,15 +522,15 @@ $$
 ## "Bias-corrected" estimators
 From the above results, it is possible to obtain an unbiased estimator of $\V(\m{\Sigma})$ as follows:
 $$
-\tilde{V}(\m{S}) = \frac{1}{p^2n(n - 1)(n + 2)}\left[ (pn + 2) (\tr\m{A})^2 - (p + n + 1) \tr(\m{A}^2) \right].
+\tilde{V}(\m{S}) = \frac{1}{p^2n(n - 1)(n + 2)}\left[ (pn + 2) \tr(\m{A}^2) - (p + n + 1)(\tr\m{A})^2 \right].
 $$
 Its variance is:
 $$
 \begin{align}
 \Var[\tilde{V}(\m{S})] = & \frac{4}{p^4n(n - 1)(n + 2)}
-\left\{ 2(n - 1)(n + 2) \tr(\m{\Lambda}^2)(\tr\m{\Lambda})^2 \right. \\ & \qquad
+\left\{ 2(n - 1)(n + 2) \tr(\m{\Lambda}^2)(\tr\m{\Lambda})^2 \right. \\ & \qquad {}
 + (p^2n + 4p + 2n + 2) \big[\tr(\m{\Lambda}^2)\big]^2
-- 4p(n - 1)(n + 2) \tr(\m{\Lambda}^3)\tr\m{\Lambda} \\ & \qquad \left.
+- 4p(n - 1)(n + 2) \tr(\m{\Lambda}^3)\tr\m{\Lambda} \\ & \qquad \left. {}
 + (2p^2n^2 + 3p^2n - 6p^2 - 4pn - 4) \tr(\m{\Lambda}^4) \right\},
 \end{align}
 $$
