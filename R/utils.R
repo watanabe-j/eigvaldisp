@@ -21,7 +21,7 @@
 #' and then conducting QR factorization of this (with pivoting).
 #' This allows for a correct Cholesky factorization of
 #' any positive semidefinite matrix, although for most simulation purposes
-#' the matrix square root by \code{matsqrt} usually suffices.
+#' the matrix square root by \code{matsqrt()} usually suffices.
 #'
 #' @name sqrt_methods
 #' @param A
@@ -60,7 +60,6 @@ NULL
 #'
 #' \code{matsqrt(A)} returns a matrix square root of \code{A}
 #' with spectral or singular value decomposition.
-#' Primarily to be used within \code{chol_qr()}.
 #'
 #' @rdname sqrt_methods
 #' @return
@@ -112,7 +111,8 @@ chol_piv <- function(A) {
 #' with QR factorization.
 #' \code{crossprod(chol_qr(A))} is equal to \code{A},
 #' even with multiple zero eigenvalues.
-#' This is more reliable, but much slower than \code{chol_piv()}.
+#' This is more reliable, but slower than \code{chol_piv()}.
+#' \code{matsqrt()}, which is called internally, usually suffices.
 #'
 #' @rdname sqrt_methods
 # #' @return
@@ -179,7 +179,7 @@ scale2 <- function(x, center = TRUE, scale = FALSE) {
 #' Obtain number of digits
 #'
 #' Internal utility function to obtain the number of digit of an integer.
-#' For internal use in AVar.VRr_pfx functions (and others).
+#' For internal use in \code{AVar.VRr_pfx()} functions (and others).
 #'
 #' @param x
 #'   The object whose number of digits is to be obtained.
@@ -195,13 +195,13 @@ digit <- function(x) {
 #' Divide index vector
 #'
 #' Utility function to divide a vector of index to a list.
-#' To be used internally in \code{AVar.VRr_pfd}.
+#' To be used internally in \code{AVar.VRr_pfd()}.
 #'
 #' The argument \code{Max} defines the maximum of \code{length(bd[[i]])} in
 #' \code{AVar.VRr_pfd}, which roughly defines the amount of RAM required
 #' (see description of that function).
-#' The number of steps (s) is defined as the maximum integer that satisfies
-#' the necessary condition: \code{(p + p - s) * (s + 1) / 2 < Max}
+# #' The number of steps (s) is defined as the maximum integer that satisfies
+# #' the necessary condition: \code{(p + p - s) * (s + 1) / 2 < Max}
 # #' Alternatively, Length could be specified to define the length of the list.
 #'
 #' @param b
@@ -245,10 +245,13 @@ divInd <- function(b, Max = 2e6) { # , Length = 2) {
 #' Complex arguments/returns are not assumed. No check is done.
 #'
 #' Tries to reduce computational time by dropping duplicated values from
-#' \code{x} while trying to retain its original names and dim.
+#' \code{x} while trying to retain its original \code{names} and \code{dim}.
 #'
-#' For the present purpose, \code{hyperg_2F1} of the package \code{gsl}
-#' may suffice.
+#' This function primarily uses \code{hypergeo::genhypergeo()}, as this seems
+#' to be more numerically stable than \code{hypergeo::hypergeo()} in some
+#' conditions tested in development.
+#' For the present purpose, \code{gsl::hyperg_2F1} may suffice,
+#' but this has not been implemented.
 #'
 #' @param a1,a2 Parameters in the numerator
 #' @param b1    Parameter in the denominator

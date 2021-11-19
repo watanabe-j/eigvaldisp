@@ -17,7 +17,7 @@ the upper triangular of \code{R}; numeric of length
 \code{p * (p - 1) / 2 * length(n)}.}
 }
 \value{
-A numeric vector of \eqn{\sum 2 Cov(r_{ij}, r_{kl})},
+A numeric vector of \eqn{\sum 2 Cov(r_{ij}^2, r_{kl}^2)},
 corresponding to \code{n}.
 }
 \description{

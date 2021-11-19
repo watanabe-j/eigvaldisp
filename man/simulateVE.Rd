@@ -72,18 +72,22 @@ ignored when \code{Sigma} or \code{cSigma} is provided.}
 \value{
 \code{simulateVE()} invisiblly returns a list containing the following:
 \describe{
-\item{VEv}{Eigenvalue variance of cov matrix V(S) (b vector)}
-\item{VRv}{Relative eigenvalue variance of cov matrix Vrel(S) (b vector)}
-\item{Lv}{Eigenvalues of cov matrix (p * b matrix)}
-\item{VEr}{Eigenvalue variance of cor matrix V(R) (b vector)}
-\item{VRr}{Relative eigenvalue variance of cor matrix Vrel(R) (b vector)}
-\item{Lr}{Eigenvalues of cor matrix (p * b matrix)}
-(the rest are returned only when \code{nv > 0})
-\item{Uv}{Eigenvectors of cov matrix (p * nv * b array)}
-\item{Ur}{Eigenvectors of cor matrix (p * nv * b array)}
-\item{Uv.org}{Eigenvectors of population cov matrix (p * nv matrix)}
-\item{Ur.org}{Eigenvectors of population cor matrix (p * nv matrix)}
-(\code{Uv.org} and \code{Ur.org} are provided
+\item{VES}{Eigenvalue variance of covariance matrix V(S) (b vector)}
+\item{VRS}{Relative eigenvalue variance of covariance matrix Vrel(S)
+(b vector)}
+\item{LS}{Eigenvalues of covariance matrix (p * b matrix)}
+\item{VER}{Eigenvalue variance of correlation matrix V(R) (b vector)}
+\item{VRR}{Relative eigenvalue variance of correlation matrix Vrel(R)
+(b vector)}
+\item{LR}{Eigenvalues of correlation matrix (p * b matrix)}
+(the following elements are appended only when \code{nv > 0})
+\item{US}{Eigenvectors of covariance matrix (p * nv * b array)}
+\item{UR}{Eigenvectors of correlation matrix (p * nv * b array)}
+\item{US.org}{Eigenvectors of population covariance matrix
+(p * nv matrix)}
+\item{UR.org}{Eigenvectors of population correlation matrix
+(p * nv matrix)}
+(\code{US.org} and \code{UR.org} are provided
 as references for signs of eigenvectors)
 }
 
@@ -94,9 +98,9 @@ the specified population mean and covariance.
 \code{simulateVE()} iteratively generates multivariate normal variates,
 from which eigenvalues, eigenvectors (optional, if \code{nv > 0}),
 and eigenvalue dispersion indices
-(both unstandardized \eqn{V} and standardized \eqn{V_{rel}}) of
+(both unstandardized \eqn{V} and standardized \eqn{Vrel}) of
 sample covariance and correlation matrices are obtained.
-These are returned as an invisible list.
+These are invisibly returned as a list.
 
 \code{rmvn()} is an internal function to generate
 multivariate normal variates.

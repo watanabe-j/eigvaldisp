@@ -34,7 +34,6 @@ Assuming \code{A} is a symmetric, non-negative definite matrix:
 
 \code{matsqrt(A)} returns a matrix square root of \code{A}
 with spectral or singular value decomposition.
-Primarily to be used within \code{chol_qr()}.
 
 \code{chol_piv(A)} conducts Cholesky factorization of \code{A}
 with "pivoting".
@@ -46,7 +45,8 @@ unless multiple zero eigenvalues exist
 with QR factorization.
 \code{crossprod(chol_qr(A))} is equal to \code{A},
 even with multiple zero eigenvalues.
-This is more reliable, but much slower than \code{chol_piv()}.
+This is more reliable, but slower than \code{chol_piv()}.
+\code{matsqrt()}, which is called internally, usually suffices.
 
 \code{chol_qrsvd(A)} is essentially \code{chol_qr(A, method = "svd")}.
 }
@@ -69,7 +69,7 @@ first taking a matrix square root via eigendecomposition (\code{matsqrt(A)})
 and then conducting QR factorization of this (with pivoting).
 This allows for a correct Cholesky factorization of
 any positive semidefinite matrix, although for most simulation purposes
-the matrix square root by \code{matsqrt} usually suffices.
+the matrix square root by \code{matsqrt()} usually suffices.
 }
 \examples{
 (A <- diag(c(2, 1, 1, 0)))

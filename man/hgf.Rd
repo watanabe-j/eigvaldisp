@@ -31,10 +31,13 @@ Elements of \code{x} are assumed to be real numbers within \eqn{[-1, 1]}.
 Complex arguments/returns are not assumed. No check is done.
 
 Tries to reduce computational time by dropping duplicated values from
-\code{x} while trying to retain its original names and dim.
+\code{x} while trying to retain its original \code{names} and \code{dim}.
 
-For the present purpose, \code{hyperg_2F1} of the package \code{gsl}
-may suffice.
+This function primarily uses \code{hypergeo::genhypergeo()}, as this seems
+to be more numerically stable than \code{hypergeo::hypergeo()} in some
+conditions tested in development.
+For the present purpose, \code{gsl::hyperg_2F1} may suffice,
+but this has not been implemented.
 }
 \seealso{
 \link[hypergeo]{genhypergeo}, \link[hypergeo]{hypergeo}

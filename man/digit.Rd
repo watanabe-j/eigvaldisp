@@ -15,5 +15,5 @@ The number of digits, as an integer vector
 }
 \description{
 Internal utility function to obtain the number of digit of an integer.
-For internal use in AVar.VRr_pfx functions (and others).
+For internal use in \code{AVar.VRr_pfx()} functions (and others).
 }

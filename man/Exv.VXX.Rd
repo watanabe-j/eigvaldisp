@@ -229,9 +229,8 @@ Var.VRR(Rho, N - 1)
 Var.VRR(Rho, N - 1, fun = "pfd") # Default
 Var.VRR(Rho, N - 1, fun = "pf")  # Slow for large p
 Var.VRR(Rho, N - 1, fun = "pfv") # Requires too much RAM for large p
-\dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc")}
-# Try to run the last one if you have Rcpp
-# These are identical
+Var.VRR(Rho, n = N - 1, fun = "pfc")
+# These are identical (up to rounding error)
 
 # Variance from Konishi's theory
 Var.VRR(Rho, N - 1, fun = "klv") # Best choice

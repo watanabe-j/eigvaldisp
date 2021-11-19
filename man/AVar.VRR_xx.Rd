@@ -104,7 +104,7 @@ AVar.VRR_krv(Rho, n = 100, Lambda, ...)
 \eqn{E(r)}/\eqn{Var(r^2)} when \code{exv1.mode}/\code{var2.mode} is
 \code{"asymptotic"}; see \link{Exv.rx}.}
 
-\item{mode}{In \code{AVar.VRR_pf} and \code{AVar.VRR_pfd},
+\item{mode}{In \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()},
 specifies the mode of iterations (see Details).}
 
 \item{mc.cores}{Number of cores to be used (numeric/integer). When \code{"auto"} (default),
@@ -193,7 +193,7 @@ Usually the best choice if pure \code{R} implementation is favored.}
 \code{AVar.VRR_pfc()} implements the same algorithm as the others,
 but makes use of \code{C++} API via the package \code{Rcpp} for evaluation of
 the sum of covariance across pairs of squared correlation coefficients.
-This version works much faster than vectorized \code{R} codes.
+This version works much faster than vectorized \code{R} implementations.
 Note that the output can slightly differ from those of pure \code{R}
 implementations (by the order of ~1e-9).
 
@@ -230,8 +230,8 @@ Windows environment. See \code{vignette("parallel")} for details.}
 }
 
 \code{AVar.VRR_pf()} internally generates vectors and matrices
-whose lengths are about p^4 / 8 and p^4 / 4. These take RAM of ~2*p^4 bytes;
-this could be prohibitively large for large p.
+whose lengths are about \eqn{p^4 / 8} and \eqn{p^4 / 4}. These take about
+\eqn{2*p^4} bytes of RAM; this can be prohibitively large for large \eqn{p}.
 
 \code{AVar.VRR_pfd()} divides the index vector \code{b} (used in
 \code{AVar.VRR_pfv()}) into a list \code{bd} using the internal function

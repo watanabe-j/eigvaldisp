@@ -109,7 +109,7 @@ of correlation matrix.
 \code{Var.VESa()}: variance of unbiased eigenvalue variance of
 covariance matrix.
 
-\code{Var.VR.av()}: variance of adjusted relative eigenvalue variance of
+\code{Var.VRSa()}: variance of adjusted relative eigenvalue variance of
 covariance matrix.
 
 \code{Var.VRRa()}: variance of adjusted relative eigenvalue variance
@@ -117,7 +117,7 @@ of correlation matrix.
 }
 \details{
 Usage is identical to that of the corresponding unadjusted versions
-(see \link{Exv.VXX}), which is in most cases called internally.
+(see \link{Exv.VXX}), which are in most cases called internally.
 }
 \examples{
 # See also examples of Exv.VXX

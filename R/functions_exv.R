@@ -141,9 +141,8 @@
 #' Var.VRR(Rho, N - 1, fun = "pfd") # Default
 #' Var.VRR(Rho, N - 1, fun = "pf")  # Slow for large p
 #' Var.VRR(Rho, N - 1, fun = "pfv") # Requires too much RAM for large p
-#' \dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc")}
-#' # Try to run the last one if you have Rcpp
-#' # These are identical
+#' Var.VRR(Rho, n = N - 1, fun = "pfc")
+#' # These are identical (up to rounding error)
 #'
 #' # Variance from Konishi's theory
 #' Var.VRR(Rho, N - 1, fun = "klv") # Best choice
@@ -455,7 +454,7 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #' \code{AVar.VRR_pfc()} implements the same algorithm as the others,
 #' but makes use of \code{C++} API via the package \code{Rcpp} for evaluation of
 #' the sum of covariance across pairs of squared correlation coefficients.
-#' This version works much faster than vectorized \code{R} codes.
+#' This version works much faster than vectorized \code{R} implementations.
 #' Note that the output can slightly differ from those of pure \code{R}
 #' implementations (by the order of ~1e-9).
 #'
@@ -492,8 +491,8 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #' }
 #'
 #' \code{AVar.VRR_pf()} internally generates vectors and matrices
-#' whose lengths are about p^4 / 8 and p^4 / 4. These take RAM of ~2*p^4 bytes;
-#' this could be prohibitively large for large p.
+#' whose lengths are about \eqn{p^4 / 8} and \eqn{p^4 / 4}. These take about
+#' \eqn{2*p^4} bytes of RAM; this can be prohibitively large for large \eqn{p}.
 #'
 #' \code{AVar.VRR_pfd()} divides the index vector \code{b} (used in
 #' \code{AVar.VRR_pfv()}) into a list \code{bd} using the internal function
@@ -531,7 +530,7 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #'   \eqn{E(r)}/\eqn{Var(r^2)} when \code{exv1.mode}/\code{var2.mode} is
 #'   \code{"asymptotic"}; see \link{Exv.rx}.
 #' @param mode
-#'   In \code{AVar.VRR_pf} and \code{AVar.VRR_pfd},
+#'   In \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()},
 #'   specifies the mode of iterations (see Details).
 #' @param mc.cores
 #'   Number of cores to be used (numeric/integer). When \code{"auto"} (default),
@@ -1240,7 +1239,7 @@ AVar.VRR_krv <- function(Rho, n = 100, Lambda, ...) {
 #' of covariance/correlation matrices.
 #'
 #' Usage is identical to that of the corresponding unadjusted versions
-#' (see \link{Exv.VXX}), which is in most cases called internally.
+#' (see \link{Exv.VXX}), which are in most cases called internally.
 #'
 #' @name Exv.VXXa
 #'
@@ -1415,7 +1414,7 @@ Var.VESa <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
 ##### Var.VRSa #####
 #' Variance of adjusted relative eigenvalue variance of covariance matrix
 #'
-#' \code{Var.VR.av()}: variance of adjusted relative eigenvalue variance of
+#' \code{Var.VRSa()}: variance of adjusted relative eigenvalue variance of
 #' covariance matrix.
 #'
 #' @rdname Exv.VXXa

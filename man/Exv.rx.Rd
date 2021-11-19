@@ -114,7 +114,7 @@ ACov.r1(
 
 \item{x}{Population correlation coefficient, numeric of length 1 or more.
 For some functions, squared correlation coefficients can be passed
-as an argument when \code{do.square = FALSE}.}
+via this argument when \code{do.square = FALSE}.}
 
 \item{tol}{Tolerance used to judge wheter x is sufficiently close to 0 or +/- 1
 (where numerical instability can happen).}
@@ -127,7 +127,7 @@ as an argument when \code{do.square = FALSE}.}
 \code{TRUE} by default; set this \code{FALSE}
 when \code{x} is already squared.}
 
-\item{order.}{Order of asymptotic approximation (exponent \eqn{r} in \eqn{O(n^r)};
+\item{order.}{Order of asymptotic approximation (exponent \eqn{k} in \eqn{O(n^k)};
 for asymptotic expressions only).}
 
 \item{return_terms}{When TRUE, returns individual terms of different orders
@@ -192,13 +192,15 @@ population correlation coefficients.
 All these functions except \code{ACov.r1()} requires the arguments
 \code{n} and \code{x}. It can be \code{length(x) > 1}
 (at least supeficially vectorized), but it is assumed \code{length(n) = 1}.
+This is because these functions are often called in the form
+\code{sapply(n, ...)} in other functions (\link{Exv.VXX}).
 
 Covariance between two \eqn{r}'s is a function of
 at least six population correlation coefficients.
 \code{ACov.r1()} takes as an argument the entire population correlation
 matrix \code{R} instead of individual correlation coefficients, and indices
 for the focal correlation coefficients. Alternatively, the all six relevant
-population correlation coefficients can directly be specified.
+population correlation coefficients can be directly specified.
 
 The exact expressions are from Soper et al. (1917) or Ghosh (1966).
 In particular:
@@ -223,9 +225,9 @@ The following functions depending on this might be inaccurate:
 \code{AExv.r3()}, \code{AExv.r4()}, and \code{AVar.r2()}.
 
 The asymptotic moment functions takes the argument \code{order.}.
-This is the exponent in \eqn{O(n^r)}.
+This is the exponent in \eqn{O(n^k)}.
 Higher orders do not always yield better approximations for ordinary
-values of \eqn{n}. The allowed ranges and "good" choice
+values of \eqn{n}. The allowed ranges and "good" choices
 (empirically confirmed by comparison to exact expressions) are as follows:
 \itemize{
 \item \code{AExv.r1()},  \code{AExv.r2()}: 1--7. 2 is good

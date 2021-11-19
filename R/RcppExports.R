@@ -27,7 +27,7 @@
 #'   \code{p * (p - 1) / 2 * length(n)}.
 #'
 #' @return
-#' A numeric vector of \eqn{\sum 2 Cov(r_{ij}, r_{kl})},
+#' A numeric vector of \eqn{\sum 2 Cov(r_{ij}^2, r_{kl}^2)},
 #' corresponding to \code{n}.
 #'
 #' @seealso \link{Exv.VXX}, \link{AVar.VRR_xx}

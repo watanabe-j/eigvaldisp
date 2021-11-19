@@ -16,12 +16,10 @@ A list
 }
 \description{
 Utility function to divide a vector of index to a list.
-To be used internally in \code{AVar.VRr_pfd}.
+To be used internally in \code{AVar.VRr_pfd()}.
 }
 \details{
 The argument \code{Max} defines the maximum of \code{length(bd[[i]])} in
 \code{AVar.VRr_pfd}, which roughly defines the amount of RAM required
 (see description of that function).
-The number of steps (s) is defined as the maximum integer that satisfies
-the necessary condition: \code{(p + p - s) * (s + 1) / 2 < Max}
 }
