@@ -16,11 +16,13 @@ See that paper for theoretical details.
 
 ## Installation
 ```
-# install.packages(devtools)
-devtools::install_github("watanabe-j/eigvaldisp", build_vignettes = TRUE)
+# install.packages("devtools")
+devtools::install_github("watanabe-j/eigvaldisp")
 ```
-`build_vignettes = TRUE` is not necessary, but recommended.
-Package `rmarkdown` is required for this option.
+If you have the packages `rmarkdown` and `knitr`, and have
+[pandoc](https://pandoc.org) installed on your machine, you can build
+a vignette by the option `build_vignettes = TRUE` in `install_github()`
+(not necessary, but recommended).
 
 This package has the following dependencies:
 ```
