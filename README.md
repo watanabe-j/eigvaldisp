@@ -53,18 +53,28 @@ with the function `GenCov()`, which constructs a covariance/correlation
 matrix with known eigenvalues/vectors, and then calculate
 eigenvalue dispersion indices of this matrix with the function `VE()`:
 ```
-# Creating a population covariance matrix with known eigenvalues
+set.seed(30)
+## Generate a population covariance matrix with known eigenvalues
 Lambda <- c(4, 2, 1, 1)
-Sigma <- GenCov(evalues = Lambda, evectors = "random")
+(Sigma <- GenCov(evalues = Lambda, evectors = "random"))
+#>              [,1]         [,2]       [,3]       [,4]
+#> [1,]  2.525707231 -0.002305745  0.4878674 -1.2925039
+#> [2,] -0.002305745  1.893637883  0.2794045 -0.4629743
+#> [3,]  0.487867373  0.279404464  1.2438233 -0.5590454
+#> [4,] -1.292503917 -0.462974308 -0.5590454  2.3368316
+eigen(Sigma)$values
+#> [1] 4 2 1 1
 
-# Calculating eigenvalue dispersion indices of this matrix
+## Calculate eigenvalue dispersion indices of this matrix
 EDI_pop <- VE(S = Sigma)
 
-# Eigenvalue variance ("V(Sigma)"): 1.5
+## Eigenvalue variance ("V(Sigma)")
 EDI_pop$VE
+#> [1] 1.5
 
-# Eigenvalue variance ("Vrel(Sigma)"): 0.125
+## Eigenvalue variance ("Vrel(Sigma)"):
 EDI_pop$VR
+#> [1] 0.125
 ```
 
 It is trivial to calculate the population eigenvalue dispersion indices.
@@ -75,19 +85,28 @@ To see this, simulate a small multivariate normal sample from
 the same population covariance matrix using
 the internal function `rmvn()`:
 ```
-# Simulate a multivariate normal sample
+## Simulate a multivariate normal sample
 N <- 20
 X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
+cov(X)
+#>            [,1]       [,2]       [,3]       [,4]
+#> [1,]  2.8116163  0.5779609  0.9517708 -1.3106853
+#> [2,]  0.5779609  2.6693532  0.2962871 -0.9844253
+#> [3,]  0.9517708  0.2962871  1.2897573 -0.5258998
+#> [4,] -1.3106853 -0.9844253 -0.5258998  2.2849262
+## Reasonable estimate of Sigma
 
-# Calculating eigenvalue dispersion indices from the sample
+## Calculating eigenvalue dispersion indices from the sample
 EDI_sam <- VE(X = X)
-# Same as VE(S = cov(X)) but faster
+## Same as VE(S = cov(X)) but usually faster
 
-# Sample eigenvalue variance ("V(S)")
+## Sample eigenvalue variance ("V(S)")
 EDI_sam$VE
+#> [1] 2.499072
 
-# Sample relative eigenvalue variance ("Vrel(S)")
+## Sample relative eigenvalue variance ("Vrel(S)")
 EDI_sam$VR
+#> [1] 0.1625316
 ```
 
 These are typically larger than the population values,
@@ -101,44 +120,55 @@ expectation and variance (i.e., estimates of sampling bias and error)
 of eigenvalue dispersion indices from arbitrary
 population covariance/correlation matrices:
 ```
-# Expectation of eigenvalue variance ("E[V(S)]"): 2.487
-# The argument n is for the degree of freedom, hence N - 1
-(E_V_Sigma <- Exv.VES(Sigma, N - 1))
+## Expectation of eigenvalue variance ("E[V(S)]")
+## The argument n is for the degree of freedom, hence N - 1 in this case
+(E_V_Sigma <- Exv.VES(Sigma = Sigma, n = N - 1))
+#> [1] 2.486842
 
-# Expected bias: 0.987
+## Expected bias
 E_V_Sigma - EDI_pop$VE
+#> [1] 0.9868421
 
-# Error (sampling variance) of eigenvalue variance ("Var[V(S)]"): 3.127
+## Error (sampling variance) of eigenvalue variance ("Var[V(S)]")
 Var.VES(Sigma, N - 1)
+#> [1] 3.126513
 
-# Same for relative eigenvalue variance ("E[Vrel(S)]", "Var[Vrel(S)]"):
-# 0.184, 0.059, and 0.008
+## Same for relative eigenvalue variance ("E[Vrel(S)]", "Var[Vrel(S)]")
 (E_Vrel_Sigma <- Exv.VRS(Sigma, N - 1))
+#> [1] 0.18438
 E_Vrel_Sigma - EDI_pop$VR
+#> [1] 0.05938
 Var.VRS(Sigma, N - 1)
+#> [1] 0.007989498
 ```
 
 "Bias-corrected" estimators are also implemented, although this is
 not globally unbiased for the relative eigenvalue variance:
 ```
-# Bias-corrected eigenvalue variance
+## Bias-corrected eigenvalue variance
 VESa(X = X)$VESa
+#> [1] 1.290192
 
-# Its expectation: 1.5 (as this is unbiased)
+## Its expectation (equals the population value)
 Exv.VESa(Sigma, N - 1)
+#> [1] 1.5
 
-# Its variance: 2.094 (smaller than that of the ordinary one)
+## Its variance (smaller than that of the ordinary one)
 Var.VESa(Sigma, N - 1)
+#> [1] 2.094455
 
 
-# Adjusted relative eigenvalue variance,
+## Adjusted relative eigenvalue variance
 VRSa(X = X)$VRSa
+#> [1] 0.09274259
 
-# Its expectation: 0.116 (tendency for underestimation)
+## Its expectation (underestimates the population value)
 Exv.VRSa(Sigma, N - 1)
+#> [1] 0.1164117
 
-# Its variance: 0.009 (larger than that of the ordinary one)
+## Its variance
 Var.VRSa(Sigma, N - 1)
+#> [1] 0.009376563
 ```
 
 The same functionalities are also available for correlation matrices,
