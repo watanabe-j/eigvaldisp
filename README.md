@@ -20,9 +20,9 @@ See that paper for theoretical details.
 devtools::install_github("watanabe-j/eigvaldisp")
 ```
 If you have the packages `rmarkdown` and `knitr`, and have
-[pandoc](https://pandoc.org) installed on your machine, you can build
-a vignette by the option `build_vignettes = TRUE` in `install_github()`
-(not necessary, but recommended).
+[pandoc](https://pandoc.org) (including pandoc-citeproc) installed
+on your machine, you can build a vignette by the option
+`build_vignettes = TRUE` in `install_github()` (recommended).
 
 This package has the following dependencies:
 ```
@@ -39,9 +39,11 @@ LinkingTo:
     Rcpp
 ```
 
-`stats` and `hypergeo` are strictly necessary, whereas
-`Rcpp` is used only in a single function.
-If you want to try this package without installing `Rcpp`,
+At present, one function uses the C++ API via `Rcpp`.
+Windows users will require
+[Rtools](https://cran.r-project.org/bin/windows/Rtools/)
+at installation to compile C++ codes.
+If you want to try this package without installing them,
 simply `source()` the .R files in `R/`, except `eigvaldisp-package.R`,
 `RcppExports.R`, and `zzz.R`.
 
