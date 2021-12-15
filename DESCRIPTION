@@ -1,11 +1,11 @@
 Package: eigvaldisp
 Title: Statistics of Eigenvalue Dispersion Indices
-Version: 0.0.0.9100
+Version: 0.0.0.9150
 Authors@R: c(
     person("Junya", "Watanabe", email = "jw2098@cam.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9810-5286")),
     person("Niels G.", "Waller", role = c("ctb"),
-           comment = "Original author of two adopted blocks in GenCov()")
+           comment = "Original author of the MAP algorithm of GenCov()")
            )
 Description: Statistics of eigenvalue dispersion indices of
     covariance and correlation matrices---common measures of

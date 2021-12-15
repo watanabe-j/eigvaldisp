@@ -189,7 +189,7 @@ For more detailed descriptions, use `vignette("eigvaldisp")`.
 
 
 ## Copyright notice
-The function `GenCov()` in this package involves algorithms originally
+The function `GenCov()` in this package involves an algorithm originally
 adopted (with modifications) from the package `fungible` version 1.99
 (Waller, 2021), which is under GPL (>= 2). See description of that function for details.
 
