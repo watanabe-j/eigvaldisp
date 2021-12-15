@@ -21,12 +21,7 @@ AVar.VRR_pf(
   var2.mode = c("exact", "asymptotic"),
   order.exv1 = 2,
   order.var2 = 2,
-  mode = c("for.ind", "nested.for", "lapply", "mclapply", "parLapply"),
-  mc.cores = "auto",
-  max.cores = parallel::detectCores(),
-  do.mcaffinity = TRUE,
-  affinity_mc = seq_len(max.cores),
-  cl = NULL,
+  mode = c("for.ind", "nested.for", "lapply"),
   ...
 )
 
@@ -51,7 +46,7 @@ AVar.VRR_pfd(
   var2.mode = c("exact", "asymptotic"),
   order.exv1 = 2,
   order.var2 = 2,
-  mode = c("for", "lapply", "mclapply", "parLapply"),
+  mode = c("for.ind", "lapply", "mclapply", "parLapply"),
   mc.cores = "auto",
   max.cores = parallel::detectCores(),
   do.mcaffinity = TRUE,
@@ -107,6 +102,10 @@ AVar.VRR_krv(Rho, n = 100, Lambda, ...)
 \item{mode}{In \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()},
 specifies the mode of iterations (see Details).}
 
+\item{...}{In the \code{pf} family functions, passed to \code{Exv.r1()} and
+\code{Var.r2()} (when the corresponding modes are \code{"exact"}).
+Otherwise ignored.}
+
 \item{mc.cores}{Number of cores to be used (numeric/integer). When \code{"auto"} (default),
 set to \code{min(c(ceiling(p / 2), max.cores))}, which usually works well.
 (Used only when \code{mode = "mclapply"}, or \code{"parLapply"})}
@@ -125,10 +124,6 @@ some Linux environments to assign threads to multiple cores.
 created, one can be specified with this argument. Otherwise, one is created
 within function call, which is turned off on exit.
 (Used only when \code{mode = "parLapply"})}
-
-\item{...}{In the \code{pf} family functions, passed to \code{Exv.r1()} and
-\code{Var.r2()} (when the corresponding modes are \code{"exact"}).
-Otherwise ignored.}
 
 \item{max.size}{Maximum size of vectors created internally (see Details).}
 
@@ -184,7 +179,7 @@ The Pan--Frank approach is at present implemented in several functions
 which yield (almost) identical results:
 \describe{
 \item{\code{AVar.VRR_pf()}}{Prototype version. Simplest implementation.}
-\item{\code{AVar.VRR_pfv()}}{Vectorized version  Much faster, but
+\item{\code{AVar.VRR_pfv()}}{Vectorized version. Much faster, but
 requires a large RAM space as \code{p} grows.}
 \item{\code{AVar.VRR_pfd()}}{Improvement over \code{AVar.VRR_pfv()}.
 Usually the best choice if pure \code{R} implementation is favored.}
@@ -216,20 +211,21 @@ The choice between different functions does not matter when \eqn{p = 2},
 when the exact variance is returned by default.
 If asymptotic result is desired, use \code{mode.var2 = "asymptotic"}.
 
-Options for \code{mode} in \code{AVar.VRR_pf()} \code{AVar.VRR_pfd()}:
+Options for \code{mode} in \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()}:
 \describe{
-\item{\code{nested.for}}{Uses nested for loops, which is straifhgforward
-and RAM efficient.}
-\item{\code{for.ind}/\code{lapply}}{Runs the iteration along an
-index vector to shorten computational time, although this does not
-seem to yield any much improvement.}
-\item{\code{mclapply}/\code{parLapply}}{Parallelize this iteration by
+\item{\code{nested.for}}{Only for \code{AVar.VRR_pf()}. Uses nested
+for loops, which is straifhgforward and RAM efficient but slow.}
+\item{\code{for.ind}/\code{lapply}}{Run the iteration along
+an index vector to shorten computational time,
+with \code{for} loop and \code{lapply()}, respectively.}
+\item{\code{mclapply}/\code{parLapply}}{Only for \code{AVar.VRR_pfd()}.
+Parallelize the same iteration by
 forking and socketing, respectively, with the named functions in the
 package \code{parallel}. Note that the former doesn't work in the
 Windows environment. See \code{vignette("parallel")} for details.}
 }
 
-\code{AVar.VRR_pf()} internally generates vectors and matrices
+\code{AVar.VRR_pfv()} internally generates vectors and matrices
 whose lengths are about \eqn{p^4 / 8} and \eqn{p^4 / 4}. These take about
 \eqn{2*p^4} bytes of RAM; this can be prohibitively large for large \eqn{p}.
 

@@ -445,7 +445,7 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #' which yield (almost) identical results:
 #' \describe{
 #'   \item{\code{AVar.VRR_pf()}}{Prototype version. Simplest implementation.}
-#'   \item{\code{AVar.VRR_pfv()}}{Vectorized version  Much faster, but
+#'   \item{\code{AVar.VRR_pfv()}}{Vectorized version. Much faster, but
 #'     requires a large RAM space as \code{p} grows.}
 #'   \item{\code{AVar.VRR_pfd()}}{Improvement over \code{AVar.VRR_pfv()}.
 #'     Usually the best choice if pure \code{R} implementation is favored.}
@@ -477,20 +477,21 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #' when the exact variance is returned by default.
 #' If asymptotic result is desired, use \code{mode.var2 = "asymptotic"}.
 #'
-#' Options for \code{mode} in \code{AVar.VRR_pf()} \code{AVar.VRR_pfd()}:
+#' Options for \code{mode} in \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()}:
 #' \describe{
-#'   \item{\code{nested.for}}{Uses nested for loops, which is straifhgforward
-#'     and RAM efficient.}
-#'   \item{\code{for.ind}/\code{lapply}}{Runs the iteration along an
-#'     index vector to shorten computational time, although this does not
-#'     seem to yield any much improvement.}
-#'   \item{\code{mclapply}/\code{parLapply}}{Parallelize this iteration by
+#'   \item{\code{nested.for}}{Only for \code{AVar.VRR_pf()}. Uses nested
+#'     for loops, which is straifhgforward and RAM efficient but slow.}
+#'   \item{\code{for.ind}/\code{lapply}}{Run the iteration along
+#'     an index vector to shorten computational time,
+#'     with \code{for} loop and \code{lapply()}, respectively.}
+#'   \item{\code{mclapply}/\code{parLapply}}{Only for \code{AVar.VRR_pfd()}.
+#'     Parallelize the same iteration by
 #'     forking and socketing, respectively, with the named functions in the
 #'     package \code{parallel}. Note that the former doesn't work in the
 #'     Windows environment. See \code{vignette("parallel")} for details.}
 #' }
 #'
-#' \code{AVar.VRR_pf()} internally generates vectors and matrices
+#' \code{AVar.VRR_pfv()} internally generates vectors and matrices
 #' whose lengths are about \eqn{p^4 / 8} and \eqn{p^4 / 4}. These take about
 #' \eqn{2*p^4} bytes of RAM; this can be prohibitively large for large \eqn{p}.
 #'
@@ -638,21 +639,22 @@ AVar.VRR_pf <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic
                         var1.mode = "asymptotic",
                         var2.mode = c("exact", "asymptotic"),
                         order.exv1 = 2, order.var2 = 2,
-                        mode = c("for.ind", "nested.for", "lapply",
-                                 "mclapply", "parLapply"),
-                        mc.cores = "auto", max.cores = parallel::detectCores(),
-                        do.mcaffinity = TRUE,
-                        affinity_mc = seq_len(max.cores), cl = NULL, ...) {
+                        mode = c("for.ind", "nested.for", "lapply"), ...) {
+                        # mode = c("for.ind", "nested.for", "lapply",
+                        #          "mclapply", "parLapply"),
+                        # mc.cores = "auto", max.cores = parallel::detectCores(),
+                        # do.mcaffinity = TRUE,
+                        # affinity_mc = seq_len(max.cores), cl = NULL, ...) {
     exv1.mode <- match.arg(exv1.mode)
     var1.mode <- match.arg(var1.mode)
     var2.mode <- match.arg(var2.mode)
     mode <- match.arg(mode)
-    if(mode == "mclapply" || mode == "parLapply") {
-        if(!requireNamespace("parallel", quietly = TRUE)) {
-            stop("Package 'parallel' is required for ",
-                 "mode = 'mclapply' or 'parLapply'")
-        }
-    }
+    # if(mode == "mclapply" || mode == "parLapply") {
+    #     if(!requireNamespace("parallel", quietly = TRUE)) {
+    #         stop("Package 'parallel' is required for ",
+    #              "mode = 'mclapply' or 'parLapply'")
+    #     }
+    # }
     getInds <- function(p){
         a <- seq_len(p)
         d <- digit(p)
@@ -734,32 +736,32 @@ AVar.VRR_pf <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic
                 cov_r2 <- cov_r2 + Cov_r2s(Inds[I])
             }
         } else {
-            if(mode == "lapply") {
-                cov_r2 <- lapply(Inds, Cov_r2s)
-            } else {
-                # require(parallel)
-                if(mc.cores == "auto") {
-                    mc.cores <- pmin(ceiling(p / 2), max.cores)
-                }
-                if(mode == "mclapply") {
-                    if(do.mcaffinity) {
-                        try(invisible(parallel::mcaffinity(affinity_mc)),
-                            silent = TRUE)
-                    }
-                    cov_r2 <- parallel::mclapply(Inds, Cov_r2s,
-                                                 mc.cores = mc.cores)
-                } else { # if(mode == "parLapply")
-                    if(is.null(cl)) {
-                        cl <- parallel::makeCluster(mc.cores)
-                        on.exit(parallel::stopCluster(cl))
-                        if(do.mcaffinity) {
-                            try(parallel::clusterApply(cl, as.list(affinity_mc),
-                                parallel::mcaffinity), silent = TRUE)
-                        }
-                    }
-                    cov_r2 <- parallel::parLapply(cl = cl, Inds, Cov_r2s)
-                }
-            }
+            # if(mode == "lapply") {
+            cov_r2 <- lapply(Inds, Cov_r2s)
+            # } else {
+            #     # require(parallel)
+            #     if(mc.cores == "auto") {
+            #         mc.cores <- pmin(ceiling(p / 2), max.cores)
+            #     }
+            #     if(mode == "mclapply") {
+            #         if(do.mcaffinity) {
+            #             try(invisible(parallel::mcaffinity(affinity_mc)),
+            #                 silent = TRUE)
+            #         }
+            #         cov_r2 <- parallel::mclapply(Inds, Cov_r2s,
+            #                                      mc.cores = mc.cores)
+            #     } else { # if(mode == "parLapply")
+            #         if(is.null(cl)) {
+            #             cl <- parallel::makeCluster(mc.cores)
+            #             on.exit(parallel::stopCluster(cl))
+            #             if(do.mcaffinity) {
+            #                 try(parallel::clusterApply(cl, as.list(affinity_mc),
+            #                     parallel::mcaffinity), silent = TRUE)
+            #             }
+            #         }
+            #         cov_r2 <- parallel::parLapply(cl = cl, Inds, Cov_r2s)
+            #     }
+            # }
             cov_r2 <- matrix(unlist(cov_r2), ncol = length(Inds))
             cov_r2 <- rowSums(cov_r2)
         }
@@ -864,7 +866,7 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
                          var1.mode = "asymptotic",
                          var2.mode = c("exact", "asymptotic"),
                          order.exv1 = 2, order.var2 = 2,
-                         mode = c("for", "lapply", "mclapply", "parLapply"),
+                         mode = c("for.ind", "lapply", "mclapply", "parLapply"),
                          mc.cores = "auto", max.cores = parallel::detectCores(),
                          do.mcaffinity = TRUE,
                          affinity_mc = seq_len(max.cores), cl = NULL,
@@ -969,7 +971,7 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
     lbd <- length(bd)
     cov_r2 <- numeric(l_n)
     if(verbose == "inline") cat(paste0(" Out of ", lbd, " iterations:"))
-    if(mode == "for") {
+    if(mode == "for.ind") {
         for(i in seq_along(bd)) {
             cov_r2 <- cov_r2 + Cov_r2m(i)
         }
