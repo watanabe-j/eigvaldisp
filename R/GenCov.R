@@ -42,6 +42,13 @@
 #' a matrix proportional to a correlation matrix
 #' (i.e., not a correlation matrix unless \code{scale. == p}).
 #'
+#' The original algorithm of Davies & Higham (2020) involves a random choice
+#' between two possible rotation angles, but this randomness is omitted
+#' (the angle with the larger tangent is always chosen) in
+#' the present implementation in favor of speed and reproducibility.
+#' As such, the present implementation of \code{"Givens"} slightly deviates
+#' from the original algorithm.
+#'
 #' *Copyright notice*: The \code{"MAP"} algorithm originally derived
 #' from \code{rMAP()} of the package
 #' \code{fungible} version 1.99 (Waller, 2021), which is under GPL (>= 2).
@@ -91,8 +98,8 @@
 #'       is a correlation matrix with the specified eigenvalues
 #'       (scaled so that the trace equals \eqn{p}); based on the iterative
 #'       algorithm of Waller (2020). Modified from \code{fungible::rMAP()}.}
-#'     \item{"Givens"}{Similar to MAP, but with the algorithm of
-#'       Davies & Higham (2000);
+#'     \item{"Givens"}{Similar to \code{"MAP"}, but with an algorithm adopted
+#'       from Davies & Higham (2000) with modifications;
 #'       this is much faster and is guaranteed to converge.}
 #'   }
 #'   Alternatively, a matrix of eigenvectors can be provided to specify
@@ -108,9 +115,13 @@
 #'   When \code{evectors = "Givens"}, specify which (or in what order)
 #'   columns/rows are subject to Givens rotation:
 #'   \describe{
-#'     \item{"random"}{Columns/rows are chosen in random order.}
+#'     \item{"random"}{Columns/rows are chosen in random order.
+#'       This conforms with the original algorithm of Davies & Higham (2020).}
 #'     \item{"head"/"tail"}{The first/last ones among candidates are rotated.
 #'       For reproducibility in simulation studies.}
+#'     \item{"minmax"}{Columns/rows corresponding to a minimum and maximum
+#'       of the diagonal elements are rotated. This is slightly faster but
+#'       presumably produces strong, isolated correlations.}
 #'   }
 #' @param tol
 #'   Only relevant when \code{evectors = "MAP"}; numeric to specify the
@@ -187,7 +198,7 @@ GenCov <- function(p = length(evalues), VR = 0.5, scale. = NULL,
                    shape = c("q-large", "elongate", "linearly_decreasing",
                              "quadratically_decreasing"), q = 1,
                    random_rotation = TRUE,
-                   which_rotate = c("random", "head", "tail"),
+                   which_rotate = c("random", "head", "tail", "minmax"),
                    tol = 1e-12, maxiter = 5000L, seed = NULL,
                    check = any(evalues == 0)) {
     if(missing(p) && missing(evalues)) stop("Provide either p or evalues")
@@ -219,16 +230,41 @@ GenCov <- function(p = length(evalues), VR = 0.5, scale. = NULL,
         crossprod(te * evalues, te)
     }
     ## How to choose rows and columns to rotate, when evectors = "Givens"
-    sample1 <- switch(which_rotate,
-                      random = function(x) x[ceiling(runif(1) * length(x))],
-                      head   = function(x) x[1],
-                      tail   = function(x) x[length(x)])
+    sample_i <- switch(which_rotate,
+                       minmax = which.min,
+                       random = function(a) {
+                           x <- which(a < 1)
+                           x[ceiling(runif(1) * length(x))]
+                           # x[sample.int(length(x), 1)]
+                       },
+                       head   = function(a) which(a < 1)[1],
+                       tail   = function(a) {x <- which(a < 1); x[length(x)]})
+    sample_j <- switch(which_rotate,
+                       minmax = which.max,
+                       random = function(a) {
+                           x <- which(a > 1);
+                           x[ceiling(runif(1) * length(x))]
+                           # x[sample.int(length(x), 1)]
+                       },
+                       head   = function(a) which(a > 1)[1],
+                       tail   = function(a) {x <- which(a > 1); x[length(x)]})
     # ## Modified sign() to return 1 for 0
     # signp <- function(x) {
     #     ans <- sign(x)
     #     ans[ans == 0] <- 1
     #     return(ans)
     # }
+    ## Get appropriate Givens rotation matrix
+    get_R <- function(aii, ajj, aij) {
+        T <- (aij + sqrt(aij ^ 2 - (aii - 1) * (ajj - 1))) / (ajj - 1)
+        C <- 1 / sqrt(1 + T ^ 2)
+        S <- T * C
+        # T <- atan((aij + sqrt(aij ^ 2 - (aii - 1) * (ajj - 1))) / (ajj - 1))
+        # C <- cos(T)
+        # S <- sin(T)
+        # R <- matrix(c(C, -S, S, C), 2, 2)
+        R <- matrix(c(C, S, -S, C), 2, 2)
+    }
     ## Construct eigenvalues; by default, the eigenvalues sum to p
     ## [changed from Watanabe (2021), where they sum to p / sqrt(p - 1)]
     if(missing(evalues)) {
@@ -289,30 +325,16 @@ GenCov <- function(p = length(evalues), VR = 0.5, scale. = NULL,
         }
         A <- S_fromUL(evec, evalues)
         a <- diag(A)
-        is <- which(a < 1)
-        js <- which(a > 1)
-        while(length(is) > 0 && length(js) > 0) {
-            i <- sample1(is)
-            j <- sample1(js)
-            aii <- a[i]
-            ajj <- a[j]
-            aij <- A[i, j]
-            T <- (aij + sqrt(aij ^ 2 - (aii - 1) * (ajj - 1))) / (ajj - 1)
-            C <- 1 / sqrt(1 + T ^ 2)
-            S <- T * C
-            # T <- atan((aij + sqrt(aij ^ 2 - (aii - 1) * (ajj - 1))) / (ajj - 1))
-            # C <- cos(T)
-            # S <- sin(T)
-            R <- matrix(c(C, -S, S, C), 2, 2)
-            A[, c(i, j)] <- crossprod(A[c(i, j), ], R)
-            A[c(i, j), ] <- crossprod(R, A[c(i, j), ])
-            # R <- matrix(c(C, S, -S, C), 2, 2)
-            # A[c(i, j), ] <- tcrossprod(R, A[, c(i, j)])
-            # A[, c(i, j)] <- tcrossprod(A[, c(i, j)], R)
+        while(min(a) < 1 && max(a) > 1) {
+            i <- sample_i(a)
+            j <- sample_j(a)
+            R <- get_R(a[i], a[j], A[i, j])
+            # A[, c(i, j)] <- crossprod(A[c(i, j), ], R)
+            # A[c(i, j), ] <- crossprod(R, A[c(i, j), ])
+            A[c(i, j), ] <- tcrossprod(R, A[, c(i, j)])
+            A[, c(i, j)] <- tcrossprod(A[, c(i, j)], R)
             a[i] <- A[i, i] <- 1
             a[j] <- A[j, j]
-            is <- which(a < 1)
-            js <- which(a > 1)
         }
         diag(A) <- 1
     } else {

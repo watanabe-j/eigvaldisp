@@ -13,7 +13,7 @@ GenCov(
   shape = c("q-large", "elongate", "linearly_decreasing", "quadratically_decreasing"),
   q = 1,
   random_rotation = TRUE,
-  which_rotate = c("random", "head", "tail"),
+  which_rotate = c("random", "head", "tail", "minmax"),
   tol = 1e-12,
   maxiter = 5000L,
   seed = NULL,
@@ -43,8 +43,8 @@ the Haar invariant distribution (ignoring the signs of diagonals).}
 is a correlation matrix with the specified eigenvalues
 (scaled so that the trace equals \eqn{p}); based on the iterative
 algorithm of Waller (2020). Modified from \code{fungible::rMAP()}.}
-\item{"Givens"}{Similar to MAP, but with the algorithm of
-Davies & Higham (2000);
+\item{"Givens"}{Similar to \code{"MAP"}, but with an algorithm adopted
+from Davies & Higham (2000) with modifications;
 this is much faster and is guaranteed to converge.}
 }
 Alternatively, a matrix of eigenvectors can be provided to specify
@@ -75,9 +75,13 @@ is randomly rotated or not. For reproducibility in simulation studies.}
 \item{which_rotate}{When \code{evectors = "Givens"}, specify which (or in what order)
 columns/rows are subject to Givens rotation:
 \describe{
-\item{"random"}{Columns/rows are chosen in random order.}
+\item{"random"}{Columns/rows are chosen in random order.
+This conforms with the original algorithm of Davies & Higham (2020).}
 \item{"head"/"tail"}{The first/last ones among candidates are rotated.
 For reproducibility in simulation studies.}
+\item{"minmax"}{Columns/rows corresponding to a minimum and maximum
+of the diagonal elements are rotated. This is slightly faster but
+presumably produces strong, isolated correlations.}
 }}
 
 \item{tol}{Only relevant when \code{evectors = "MAP"}; numeric to specify the
@@ -137,6 +141,13 @@ User-specified eigenvalues are scaled to sum to \eqn{p} in these cases.
 Note that, when \code{scale.} is specified as well, the outcome will be
 a matrix proportional to a correlation matrix
 (i.e., not a correlation matrix unless \code{scale. == p}).
+
+The original algorithm of Davies & Higham (2020) involves a random choice
+between two possible rotation angles, but this randomness is omitted
+(the angle with the larger tangent is always chosen) in
+the present implementation in favor of speed and reproducibility.
+As such, the present implementation of \code{"Givens"} slightly deviates
+from the original algorithm.
 
 \emph{Copyright notice}: The \code{"MAP"} algorithm originally derived
 from \code{rMAP()} of the package
