@@ -40,6 +40,8 @@ NumericVector Cov_r2C(NumericVector n, NumericVector R, NumericVector E) {
     int nrE = p * (p - 1) / 2;
     double rij, rkl, rik, ril, rjk, rjl, C;
     double Eij, Ekl, Cijkl;
+    NumericVector E2 = sqrt(2) * E;
+    NumericVector ni = 1 / n;
     NumericVector out(ln);
     for(int i = 0; i < p - 1; i++) {
         for(int j = i + 1; j < p; j++) {
@@ -56,15 +58,15 @@ NumericVector Cov_r2C(NumericVector n, NumericVector R, NumericVector E) {
                         rik * rjl + ril * rjk - (rij * rik * ril
                         + rij * rjk * rjl + rik * rjk * rkl + ril * rjl * rkl);
                     for(int m = 0; m < ln; m++) {
-                        Eij = E[i + j * p - j * (2 * p - j + 1) / 2 + m * nrE];
-                        Ekl = E[k + l * p - l * (2 * p - l + 1) / 2 + m * nrE];
-                        Cijkl = C / n[m];
-                        out[m] += (4 * Eij * Ekl + 2 * Cijkl) * Cijkl;
-                    }
+                        Eij = E2[i + j * p - j * (2 * p - j + 1) / 2 + m * nrE];
+                        Ekl = E2[k + l * p - l * (2 * p - l + 1) / 2 + m * nrE];
+                        Cijkl = C * ni[m];
+                        out[m] += (Eij * Ekl + Cijkl) * Cijkl;
+                    } // Original expression for out is 2 times this
                 }
             }
         }
-    } // for speed, out is doubled after skipping redundant pairs of (rij, rkl)
-    out = out * 2;
+    } // out is multiplied after skipping redundant pairs of (rij, rkl)
+    out = out * 4;
     return out;
 }
