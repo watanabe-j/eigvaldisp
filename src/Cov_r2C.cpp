@@ -1,4 +1,6 @@
 #include <Rcpp.h>
+#define _USE_MATH_DEFINES
+#include <cmath>
 using namespace Rcpp;
 
 //*** Cov.r2C ***
@@ -40,7 +42,7 @@ NumericVector Cov_r2C(NumericVector n, NumericVector R, NumericVector E) {
     int nrE = p * (p - 1) / 2;
     double rij, rkl, rik, ril, rjk, rjl, C;
     double Eij, Ekl, Cijkl;
-    NumericVector E2 = sqrt(2) * E;
+    NumericVector E2 = M_SQRT2 * E;
     NumericVector ni = 1 / n;
     NumericVector out(ln);
     for(int i = 0; i < p - 1; i++) {
