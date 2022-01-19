@@ -157,9 +157,9 @@ Var.VRRa(Rho, n = N - 1, fun = "klv") # Konishi's theory
 
 }
 \references{
-Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
 }
 \seealso{
 \link{VXXa} for ``bias-corrected'' estimators;

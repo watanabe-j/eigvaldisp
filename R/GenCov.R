@@ -24,7 +24,7 @@
 #' all resultant eigenvalues are nonnegative; an error is returned otherwise.
 #' Alternatively, gradually decreasing eigenvalues can be generated with
 #' \code{shape = "linearly_decreasing"} or \code{"quadratically_decreasing"}.
-#' See Watanabe (2021) for technical details.
+#' See Watanabe (2022) for technical details.
 #'
 #' Unless \code{evalues} is specified, the trace of the resultant matrix
 #' equals to \eqn{p} by default. The argument \code{scale.} can be used to
@@ -80,7 +80,7 @@
 #'     \item{"quadratically_decreasing"}{Eigenvalues quadratically decreasing}
 #'   }
 #'   User-specified \code{VR} is ignored in the last two options.
-#'   The terminology follows Watanabe (2021).
+#'   The terminology follows Watanabe (2022).
 #' @param q
 #'   The number of large eigenvalues. To be used with \code{shape = q-large}.
 #' @param evalues
@@ -153,9 +153,9 @@
 #'  R package version 1.99.
 #'  [https://CRAN.R-project.org/package=fungible](https://CRAN.R-project.org/package=fungible).
 #'
-#' Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+#' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
-#'  doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
 #' @importFrom stats rnorm runif
 #'
@@ -266,7 +266,7 @@ GenCov <- function(p = length(evalues), VR = 0.5, scale. = NULL,
         R <- matrix(c(C, S, -S, C), 2, 2)
     }
     ## Construct eigenvalues; by default, the eigenvalues sum to p
-    ## [changed from Watanabe (2021), where they sum to p / sqrt(p - 1)]
+    ## [changed from Watanabe (2022), where they sum to p / sqrt(p - 1)]
     if(missing(evalues)) {
         evalues <- numeric(p)
         if(shape == "elongate") {

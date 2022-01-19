@@ -38,7 +38,7 @@
 #'   Either \code{"UB"} (default) or \code{"ML"},
 #'   to decide the default value of \code{m}.
 #' @param m
-#'   Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2021)).
+#'   Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2022)).
 #' @param nv
 #'   Numeric. Specify how many eigenvectors are to be retained; default 0.
 #' @param sub
@@ -83,9 +83,9 @@
 #'  of quantitative character variation. *Journal of Mathematical Biology*
 #'  **7**, 77--95. doi:[10.1007/BF00275224](https://doi.org/10.1007/BF00275224).
 #'
-#' Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+#' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
-#'  doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
 #' @importFrom stats cov2cor
 #'
@@ -217,7 +217,7 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' Bias correction is possible for eigenvalue variance of covariance matrices,
 #' but not straightforward for relative eigenvalue variance (of either
 #' covariance or correlation matrices), because the latter is a nonlinear
-#' function of the population value (see Watanabe, 2021).
+#' function of the population value (see Watanabe, 2022).
 #' Although this could potentially be achievable for correlation matrices,
 #' expression for its variance is not known to the author.
 #'
@@ -254,9 +254,9 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' \link{Exv.VXXa} for the expectation/variance of the adjusted estimators.
 #'
 #' @references
-#' Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+#' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
-#'  doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
 #' @examples
 #' # Spherical covariance matrix (VE = VR = 0)

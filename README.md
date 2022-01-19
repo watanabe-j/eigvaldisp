@@ -9,7 +9,7 @@ variance (i.e., sampling bias and error) of eigenvalue dispersion indices
 for arbitrary population covariance structures
 under multivariate normality.
 
-This package was designed to supplement Watanabe (2021),
+This package was designed to supplement Watanabe (2022),
 and built on the supplementary scripts associated with that paper.
 See that paper for theoretical details.
 
@@ -199,4 +199,4 @@ Waller, N. G. (2021). fungible: psychometric functions from
 the Waller Lab. R package version 1.99.
 [https://CRAN.R-project.org/package=fungible](https://CRAN.R-project.org/package=fungible).
 
-Watanabe, J. (2021). Statistics of eigenvalue dispersion indices: quantifying the magnitude of phenotypic integration. *Evolution*, doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+Watanabe, J. (2022). Statistics of eigenvalue dispersion indices: quantifying the magnitude of phenotypic integration. *Evolution*, **76**, 4&ndash;28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).

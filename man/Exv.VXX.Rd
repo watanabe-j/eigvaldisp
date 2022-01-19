@@ -92,7 +92,7 @@ Var.VRR(
 \item{divisor}{Either \code{"UB"} (default) or \code{"ML"},
 to decide the default value of \code{m}.}
 
-\item{m}{Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2021)).
+\item{m}{Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2022)).
 By default equals \eqn{n}.}
 
 \item{drop_0}{Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped.}
@@ -173,7 +173,7 @@ Hence, \code{Exv.VER()} and \code{Var.VER()} calls \code{Exv.VRR()} and
 These functions are provided for completeness, although there will be little
 practical demand for these functions (and \eqn{V(R)} itself).
 
-As detailed in Watanabe (2021), the distribution of \eqn{Vrel(R)} cannot be
+As detailed in Watanabe (2022), the distribution of \eqn{Vrel(R)} cannot be
 uniquely specified by eigenvalues alone. Hence, a full correlation
 matrix \code{R} should preferably be provided. Otherwise, a correlation
 matrix is constructed from the eigenvalues \code{Lambda} provided using
@@ -188,7 +188,7 @@ scaled to have diagonals of 1; and if any of these are unequal,
 an error is returned.
 
 These moments are derived under the assumption of multivariate normality
-(Watanabe, 2021), although the distributions will remain the same in
+(Watanabe, 2022), although the distributions will remain the same in
 all elliptically contoured distributions (see Anderson, 2003).
 }
 \examples{
@@ -243,9 +243,9 @@ Var.VRR(Rho, N - 1, fun = "kr")
 
 }
 \references{
-Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
 }
 \seealso{
 \link{VE} for estimation;

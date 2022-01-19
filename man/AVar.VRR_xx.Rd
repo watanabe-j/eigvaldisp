@@ -164,11 +164,11 @@ Much faster, but requires a large RAM space as \code{p} grows.
 \code{AVar.VRR_krv()}: vectorized version of \code{AVar.VRR_kr()}.
 }
 \details{
-Watanabe (2021) presented two approaches to evaluate approximate variance
+Watanabe (2022) presented two approaches to evaluate approximate variance
 of the relative eigenvalue variance of a correlation matrix \eqn{Vrel(R)}.
 One is Pan & Frank's (2004) heuristic approximation (eqs. 28 and 36--38 in
-Watanabe 2021). The other is based on Konishi's (1979) asymptotic
-theory (eq. 39 in Watanabe 2021). Simulations showed that the former tends
+Watanabe 2022). The other is based on Konishi's (1979) asymptotic
+theory (eq. 39 in Watanabe 2022). Simulations showed that the former tends
 to be more accurate, but the latter is much faster. This is mainly because
 the Pan--Frank approach involves evaluation of covariances in \eqn{~p^4 / 4}
 pairs of (squared) correlation coefficients.
@@ -297,9 +297,9 @@ product of two dependent correlation coefficients. \emph{Journal of Statistical
 Computation and Simulation} \strong{74}, 419--443.
 doi:\href{https://doi.org/10.1080/00949650310001596822}{10.1080/00949650310001596822}.
 
-Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
 }
 \seealso{
 \link{Exv.VXX} for main moment functions.

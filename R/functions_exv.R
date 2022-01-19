@@ -31,7 +31,7 @@
 #' These functions are provided for completeness, although there will be little
 #' practical demand for these functions (and \eqn{V(R)} itself).
 #'
-#' As detailed in Watanabe (2021), the distribution of \eqn{Vrel(R)} cannot be
+#' As detailed in Watanabe (2022), the distribution of \eqn{Vrel(R)} cannot be
 #' uniquely specified by eigenvalues alone. Hence, a full correlation
 #' matrix \code{R} should preferably be provided. Otherwise, a correlation
 #' matrix is constructed from the eigenvalues \code{Lambda} provided using
@@ -46,7 +46,7 @@
 #' an error is returned.
 #'
 #' These moments are derived under the assumption of multivariate normality
-#' (Watanabe, 2021), although the distributions will remain the same in
+#' (Watanabe, 2022), although the distributions will remain the same in
 #' all elliptically contoured distributions (see Anderson, 2003).
 #'
 # #' For covariance matrices, the divisor of \eqn{n}
@@ -70,7 +70,7 @@
 #'   Either \code{"UB"} (default) or \code{"ML"},
 #'   to decide the default value of \code{m}.
 #' @param m
-#'   Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2021)).
+#'   Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2022)).
 #'   By default equals \eqn{n}.
 #' @param drop_0
 #'   Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped.
@@ -93,9 +93,9 @@
 #' A numeric vector of the desired moment, corresponding to \code{n}.
 #'
 #' @references
-#' Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+#' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
-#'  doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
 #' @seealso
 #' \link{VE} for estimation;
@@ -430,11 +430,11 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #' of correlation matrix \eqn{Var[Vrel(R)]}. There are several versions
 #' for each of two different expressions: \code{pf*} and \code{k*} families.
 #'
-#' Watanabe (2021) presented two approaches to evaluate approximate variance
+#' Watanabe (2022) presented two approaches to evaluate approximate variance
 #' of the relative eigenvalue variance of a correlation matrix \eqn{Vrel(R)}.
 #' One is Pan & Frank's (2004) heuristic approximation (eqs. 28 and 36--38 in
-#' Watanabe 2021). The other is based on Konishi's (1979) asymptotic
-#' theory (eq. 39 in Watanabe 2021). Simulations showed that the former tends
+#' Watanabe 2022). The other is based on Konishi's (1979) asymptotic
+#' theory (eq. 39 in Watanabe 2022). Simulations showed that the former tends
 #' to be more accurate, but the latter is much faster. This is mainly because
 #' the Pan--Frank approach involves evaluation of covariances in \eqn{~p^4 / 4}
 #' pairs of (squared) correlation coefficients.
@@ -581,9 +581,9 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #'  Computation and Simulation* **74**, 419--443.
 #'  doi:[10.1080/00949650310001596822](https://doi.org/10.1080/00949650310001596822).
 #'
-#' Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+#' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
-#'  doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
 #' @seealso \link{Exv.VXX} for main moment functions.
 #'
@@ -1251,9 +1251,9 @@ AVar.VRR_krv <- function(Rho, n = 100, Lambda, ...) {
 #' A numeric vector of the desired moment, corresponding to \code{n}.
 #'
 #' @references
-#' Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+#' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
-#'  doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
 #' @seealso
 #' \link{VXXa} for ``bias-corrected'' estimators;

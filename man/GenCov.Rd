@@ -64,7 +64,7 @@ in magnitude}
 \item{"quadratically_decreasing"}{Eigenvalues quadratically decreasing}
 }
 User-specified \code{VR} is ignored in the last two options.
-The terminology follows Watanabe (2021).}
+The terminology follows Watanabe (2022).}
 
 \item{q}{The number of large eigenvalues. To be used with \code{shape = q-large}.}
 
@@ -124,7 +124,7 @@ The combination of \code{p}, \code{q}, and \code{VR} should be such that
 all resultant eigenvalues are nonnegative; an error is returned otherwise.
 Alternatively, gradually decreasing eigenvalues can be generated with
 \code{shape = "linearly_decreasing"} or \code{"quadratically_decreasing"}.
-See Watanabe (2021) for technical details.
+See Watanabe (2022) for technical details.
 
 Unless \code{evalues} is specified, the trace of the resultant matrix
 equals to \eqn{p} by default. The argument \code{scale.} can be used to
@@ -208,7 +208,7 @@ Waller, N. G. (2021). fungible: psychometric functions from the Waller Lab.
 R package version 1.99.
 \url{https://CRAN.R-project.org/package=fungible}.
 
-Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
 }

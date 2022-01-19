@@ -35,7 +35,7 @@ a correlation matrix by \code{stats::cov2cor()}.}
 \item{divisor}{Either \code{"UB"} (default) or \code{"ML"},
 to decide the default value of \code{m}.}
 
-\item{m}{Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2021)).}
+\item{m}{Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2022)).}
 
 \item{nv}{Numeric. Specify how many eigenvectors are to be retained; default 0.}
 
@@ -169,9 +169,9 @@ phenotypic dispersion matrices: evidence for a nonrandom organization
 of quantitative character variation. \emph{Journal of Mathematical Biology}
 \strong{7}, 77--95. doi:\href{https://doi.org/10.1007/BF00275224}{10.1007/BF00275224}.
 
-Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
 }
 \seealso{
 \link{Exv.VXX} for moments of sample eigenvalue dispersion indices;

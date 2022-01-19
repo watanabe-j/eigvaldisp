@@ -45,7 +45,7 @@ VRRa(X, S, L, n = N - as.numeric(center), center = TRUE, nv = 0, ...)
 \item{divisor}{Either \code{"UB"} (default) or \code{"ML"},
 to decide the default value of \code{m}.}
 
-\item{m}{Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2021)).}
+\item{m}{Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2022)).}
 
 \item{center}{Logical to specify whether sample-mean-centering should be done.}
 
@@ -90,7 +90,7 @@ and returned as well.
 Bias correction is possible for eigenvalue variance of covariance matrices,
 but not straightforward for relative eigenvalue variance (of either
 covariance or correlation matrices), because the latter is a nonlinear
-function of the population value (see Watanabe, 2021).
+function of the population value (see Watanabe, 2022).
 Although this could potentially be achievable for correlation matrices,
 expression for its variance is not known to the author.
 
@@ -145,9 +145,9 @@ VRRa(X = X2)
 
 }
 \references{
-Watanabe, J. (2021). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
 }
 \seealso{
 \link{VE} for the main function;
