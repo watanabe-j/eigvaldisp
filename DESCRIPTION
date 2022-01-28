@@ -1,6 +1,6 @@
 Package: eigvaldisp
 Title: Statistics of Eigenvalue Dispersion Indices
-Version: 0.0.0.9299
+Version: 0.0.0.9300
 Authors@R: c(
     person("Junya", "Watanabe", email = "jw2098@cam.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9810-5286")),
@@ -17,15 +17,13 @@ License: GPL (>= 3)
 BugReports: https://github.com/watanabe-j/eigvaldisp/issues
 Imports:
     stats,
-    hypergeo,
-    Rcpp
+    hypergeo
 Suggests:
+    eigvaldispRcpp,
     parallel,
     testthat (>= 3.0.0),
     knitr,
     rmarkdown
-LinkingTo:
-    Rcpp
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2

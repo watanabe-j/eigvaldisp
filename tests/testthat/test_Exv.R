@@ -121,8 +121,6 @@ test_that("behavior of AVar.VRR_pfx under arbitrary conditions", {
     pfd <- AVar.VRR_pfd(A, n)
     pfv <- AVar.VRR_pfv(A, n)
     pf <- AVar.VRR_pf(A, n)
-    pfc <- AVar.VRR_pfc(A, n)
     expect_equal(pfd, pfv)
     expect_equal(pfd, pf)
-    expect_equal(pfd, pfc)
 })

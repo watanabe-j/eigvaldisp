@@ -23,6 +23,15 @@
 #' from Konishi's asymptotic theory (usually, \code{klv} is the choice).
 #' See \link{AVar.VRR_xx} for details of these functions.
 #'
+#' The option \code{fun = "pfc"} in \code{Var.VRR()} calls
+#' \code{AVar.VRR_pfc()}, which requires the extension package
+#' \code{eigvaldispRcpp}. The package have several options for fast evaluation
+#' of the approximate variance with \code{C++} functions via \code{Rcpp}.
+#' The option for \code{C++} function is controlled by the argument
+#' \code{cppfun} which in turn is passed to \code{AVar.VRR_pfc()}
+#' (see \link{AVar.VRR_xx}). When this argument is provided, the argument
+#' \code{fun} is ignored.
+#'
 #' Since the eigenvalue variance of a correlation matrix \eqn{V(R)} is simply
 #' \eqn{(p - 1)} times the relative eigenvalue variance \eqn{Vrel(R)} of
 #' the same matrix, their distributions are identical up to this scaling.
@@ -46,8 +55,9 @@
 #' an error is returned.
 #'
 #' These moments are derived under the assumption of multivariate normality
-#' (Watanabe, 2022), although the distributions will remain the same in
-#' all elliptically contoured distributions (see Anderson, 2003).
+#' (Watanabe, 2022), although the distributions will remain the same for
+#' correlation matrices in all elliptically contoured distributions
+#' (see Anderson, 2003).
 #'
 # #' For covariance matrices, the divisor of \eqn{n}
 # #' (which gives the ordinary unbiased estimator) is assumed by default.
@@ -141,8 +151,11 @@
 #' Var.VRR(Rho, N - 1, fun = "pfd") # Default
 #' Var.VRR(Rho, N - 1, fun = "pf")  # Slow for large p
 #' Var.VRR(Rho, N - 1, fun = "pfv") # Requires too much RAM for large p
-#' Var.VRR(Rho, n = N - 1, fun = "pfc")
-#' # These are identical (up to rounding error)
+#' \dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc")} # Requires eigvaldispRcpp
+#' \dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc", cppfun = "Cov_r2P")}
+#' # The last two use C++ functions provided by extension package eigvaldispRcpp
+#' # fun = "pfc"' can be omitted in the last call.
+#' # The above results are identical (up to rounding error)
 #'
 #' # Variance from Konishi's theory
 #' Var.VRR(Rho, N - 1, fun = "klv") # Best choice
@@ -392,9 +405,16 @@ Var.VER <- function(Rho, n = 100, Lambda, ...) {
 Var.VRR <- function(Rho, n = 100, Lambda,
                     fun = c("pfd", "pfv", "pfc", "pf",
                             "klv", "kl", "krv", "kr"), ...) {
+    flag <- if(missing(fun)) FALSE else TRUE
     fun <- match.arg(fun)
     if(length(list(...)) > 0L) {
-        if(grepl("cpp", names(list(...)))) fun <- "pfc"
+        if(any(grepl("cpp", names(list(...)))) && fun != "pfc") {
+            fun <- "pfc"
+            if(flag) {
+                warning("The argument 'fun' was ignored as another argument ",
+                        "beginning with 'cpp' was provided")
+            }
+        }
     }
     if(missing(Rho)) {
         Rho <- GenCov(evalues = Lambda, evectors = "Givens")
@@ -516,6 +536,27 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #' The iteration can be parallelized with \code{mode = "mclapply"} or
 #' \code{"parLapply"}, but be careful about RAM limitations.
 #'
+#' \code{AVar.VRR_pfc()} provides a faster implementation with one of the
+#' \code{C++} functions defined in the extension package \code{eigvaldispRcpp}
+#' (which is required to run this function).
+#' The \code{C++} function is specified by the argument \code{cppfun}:
+#' \describe{
+#'   \item{\code{"Cov_r2C"}}{Default. Serial evaluation with base
+#'     \code{Rcpp} functionalities.}
+#'   \item{\code{"Cov_r2A"} or \code{"Armadillo"}}{Using \code{RcppArmadillo}.
+#'     Parallelized with OpenMP when the environment allows.}
+#'   \item{\code{"Cov_r2E"} or \code{"Eigen"}}{Using \code{RcppEigen}.
+#'     Parallelized with OpenMP when the environment allows.}
+#'   \item{\code{"Cov_r2P"} or \code{"Parallel"}}{Using \code{RcppParallel}.
+#'     Parallelized with IntelTBB when the environment allows.}
+#' }
+#' The default option would be sufficiently fast for up to p = 100 or so.
+#' The latter three options aim at speeding-up the calculation via
+#' parallelization with other \code{Rcpp}-related packages. Although these
+#' would have similar performance in most environments, \code{"Cov_r2E"} seems
+#' the fastest in the development environment, closely followed by
+#' \code{"Cov_r2A"}.
+#'
 #' @name AVar.VRR_xx
 #'
 #' @inheritParams Exv.VXX
@@ -560,11 +601,17 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #' @param bd
 #'   List of indices used for iteration (see Details).
 #' @param verbose
-#'   When \code{"yes"} or \code{"inline"}, progress of iteration is printed.
+#'   When \code{"yes"} or \code{"inline"}, prWhen allowed, pogress of iteration is printed.
 #'   Intended to be used with large \eqn{p} (hundreds or more).
 #' @param cppfun
-#'   Option to specify the C++ function to be used.
-#'   (At present, only "Cov_r2C" is allowed.)
+#'   Option to specify the C++ function to be used (see Details).
+#' @param omp_nthreads
+#'   Numeric to specify the number of threads used in OpenMP parallelization
+#'   in \code{"Cov_r2A"} and \code{"Cov_r2E"}. By default (0), the number of
+#'   threads is automatically set to one-half of that of (logical) processors
+#'   detected (by the \code{C++} function \code{omp_get_num_procs()}).
+#'   Typically, setting this beyond the number of physical processors
+#'   leads to slow-down.
 #' @param ...
 #'   In the \code{pf} family functions, passed to \code{Exv.r1()} and
 #'   \code{Var.r2()} (when the corresponding modes are \code{"exact"}).
@@ -604,9 +651,14 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #' eigvaldisp:::AVar.VRR_pfd(Rho, n = N - 1) # Default
 #' eigvaldisp:::AVar.VRR_pf(Rho, n = N - 1)  # Slow for large p
 #' eigvaldisp:::AVar.VRR_pfv(Rho, n = N - 1) # Requires too much RAM for large p
+#' # Various implementations with Rcpp (require eigvaldispRcpp):
 #' \dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1)}
-#' # Try to run the last one if you have Rcpp
-#' # These are identical
+#' \dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1, cppfun = "Cov_r2A")}
+#' \dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1, cppfun = "Cov_r2E")}
+#' \dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1, cppfun = "Cov_r2P")}
+#' # Equivalently, this calls AVar.VRR_pfc():
+#' \dontrun{Var.VRR(Rho, n = N - 1, cppfun = "Cov_r2P"))}
+#' # The above results are identical
 #'
 #' # Variance from Konishi's theory
 #' eigvaldisp:::AVar.VRR_klv(Rho, n = N - 1) # Best choice
@@ -1017,7 +1069,8 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
 #' Approximate variance of relative eigenvalue variance of correlation matrix,
 #' with Rcpp
 #'
-#' \code{AVar.VRR_pfc()}: fast version using \code{Rcpp}.
+#' \code{AVar.VRR_pfc()}: fast version using \code{Rcpp}. Requires
+#' the extension package \code{eigvaldispRcpp}.
 #'
 # #' When the function to be used (specified by cppfun) is not found,
 # #' an attempt is made to sourceCpp() the .cpp file in the present directory.

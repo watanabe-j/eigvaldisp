@@ -63,6 +63,7 @@ AVar.VRR_pfc(
   n = 100,
   Lambda,
   cppfun = "Cov_r2C",
+  omp_nthreads = 0L,
   exv1.mode = c("exact", "asymptotic"),
   var2.mode = c("exact", "asymptotic"),
   order.exv1 = 2,
@@ -129,11 +130,17 @@ within function call, which is turned off on exit.
 
 \item{bd}{List of indices used for iteration (see Details).}
 
-\item{verbose}{When \code{"yes"} or \code{"inline"}, progress of iteration is printed.
+\item{verbose}{When \code{"yes"} or \code{"inline"}, prWhen allowed, pogress of iteration is printed.
 Intended to be used with large \eqn{p} (hundreds or more).}
 
-\item{cppfun}{Option to specify the C++ function to be used.
-(At present, only "Cov_r2C" is allowed.)}
+\item{cppfun}{Option to specify the C++ function to be used (see Details).}
+
+\item{omp_nthreads}{Numeric to specify the number of threads used in OpenMP parallelization
+in \code{"Cov_r2A"} and \code{"Cov_r2E"}. By default (0), the number of
+threads is automatically set to one-half of that of (logical) processors
+detected (by the \code{C++} function \code{omp_get_num_procs()}).
+Typically, setting this beyond the number of physical processors
+leads to slow-down.}
 }
 \value{
 A numeric vector of \eqn{Var[Vrel(R)]}, corresponding to \code{n}.
@@ -151,7 +158,8 @@ Much faster, but requires a large RAM space as \code{p} grows.
 
 \code{AVar.VRR_pfd()}: further improvement over \code{AVar.VRR_pfv()}.
 
-\code{AVar.VRR_pfc()}: fast version using \code{Rcpp}.
+\code{AVar.VRR_pfc()}: fast version using \code{Rcpp}. Requires
+the extension package \code{eigvaldispRcpp}.
 
 \code{AVar.VRR_kl()}: asymptotic variance from Konishi's theory:
 \eqn{Vrel(R)} as function of eigenvalues.
@@ -246,6 +254,27 @@ However, performance does not seem to improve past 1e6--1e7 presumably
 because memory allocation takes substantial time for large objects.
 The iteration can be parallelized with \code{mode = "mclapply"} or
 \code{"parLapply"}, but be careful about RAM limitations.
+
+\code{AVar.VRR_pfc()} provides a faster implementation with one of the
+\code{C++} functions defined in the extension package \code{eigvaldispRcpp}
+(which is required to run this function).
+The \code{C++} function is specified by the argument \code{cppfun}:
+\describe{
+\item{\code{"Cov_r2C"}}{Default. Serial evaluation with base
+\code{Rcpp} functionalities.}
+\item{\code{"Cov_r2A"} or \code{"Armadillo"}}{Using \code{RcppArmadillo}.
+Parallelized with OpenMP when the environment allows.}
+\item{\code{"Cov_r2E"} or \code{"Eigen"}}{Using \code{RcppEigen}.
+Parallelized with OpenMP when the environment allows.}
+\item{\code{"Cov_r2P"} or \code{"Parallel"}}{Using \code{RcppParallel}.
+Parallelized with IntelTBB when the environment allows.}
+}
+The default option would be sufficiently fast for up to p = 100 or so.
+The latter three options aim at speeding-up the calculation via
+parallelization with other \code{Rcpp}-related packages. Although these
+would have similar performance in most environments, \code{"Cov_r2E"} seems
+the fastest in the development environment, closely followed by
+\code{"Cov_r2A"}.
 }
 \examples{
 # See also examples of Exv.VXX
@@ -261,9 +290,14 @@ VE(S = Rho)$VR
 eigvaldisp:::AVar.VRR_pfd(Rho, n = N - 1) # Default
 eigvaldisp:::AVar.VRR_pf(Rho, n = N - 1)  # Slow for large p
 eigvaldisp:::AVar.VRR_pfv(Rho, n = N - 1) # Requires too much RAM for large p
+# Various implementations with Rcpp (require eigvaldispRcpp):
 \dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1)}
-# Try to run the last one if you have Rcpp
-# These are identical
+\dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1, cppfun = "Cov_r2A")}
+\dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1, cppfun = "Cov_r2E")}
+\dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1, cppfun = "Cov_r2P")}
+# Equivalently, this calls AVar.VRR_pfc():
+\dontrun{Var.VRR(Rho, n = N - 1, cppfun = "Cov_r2P"))}
+# The above results are identical
 
 # Variance from Konishi's theory
 eigvaldisp:::AVar.VRR_klv(Rho, n = N - 1) # Best choice

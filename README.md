@@ -28,24 +28,23 @@ This package has the following dependencies:
 ```
 Imports:
     stats,
-    hypergeo,
-    Rcpp
+    hypergeo
 Suggests:
+    eigvaldispRcpp,
     parallel,
     testthat (>= 3.0.0),
     knitr,
     rmarkdown
-LinkingTo:
-    Rcpp
 ```
 
-At present, one function uses the C++ API via `Rcpp`.
-Windows users will require
-[Rtools](https://cran.r-project.org/bin/windows/Rtools/)
-at installation to compile C++ codes.
-If you want to try this package without installing them,
-simply `source()` the .R files in `R/`, except `eigvaldisp-package.R`,
-`RcppExports.R`, and `zzz.R`.
+Earlier developmental versions imported `Rcpp`, but the relevant
+functionality has now been separated into an extension package,
+[`eigvaldispRcpp`](https://github.com/watanabe-j/eigvaldispRcpp),
+to minimize dependency of the main package.
+One would not need that extension unless interested in calculating
+sampling variance of the relative eigenvalue variance of
+large correlation matrices $V_\mathrm{rel}(\mathbf{R})$
+($p > 100$ or so).
 
 
 ## Examples

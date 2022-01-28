@@ -165,6 +165,15 @@ the Pan--Frank approach
 from Konishi's asymptotic theory (usually, \code{klv} is the choice).
 See \link{AVar.VRR_xx} for details of these functions.
 
+The option \code{fun = "pfc"} in \code{Var.VRR()} calls
+\code{AVar.VRR_pfc()}, which requires the extension package
+\code{eigvaldispRcpp}. The package have several options for fast evaluation
+of the approximate variance with \code{C++} functions via \code{Rcpp}.
+The option for \code{C++} function is controlled by the argument
+\code{cppfun} which in turn is passed to \code{AVar.VRR_pfc()}
+(see \link{AVar.VRR_xx}). When this argument is provided, the argument
+\code{fun} is ignored.
+
 Since the eigenvalue variance of a correlation matrix \eqn{V(R)} is simply
 \eqn{(p - 1)} times the relative eigenvalue variance \eqn{Vrel(R)} of
 the same matrix, their distributions are identical up to this scaling.
@@ -188,8 +197,9 @@ scaled to have diagonals of 1; and if any of these are unequal,
 an error is returned.
 
 These moments are derived under the assumption of multivariate normality
-(Watanabe, 2022), although the distributions will remain the same in
-all elliptically contoured distributions (see Anderson, 2003).
+(Watanabe, 2022), although the distributions will remain the same for
+correlation matrices in all elliptically contoured distributions
+(see Anderson, 2003).
 }
 \examples{
 # Covariance matrix
@@ -229,8 +239,11 @@ Var.VRR(Rho, N - 1)
 Var.VRR(Rho, N - 1, fun = "pfd") # Default
 Var.VRR(Rho, N - 1, fun = "pf")  # Slow for large p
 Var.VRR(Rho, N - 1, fun = "pfv") # Requires too much RAM for large p
-Var.VRR(Rho, n = N - 1, fun = "pfc")
-# These are identical (up to rounding error)
+\dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc")} # Requires eigvaldispRcpp
+\dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc", cppfun = "Cov_r2P")}
+# The last two use C++ functions provided by extension package eigvaldispRcpp
+# fun = "pfc"' can be omitted in the last call.
+# The above results are identical (up to rounding error)
 
 # Variance from Konishi's theory
 Var.VRR(Rho, N - 1, fun = "klv") # Best choice
