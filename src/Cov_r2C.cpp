@@ -36,7 +36,7 @@ using namespace Rcpp;
 //' @seealso \link{Exv.VXX}, \link{AVar.VRR_xx}
 //'
 // [[Rcpp::export]]
-NumericVector Cov_r2C(NumericVector n, NumericVector R, NumericVector E) {
+NumericVector Cov_r2C(NumericVector n, NumericVector R, NumericVector E, int dummy_nthread) {
     int ln = n.size();
     int p = sqrt(R.size()); // If R was read as NumericMatrix, int p = R.nrow()
     int nrE = p * (p - 1) / 2;

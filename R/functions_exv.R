@@ -393,6 +393,9 @@ Var.VRR <- function(Rho, n = 100, Lambda,
                     fun = c("pfd", "pfv", "pfc", "pf",
                             "klv", "kl", "krv", "kr"), ...) {
     fun <- match.arg(fun)
+    if(length(list(...)) > 0L) {
+        if(grepl("cpp", names(list(...)))) fun <- "pfc"
+    }
     if(missing(Rho)) {
         Rho <- GenCov(evalues = Lambda, evectors = "Givens")
         if(Lambda[2] != Lambda[length(Lambda)]) {
@@ -1024,23 +1027,28 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
 #' @rdname AVar.VRR_xx
 #'
 AVar.VRR_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
+                         omp_nthreads = 0L,
                          exv1.mode = c("exact", "asymptotic"),
                          # var1.mode = "asymptotic",
                          var2.mode = c("exact", "asymptotic"),
                          order.exv1 = 2, order.var2 = 2, ...) {
-    # cppfun <- match.arg(cppfun)
+    if(!requireNamespace("eigvaldispRcpp", quietly = TRUE)) {
+        stop("Package 'eigvaldispRcpp' is required for AVar.VRR_pfc() to run. ",
+             "Install it from github.com/watanabe-j/eigvaldispRcpp")
+    }
+    cppfun <- match.arg(cppfun, c("Cov_r2C", "Cov_r2A", "Cov_r2E", "Cov_r2P",
+                                  "Armadillo", "Eigen", "Parallel"))
     exv1.mode <- match.arg(exv1.mode)
     # var1.mode <- match.arg(var1.mode)
     var2.mode <- match.arg(var2.mode)
-    # if(length(find(cppfun)) == 0) {
-    #     require(Rcpp)
-    #     sourceCpp(paste0(cppfun, ".cpp"))
-    # }
-    if(!requireNamespace("Rcpp", quietly = TRUE)) {
-        stop("Package 'Rcpp' is required for AVar.VRR_pfc() to run")
-    }
-    # c1fun <- switch(cppfun, Cov_r2C = Cov_r2C, Cov_r2V = Cov_r2V)
-    c1fun <- Cov_r2C
+    c1fun <- switch(cppfun,
+                    Cov_r2C   = eigvaldispRcpp:::Cov_r2C,
+                    Cov_r2A   = eigvaldispRcpp:::Cov_r2A,
+                    Cov_r2E   = eigvaldispRcpp:::Cov_r2E,
+                    Cov_r2P   = eigvaldispRcpp:::Cov_r2P,
+                    Armadillo = eigvaldispRcpp:::Cov_r2A,
+                    Eigen     = eigvaldispRcpp:::Cov_r2E,
+                    Parallel  = eigvaldispRcpp:::Cov_r2P)
     e1fun <- switch(exv1.mode,
                     exact = function(n, x) Exv.r1(n, x, ...),
                     asymptotic = function(n, x) AExv.r1(n, x,
@@ -1067,7 +1075,7 @@ AVar.VRR_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
     R_u <- Rho[upper.tri(Rho)]
     var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
     exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
-    cov_r2 <- c(c1fun(n, Rho, exv_r1))
+    cov_r2 <- c(c1fun(n, Rho, exv_r1, omp_nthreads))
     ans <- colSums(var_r2) + cov_r2
     4 * ans / (p * (p - 1))^2
 }

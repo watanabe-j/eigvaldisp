@@ -11,21 +11,22 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // Cov_r2C
-NumericVector Cov_r2C(NumericVector n, NumericVector R, NumericVector E);
-RcppExport SEXP _eigvaldisp_Cov_r2C(SEXP nSEXP, SEXP RSEXP, SEXP ESEXP) {
+NumericVector Cov_r2C(NumericVector n, NumericVector R, NumericVector E, int dummy_nthread);
+RcppExport SEXP _eigvaldisp_Cov_r2C(SEXP nSEXP, SEXP RSEXP, SEXP ESEXP, SEXP dummy_nthreadSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type n(nSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type R(RSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type E(ESEXP);
-    rcpp_result_gen = Rcpp::wrap(Cov_r2C(n, R, E));
+    Rcpp::traits::input_parameter< int >::type dummy_nthread(dummy_nthreadSEXP);
+    rcpp_result_gen = Rcpp::wrap(Cov_r2C(n, R, E, dummy_nthread));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_eigvaldisp_Cov_r2C", (DL_FUNC) &_eigvaldisp_Cov_r2C, 3},
+    {"_eigvaldisp_Cov_r2C", (DL_FUNC) &_eigvaldisp_Cov_r2C, 4},
     {NULL, NULL, 0}
 };
 

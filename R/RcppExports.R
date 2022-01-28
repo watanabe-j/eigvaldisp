@@ -32,7 +32,7 @@
 #'
 #' @seealso \link{Exv.VXX}, \link{AVar.VRR_xx}
 #'
-Cov_r2C <- function(n, R, E) {
-    .Call(`_eigvaldisp_Cov_r2C`, n, R, E)
+Cov_r2C <- function(n, R, E, dummy_nthread) {
+    .Call(`_eigvaldisp_Cov_r2C`, n, R, E, dummy_nthread)
 }
 
