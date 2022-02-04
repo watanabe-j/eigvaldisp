@@ -1086,8 +1086,8 @@ AVar.VRR_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
                          var2.mode = c("exact", "asymptotic"),
                          order.exv1 = 2, order.var2 = 2, ...) {
     if(!requireNamespace("eigvaldispRcpp", quietly = TRUE)) {
-        stop("Package 'eigvaldispRcpp' is required for AVar.VRR_pfc() to run. ",
-             "Install it from github.com/watanabe-j/eigvaldispRcpp")
+        stop("Package 'eigvaldispRcpp' is required for AVar.VRR_pfc() to run.",
+             "\n  Install it from github.com/watanabe-j/eigvaldispRcpp")
     }
     cppfun <- match.arg(cppfun, c("Cov_r2C", "Cov_r2A", "Cov_r2E", "Cov_r2P",
                                   "Armadillo", "Eigen", "Parallel"))
