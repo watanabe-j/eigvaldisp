@@ -43,8 +43,8 @@ functionality has now been separated into an extension package,
 to minimize dependency of the main package.
 One would not need that extension unless interested in calculating
 sampling variance of the relative eigenvalue variance of
-large correlation matrices $V_\mathrm{rel}(\mathbf{R})$
-($p > 100$ or so).
+large correlation matrices *V*<sub>rel</sub>(**R**)
+(*p* > 100 or so).
 
 
 ## Examples
