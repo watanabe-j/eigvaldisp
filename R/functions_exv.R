@@ -937,7 +937,7 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
     mode <- match.arg(mode)
     verbose <- match.arg(verbose)
     if(mode == "mclapply" || mode == "parLapply") {
-        if(!requireNamespace("parallel", quietly = TRUE)) {
+        if(!requireNamespace("parallel")) {
             stop("Package 'parallel' is required for ",
                  "mode = 'mclapply' or 'parLapply'")
         }
@@ -1089,7 +1089,7 @@ AVar.VRR_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
                          # var1.mode = "asymptotic",
                          var2.mode = c("exact", "asymptotic"),
                          order.exv1 = 2, order.var2 = 2, ...) {
-    if(!requireNamespace("eigvaldispRcpp", quietly = TRUE)) {
+    if(!requireNamespace("eigvaldispRcpp")) {
         stop("Package 'eigvaldispRcpp' is required for AVar.VRR_pfc() to run.",
              "\n  Install it from github.com/watanabe-j/eigvaldispRcpp")
     }
