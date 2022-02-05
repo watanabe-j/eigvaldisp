@@ -111,8 +111,8 @@ function which it in turn calls. Otherwise ignored.}
 
 \item{fun}{For \code{Var.VRR()} (and \code{Var.VER()}), determines the function
 to be used to evaluate approximate variance. See Details.
-Options allowed are: \code{pfd}, \code{pfv}, \code{pfc}, \code{pf},
-\code{klv}, \code{kl}, \code{krv}, and \code{kr}.}
+Options allowed are: \code{"pfd"}, \code{"pfv"}, \code{"pfc"}, \code{"pf"},
+\code{"klv"}, \code{"kl"}, \code{"krv"}, and \code{"kr"}.}
 }
 \value{
 A numeric vector of the desired moment, corresponding to \code{n}.

@@ -221,12 +221,12 @@ If asymptotic result is desired, use \code{mode.var2 = "asymptotic"}.
 
 Options for \code{mode} in \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()}:
 \describe{
-\item{\code{nested.for}}{Only for \code{AVar.VRR_pf()}. Uses nested
+\item{\code{"nested.for"}}{Only for \code{AVar.VRR_pf()}. Uses nested
 for loops, which is straifhgforward and RAM efficient but slow.}
-\item{\code{for.ind}/\code{lapply}}{Run the iteration along
+\item{\code{"for.ind"}/\code{"lapply"}}{Run the iteration along
 an index vector to shorten computational time,
 with \code{for} loop and \code{lapply()}, respectively.}
-\item{\code{mclapply}/\code{parLapply}}{Only for \code{AVar.VRR_pfd()}.
+\item{\code{"mclapply"}/\code{"parLapply"}}{Only for \code{AVar.VRR_pfd()}.
 Parallelize the same iteration by
 forking and socketing, respectively, with the named functions in the
 package \code{parallel}. Note that the former doesn't work in the

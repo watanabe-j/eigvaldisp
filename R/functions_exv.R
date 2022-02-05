@@ -93,8 +93,8 @@
 #' @param fun
 #'   For \code{Var.VRR()} (and \code{Var.VER()}), determines the function
 #'   to be used to evaluate approximate variance. See Details.
-#'   Options allowed are: \code{pfd}, \code{pfv}, \code{pfc}, \code{pf},
-#'   \code{klv}, \code{kl}, \code{krv}, and \code{kr}.
+#'   Options allowed are: \code{"pfd"}, \code{"pfv"}, \code{"pfc"}, \code{"pf"},
+#'   \code{"klv"}, \code{"kl"}, \code{"krv"}, and \code{"kr"}.
 #' @param ...
 #'   In \code{Var.VRR()}, additional arguments are passed to an internal
 #'   function which it in turn calls. Otherwise ignored.
@@ -506,12 +506,12 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #'
 #' Options for \code{mode} in \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()}:
 #' \describe{
-#'   \item{\code{nested.for}}{Only for \code{AVar.VRR_pf()}. Uses nested
+#'   \item{\code{"nested.for"}}{Only for \code{AVar.VRR_pf()}. Uses nested
 #'     for loops, which is straifhgforward and RAM efficient but slow.}
-#'   \item{\code{for.ind}/\code{lapply}}{Run the iteration along
+#'   \item{\code{"for.ind"}/\code{"lapply"}}{Run the iteration along
 #'     an index vector to shorten computational time,
 #'     with \code{for} loop and \code{lapply()}, respectively.}
-#'   \item{\code{mclapply}/\code{parLapply}}{Only for \code{AVar.VRR_pfd()}.
+#'   \item{\code{"mclapply"}/\code{"parLapply"}}{Only for \code{AVar.VRR_pfd()}.
 #'     Parallelize the same iteration by
 #'     forking and socketing, respectively, with the named functions in the
 #'     package \code{parallel}. Note that the former doesn't work in the
