@@ -63,7 +63,7 @@
 #' EDI_sam <- VE(X = X)
 #'
 #' ## Sample eigenvalue variance ("V(S)") and
-#' relative eigenvalue variance ("Vrel(S)")
+#' ## relative eigenvalue variance ("Vrel(S)")
 #' EDI_sam$VE
 #' EDI_sam$VR
 #' ## These are typically biased upward

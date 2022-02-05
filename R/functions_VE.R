@@ -92,10 +92,10 @@
 #' @export
 #'
 #' @seealso
-#' \code{\code{\link{Exv.VXX}}} for moments of sample
+#' \code{\link{Exv.VXX}} for moments of sample
 #'   eigenvalue dispersion indices
 #'
-#' \code{\code{\link{VXXa}}} for bias-corrected versions
+#' \code{\link{VXXa}} for bias-corrected versions
 #'
 #' @examples
 #' # For a population covariance matrix or population eigenvalues
