@@ -605,7 +605,7 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #'   Intended to be used with large \eqn{p} (hundreds or more).
 #' @param cppfun
 #'   Option to specify the C++ function to be used (see Details).
-#' @param omp_nthreads
+#' @param nthreads
 #'   Numeric to specify the number of threads used in OpenMP parallelization
 #'   in \code{"Cov_r2A"} and \code{"Cov_r2E"}. By default (0), the number of
 #'   threads is automatically set to one-half of that of (logical) processors
@@ -1080,7 +1080,7 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
 #' @rdname AVar.VRR_xx
 #'
 AVar.VRR_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
-                         omp_nthreads = 0L,
+                         nthreads = 0L,
                          exv1.mode = c("exact", "asymptotic"),
                          # var1.mode = "asymptotic",
                          var2.mode = c("exact", "asymptotic"),
@@ -1128,7 +1128,7 @@ AVar.VRR_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
     R_u <- Rho[upper.tri(Rho)]
     var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
     exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
-    cov_r2 <- c(c1fun(n, Rho, exv_r1, omp_nthreads))
+    cov_r2 <- c(c1fun(n, Rho, exv_r1, nthreads))
     ans <- colSums(var_r2) + cov_r2
     4 * ans / (p * (p - 1))^2
 }
