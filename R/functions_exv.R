@@ -21,7 +21,7 @@
 #' (usually, \code{pfd} or \code{pfc} will be the choice);
 #' \code{klv}, \code{kl}, \code{krv}, \code{kr} are equivalent variants
 #' from Konishi's asymptotic theory (usually, \code{klv} is the choice).
-#' See \link{AVar.VRR_xx} for details of these functions.
+#' See \code{\link{AVar.VRR_xx}} for details of these functions.
 #'
 #' The option \code{fun = "pfc"} in \code{Var.VRR()} calls
 #' \code{AVar.VRR_pfc()}, which requires the extension package
@@ -29,7 +29,7 @@
 #' of the approximate variance with \code{C++} functions via \code{Rcpp}.
 #' The option for \code{C++} function is controlled by the argument
 #' \code{cppfun} which in turn is passed to \code{AVar.VRR_pfc()}
-#' (see \link{AVar.VRR_xx}). When this argument is provided, the argument
+#' (see \code{\link{AVar.VRR_xx}}). When this argument is provided, the argument
 #' \code{fun} is ignored.
 #'
 #' Since the eigenvalue variance of a correlation matrix \eqn{V(R)} is simply
@@ -63,7 +63,7 @@
 # #' (which gives the ordinary unbiased estimator) is assumed by default.
 # #'
 # #' \code{Exv.VRR()} calls \code{Exv.r2()}, which in turn calls \code{hgf()}.
-# #' (see \link{Exv.rx}).
+# #' (see \code{\link{Exv.rx}}).
 # #'
 #' @name Exv.VXX
 #'
@@ -108,10 +108,14 @@
 #'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
 #' @seealso
-#' \link{VE} for estimation;
-#' \link{AVar.VRR_xx} for internal functions of Var.VRR;
-#' \link{Exv.rx} for internal functions for moments of correlation coefficients;
-#' \link{Exv.VXXa} for moments of ``bias-corrected'' versions.
+#' \code{\link{VE}} for estimation
+#'
+#' \code{\link{AVar.VRR_xx}} for internal functions of Var.VRR
+#'
+#' \code{\link{Exv.rx}} for internal functions for moments of
+#'   correlation coefficients
+#'
+#' \code{\link{Exv.VXXa}} for moments of ``bias-corrected'' versions
 #'
 #' @examples
 #' # Covariance matrix
@@ -573,7 +577,7 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #' @param order.exv1,order.var2
 #'   Used to specify the order of asymptotic expressions for
 #'   \eqn{E(r)}/\eqn{Var(r^2)} when \code{exv1.mode}/\code{var2.mode} is
-#'   \code{"asymptotic"}; see \link{Exv.rx}.
+#'   \code{"asymptotic"}; see \code{\link{Exv.rx}}.
 #' @param mode
 #'   In \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()},
 #'   specifies the mode of iterations (see Details).
@@ -635,7 +639,7 @@ Var.VRR <- function(Rho, n = 100, Lambda,
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
 #'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
-#' @seealso \link{Exv.VXX} for main moment functions.
+#' @seealso \code{\link{Exv.VXX}} for main moment functions
 #'
 #' @examples
 #' # See also examples of Exv.VXX
@@ -1302,7 +1306,7 @@ AVar.VRR_krv <- function(Rho, n = 100, Lambda, ...) {
 #' of covariance/correlation matrices.
 #'
 #' Usage is identical to that of the corresponding unadjusted versions
-#' (see \link{Exv.VXX}), which are in most cases called internally.
+#' (see \code{\link{Exv.VXX}}), which are in most cases called internally.
 #'
 #' @name Exv.VXXa
 #'
@@ -1317,8 +1321,9 @@ AVar.VRR_krv <- function(Rho, n = 100, Lambda, ...) {
 #'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
 #' @seealso
-#' \link{VXXa} for ``bias-corrected'' estimators;
-#' \link{Exv.VXX} for moments of unajusted versions.
+#' \code{\link{VXXa}} for ``bias-corrected'' estimators
+#'
+#' \code{\link{Exv.VXX}} for moments of unajusted versions
 #'
 #' @examples
 #' # See also examples of Exv.VXX

@@ -60,7 +60,8 @@ when \code{X} is provided.}
 \code{"chol_piv"} or \code{"pivot"} for \code{chol_piv()},
 \code{"chol_qr"} or \code{"qr"} for \code{chol_qr()},
 \code{"matsqrt"} or \code{"sqrt"} for \code{matsqrt()}.
-See \link{sqrt_methods} for details. Ignored when \code{cSigma} is provided.}
+See \code{\link{sqrt_methods}} for details.
+Ignored when \code{cSigma} is provided.}
 
 \item{p}{Number of variables; ignored when \code{Sigma} or \code{cSigma} is provided.}
 
@@ -143,5 +144,5 @@ param_boot <- simulateVE(b = 50L, X = X1)
 
 }
 \seealso{
-\link{VE}, \link{sqrt_methods}
+\code{\link{VE}}, \code{\link{sqrt_methods}}
 }

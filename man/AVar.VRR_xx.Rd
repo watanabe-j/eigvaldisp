@@ -63,7 +63,7 @@ AVar.VRR_pfc(
   n = 100,
   Lambda,
   cppfun = "Cov_r2C",
-  omp_nthreads = 0L,
+  nthreads = 0L,
   exv1.mode = c("exact", "asymptotic"),
   var2.mode = c("exact", "asymptotic"),
   order.exv1 = 2,
@@ -98,7 +98,7 @@ AVar.VRR_krv(Rho, n = 100, Lambda, ...)
 
 \item{order.exv1, order.var2}{Used to specify the order of asymptotic expressions for
 \eqn{E(r)}/\eqn{Var(r^2)} when \code{exv1.mode}/\code{var2.mode} is
-\code{"asymptotic"}; see \link{Exv.rx}.}
+\code{"asymptotic"}; see \code{\link{Exv.rx}}.}
 
 \item{mode}{In \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()},
 specifies the mode of iterations (see Details).}
@@ -135,7 +135,7 @@ Intended to be used with large \eqn{p} (hundreds or more).}
 
 \item{cppfun}{Option to specify the C++ function to be used (see Details).}
 
-\item{omp_nthreads}{Numeric to specify the number of threads used in OpenMP parallelization
+\item{nthreads}{Numeric to specify the number of threads used in OpenMP parallelization
 in \code{"Cov_r2A"} and \code{"Cov_r2E"}. By default (0), the number of
 threads is automatically set to one-half of that of (logical) processors
 detected (by the \code{C++} function \code{omp_get_num_procs()}).
@@ -336,5 +336,5 @@ quantifying the magnitude of phenotypic integration. \emph{Evolution},
 \strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
 }
 \seealso{
-\link{Exv.VXX} for main moment functions.
+\code{\link{Exv.VXX}} for main moment functions
 }

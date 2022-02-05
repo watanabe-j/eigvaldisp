@@ -193,7 +193,7 @@ All these functions except \code{ACov.r1()} requires the arguments
 \code{n} and \code{x}. It can be \code{length(x) > 1}
 (at least supeficially vectorized), but it is assumed \code{length(n) = 1}.
 This is because these functions are often called in the form
-\code{sapply(n, ...)} in other functions (\link{Exv.VXX}).
+\code{sapply(n, ...)} in other functions (\code{\link{Exv.VXX}}).
 
 Covariance between two \eqn{r}'s is a function of
 at least six population correlation coefficients.
@@ -315,5 +315,5 @@ Appendix II to the papers of ``Student'' and R. A. Fisher.
 doi:\href{https://doi.org/10.1093/biomet/11.4.328}{10.1093/biomet/11.4.328}.
 }
 \seealso{
-\link{Exv.VXX}, \link{AVar.VRR_xx} for outer functions.
+\code{\link{Exv.VXX}} and \code{\link{AVar.VRR_xx}} for outer functions
 }

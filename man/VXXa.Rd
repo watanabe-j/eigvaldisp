@@ -150,7 +150,10 @@ quantifying the magnitude of phenotypic integration. \emph{Evolution},
 \strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
 }
 \seealso{
-\link{VE} for the main function;
-\link{Exv.VXX} for expectation (bias) in the ordinary estimators;
-\link{Exv.VXXa} for the expectation/variance of the adjusted estimators.
+\code{\link{VE}} for the main function
+
+\code{\link{Exv.VXX}} for expectation (bias) in the ordinary estimators
+
+\code{\link{Exv.VXXa}} for the expectation/variance of
+the adjusted estimators.
 }

@@ -117,7 +117,7 @@ of correlation matrix.
 }
 \details{
 Usage is identical to that of the corresponding unadjusted versions
-(see \link{Exv.VXX}), which are in most cases called internally.
+(see \code{\link{Exv.VXX}}), which are in most cases called internally.
 }
 \examples{
 # See also examples of Exv.VXX
@@ -162,6 +162,7 @@ quantifying the magnitude of phenotypic integration. \emph{Evolution},
 \strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
 }
 \seealso{
-\link{VXXa} for ``bias-corrected'' estimators;
-\link{Exv.VXX} for moments of unajusted versions.
+\code{\link{VXXa}} for ``bias-corrected'' estimators
+
+\code{\link{Exv.VXX}} for moments of unajusted versions
 }

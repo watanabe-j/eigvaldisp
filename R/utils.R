@@ -260,7 +260,8 @@ divInd <- function(b, Max = 2e6) { # , Length = 2) {
 #'
 #' @return A numeric vector corresponding to \code{x}
 #'
-#' @seealso \link[hypergeo]{genhypergeo}, \link[hypergeo]{hypergeo}
+#' @seealso \code{\link[hypergeo]{genhypergeo}}, 
+#'   \code{\link[hypergeo]{hypergeo}}
 #'
 hgf <- function(a1, a2, b1, x, tol = 0, maxiter = 2000) {
     # require(hypergeo)

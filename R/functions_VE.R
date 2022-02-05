@@ -92,8 +92,10 @@
 #' @export
 #'
 #' @seealso
-#' \link{Exv.VXX} for moments of sample eigenvalue dispersion indices;
-#' \link{VXXa} for bias-corrected versions.
+#' \code{\code{\link{Exv.VXX}}} for moments of sample
+#'   eigenvalue dispersion indices
+#'
+#' \code{\code{\link{VXXa}}} for bias-corrected versions
 #'
 #' @examples
 #' # For a population covariance matrix or population eigenvalues
@@ -249,9 +251,12 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' }
 #'
 #' @seealso
-#' \link{VE} for the main function;
-#' \link{Exv.VXX} for expectation (bias) in the ordinary estimators;
-#' \link{Exv.VXXa} for the expectation/variance of the adjusted estimators.
+#' \code{\link{VE}} for the main function
+#'
+#' \code{\link{Exv.VXX}} for expectation (bias) in the ordinary estimators
+#'
+#' \code{\link{Exv.VXXa}} for the expectation/variance of
+#'   the adjusted estimators.
 #'
 #' @references
 #' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
@@ -478,7 +483,7 @@ VRRa <- function(X, S, L, n = N - as.numeric(center),
 #'     (\code{US.org} and \code{UR.org} are provided
 #'     as references for signs of eigenvectors)
 #'   }
-#' @seealso \link{VE}, \link{sqrt_methods}
+#' @seealso \code{\link{VE}}, \code{\link{sqrt_methods}}
 #'
 #' @importFrom stats cov2cor
 #'
@@ -620,7 +625,8 @@ simulateVE <- function(b = 100L, X, Sigma, cSigma = sqrtfun(Sigma), N = nrow(X),
 #'   \code{"chol_piv"} or \code{"pivot"} for \code{chol_piv()},
 #'   \code{"chol_qr"} or \code{"qr"} for \code{chol_qr()},
 #'   \code{"matsqrt"} or \code{"sqrt"} for \code{matsqrt()}.
-#'   See \link{sqrt_methods} for details. Ignored when \code{cSigma} is provided.
+#'   See \code{\link{sqrt_methods}} for details.
+#'   Ignored when \code{cSigma} is provided.
 #'
 #' @return
 #'   \code{rmvn()} returns a \eqn{N * p} matrix with

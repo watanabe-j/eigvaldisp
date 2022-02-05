@@ -40,5 +40,6 @@ For the present purpose, \code{gsl::hyperg_2F1} may suffice,
 but this has not been implemented.
 }
 \seealso{
-\link[hypergeo]{genhypergeo}, \link[hypergeo]{hypergeo}
+\code{\link[hypergeo]{genhypergeo}},
+\code{\link[hypergeo]{hypergeo}}
 }

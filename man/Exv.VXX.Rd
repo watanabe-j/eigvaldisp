@@ -163,7 +163,7 @@ the Pan--Frank approach
 (usually, \code{pfd} or \code{pfc} will be the choice);
 \code{klv}, \code{kl}, \code{krv}, \code{kr} are equivalent variants
 from Konishi's asymptotic theory (usually, \code{klv} is the choice).
-See \link{AVar.VRR_xx} for details of these functions.
+See \code{\link{AVar.VRR_xx}} for details of these functions.
 
 The option \code{fun = "pfc"} in \code{Var.VRR()} calls
 \code{AVar.VRR_pfc()}, which requires the extension package
@@ -171,7 +171,7 @@ The option \code{fun = "pfc"} in \code{Var.VRR()} calls
 of the approximate variance with \code{C++} functions via \code{Rcpp}.
 The option for \code{C++} function is controlled by the argument
 \code{cppfun} which in turn is passed to \code{AVar.VRR_pfc()}
-(see \link{AVar.VRR_xx}). When this argument is provided, the argument
+(see \code{\link{AVar.VRR_xx}}). When this argument is provided, the argument
 \code{fun} is ignored.
 
 Since the eigenvalue variance of a correlation matrix \eqn{V(R)} is simply
@@ -261,8 +261,12 @@ quantifying the magnitude of phenotypic integration. \emph{Evolution},
 \strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
 }
 \seealso{
-\link{VE} for estimation;
-\link{AVar.VRR_xx} for internal functions of Var.VRR;
-\link{Exv.rx} for internal functions for moments of correlation coefficients;
-\link{Exv.VXXa} for moments of ``bias-corrected'' versions.
+\code{\link{VE}} for estimation
+
+\code{\link{AVar.VRR_xx}} for internal functions of Var.VRR
+
+\code{\link{Exv.rx}} for internal functions for moments of
+correlation coefficients
+
+\code{\link{Exv.VXXa}} for moments of ``bias-corrected'' versions
 }
