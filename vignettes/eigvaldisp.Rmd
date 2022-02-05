@@ -77,7 +77,7 @@ EDI_pop <- VE(S = Sigma)
 ## Eigenvalue variance ("V(Sigma)")
 EDI_pop$VE
 
-## Eigenvalue variance ("Vrel(Sigma)"):
+## Relative eigenvalue variance ("Vrel(Sigma)"):
 EDI_pop$VR
 ```
 
