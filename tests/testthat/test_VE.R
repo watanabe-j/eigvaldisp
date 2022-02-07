@@ -100,3 +100,30 @@ test_that("value of VE(S = GenCov(evalues = Lambda))", {
     expect_equal(VE_Xs, VE_R)
     expect_equal(VE_Xs, VE_K)
 })
+
+test_that("warnings and errors of VE()", {
+    p <- sample(3:20, 1)
+    N <- sample(3:20, 1)
+    Lambda <- sort(stats::rchisq(p, 5), decreasing = TRUE)
+    Sigma <- GenCov(evalues = Lambda, evectors = "random")
+
+    X <- rmvn(N, Sigma = Sigma)
+    S <- stats::cov(X)
+    L <- svd(S, nu = 0, nv = 0)$d
+
+    expect_warning(temp <- VE(X = X, S = S), "S was ignored")
+    expect_warning(temp <- VE(X = X, L = L), "L was ignored")
+    expect_warning(temp <- VE(S = S, L = L), "L was ignored")
+    expect_warning(expect_warning(temp <- VE(X = X, S = S, L = L), "S was ignored"), "L was ignored")
+    expect_warning(temp <- VE(S), "Covariance/correlation matrix is to be passed as S")
+    expect_error(temp <- VE(L), "If this is a vector of eigenvalues, pass it as L")
+    expect_error(temp <- VE(S = L), "If this is a vector of eigenvalues, pass it as L")
+    expect_error(temp <- VE(array(1:p, 1)), "X must be a 2D matrix")
+    expect_error(temp <- VE(array(1:p, c(1, 1, 1))), "X must be a 2D matrix")
+    expect_error(temp <- VE(S = array(1:p, 1)), "S must be a 2D matrix")
+    expect_error(temp <- VE(S = array(1:p, c(1, 1, 1))), "S must be a 2D matrix")
+    expect_warning(temp <- VE(L = X), "Data matrix is to be passed as X")
+    expect_warning(temp <- VE(L = S), "Covariance/correlation matrix is to be passed as S")
+    expect_warning(temp <- VE(L = array(1:p, c(2, 2, 1))), "L is expected to be a vector")
+    expect_silent(temp <- VE(L = array(1:p, c(p, 1, 1))))
+})

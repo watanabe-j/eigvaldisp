@@ -6,8 +6,28 @@
 #' of a covariance/correlation matrix, either from a data matrix \code{X}
 #' or a covariance/correlation matrix \code{S}.
 #'
-#' Provide either a data matrix (\code{X}), covariance/correlation matrix
+#' Provide one of a data matrix (\code{X}), covariance/correlation matrix
 #' (\code{S}), or vector of eigenvalues (\code{L}).
+#' These arguments take precedence over one another in this order;
+#' if more than one of them are provided, the one with less precedence is
+#' ignored with warning.
+#'
+#' \code{X} must be a 2D numeric matrix, with rows representing
+#' observations and columns variables. When relevant, \code{S} must be a valid
+#' covariance/correlation matrix. With \code{check = TRUE} (default),
+#' basic structure checks are done on \code{X}, \code{S}, or \code{L}:
+#' \itemize{
+#'   \item{If \code{X} or \code{S} (when relevant) is a non-2D matrix/array,
+#'     an error is returned.}
+#'   \item{If \code{S} (when relevant) is not symmetric, an error is returned.}
+#'   \item{If \code{L} (when relevant) is not a vector-like array,
+#'     a warning emerges, although a result is returned
+#'     (a column/row vector is tolerated without warning).}
+#'   \item{If \code{X} is a symmetric matrix (i.e., it looks like \code{S}),
+#'     a warning emerges, although a result is returned.}
+#' }
+#' For sake of speed, the checks can be turned off with \code{check = FALSE}.
+#'
 #' When \code{X} is given, the default divisor is \eqn{N - 1} where \eqn{N}
 #' is the sample size.
 #'
@@ -48,13 +68,18 @@
 #'   Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped.
 #' @param tol
 #'   Tolerance to be used with \code{drop_0}.
+#' @param check
+#'   Logical to specify whether structures of X, S, and L are checked
+#'   (see Details).
 #'
 #' @return
-#'   A list containing the following:
+#'   A list containing the following numeric objects:
 #'   \describe{
-#'     \item{VE}{Eigenvalue variance (\eqn{V})}
-#'     \item{VR}{Relative eigenvalue variance (\eqn{Vrel})}
-#'     \item{meanL}{Mean (average) of the eigenvalues}
+#'     \item{VE}{Eigenvalue variance (\eqn{V}):
+#'       \code{sum( (L - meanL)^2 ) / length(L)}}
+#'     \item{VR}{Relative eigenvalue variance (\eqn{Vrel}):
+#'       \code{VE / ( (length(L) - 1) * meanL^2)}}
+#'     \item{meanL}{Mean (average) of the eigenvalues \code{L}}
 #'     \item{L}{Vector of eigenvalues}
 #'     \item{U}{Matrix of eigenvectors, appended only when \code{nv > 0}}
 #'   }
@@ -166,9 +191,21 @@
 VE <- function(X, S, L, center = TRUE, scale. = FALSE,
                divisor = c("UB", "ML"), m = switch(divisor, UB = N - 1, ML = N),
                nv = 0, sub = seq_len(length(L)),
-               drop_0 = FALSE, tol = .Machine$double.eps * 100) {
+               drop_0 = FALSE, tol = .Machine$double.eps * 100, check = TRUE) {
     divisor <- match.arg(divisor)
     if(!missing(X)) {
+        if(check) {
+            if(!missing(S)) warning("S was ignored as X was provided")
+            if(!missing(L)) warning("L was ignored as X was provided")
+            if(length(dim(X)) != 2) {
+                stop("X must be a 2D matrix, but length(dim(X)) was not 2",
+                     "\n  If this is a vector of eigenvalues, pass it as L.")
+            }
+            if(isTRUE(all.equal(X, t(X)))) {
+                warning("X was expected to be a data matrix but looks symmetric.",
+                        "\n  Covariance/correlation matrix is to be passed as S.")
+            }
+        }
         X <- scale2(X, center = center, scale = scale.)
         N <- nrow(X)
         p <- ncol(X)
@@ -182,16 +219,37 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
         }
         L <- c(L, rep_len(0, max(p - length(L), 0)))
     } else if(!missing(S)) {
+        if(check) {
+            if(!missing(L)) warning("L was ignored as S was provided")
+            if(length(dim(S)) != 2) {
+                stop("S must be a 2D matrix, but length(dim(S)) was not 2",
+                     "\n  If this is a vector of eigenvalues, pass it as L.")
+            }
+            if(!isTRUE(all.equal(S, t(S)))) {
+                stop("S must be a valid covariance/correlation matrix ",
+                     "but was not symmetric")
+            }
+        }
         p <- ncol(S)
         if(scale.) S <- cov2cor(S)
         svd.X <- svd(S, nu = 0, nv = nv)
         L <- svd.X$d
+    } else if(missing(L)) { # FALSE if at least one of X, S, or L exists
+        stop("Provide one of X, S, or L")
+    } else if(check) {
+        if(length(dim(L)) > 1) {
+            if(sum(dim(L) != 1) != 1) { # Vector-like arrays are tolerated
+                warning("L is expected to be a vector but looks like a non-1D ",
+                    "matrix/array.\n  Data matrix is to be passed as X.",
+                    "\n  Covariance/correlation matrix is to be passed as S.")
+            }
+        }
     }
     L <- L[sub]
     if(drop_0) L <- L[L > tol]
     p <- length(L)
     mL <- mean(L)
-    VE <- sum((L - mL) ^ 2) / p   # Faster than var(L) * (p - 1) / p,
+    VE <- sum((L - mL) ^ 2) / p   # Faster than var(L) * (p - 1) / p or mean()
     VR <- VE / ((p - 1) * mL ^ 2) # as mL is already available
     ans <- list(VE = VE, VR = VR, meanL = mL, L = L)
     if(nv > 0) ans <- c(ans, list(U = svd.X$v))

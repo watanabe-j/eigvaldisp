@@ -15,7 +15,8 @@ VE(
   nv = 0,
   sub = seq_len(length(L)),
   drop_0 = FALSE,
-  tol = .Machine$double.eps * 100
+  tol = .Machine$double.eps * 100,
+  check = TRUE
 )
 }
 \arguments{
@@ -45,13 +46,18 @@ to be involved; used to exclude some subspace.}
 \item{drop_0}{Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped.}
 
 \item{tol}{Tolerance to be used with \code{drop_0}.}
+
+\item{check}{Logical to specify whether structures of X, S, and L are checked
+(see Details).}
 }
 \value{
-A list containing the following:
+A list containing the following numeric objects:
 \describe{
-\item{VE}{Eigenvalue variance (\eqn{V})}
-\item{VR}{Relative eigenvalue variance (\eqn{Vrel})}
-\item{meanL}{Mean (average) of the eigenvalues}
+\item{VE}{Eigenvalue variance (\eqn{V}):
+\code{sum( (L - meanL)^2 ) / length(L)}}
+\item{VR}{Relative eigenvalue variance (\eqn{Vrel}):
+\code{VE / ( (length(L) - 1) * meanL^2)}}
+\item{meanL}{Mean (average) of the eigenvalues \code{L}}
 \item{L}{Vector of eigenvalues}
 \item{U}{Matrix of eigenvectors, appended only when \code{nv > 0}}
 }
@@ -63,8 +69,28 @@ of a covariance/correlation matrix, either from a data matrix \code{X}
 or a covariance/correlation matrix \code{S}.
 }
 \details{
-Provide either a data matrix (\code{X}), covariance/correlation matrix
+Provide one of a data matrix (\code{X}), covariance/correlation matrix
 (\code{S}), or vector of eigenvalues (\code{L}).
+These arguments take precedence over one another in this order;
+if more than one of them are provided, the one with less precedence is
+ignored with warning.
+
+\code{X} must be a 2D numeric matrix, with rows representing
+observations and columns variables. When relevant, \code{S} must be a valid
+covariance/correlation matrix. With \code{check = TRUE} (default),
+basic structure checks are done on \code{X}, \code{S}, or \code{L}:
+\itemize{
+\item{If \code{X} or \code{S} (when relevant) is a non-2D matrix/array,
+an error is returned.}
+\item{If \code{S} (when relevant) is not symmetric, an error is returned.}
+\item{If \code{L} (when relevant) is not a vector-like array,
+a warning emerges, although a result is returned
+(a column/row vector is tolerated without warning).}
+\item{If \code{X} is a symmetric matrix (i.e., it looks like \code{S}),
+a warning emerges, although a result is returned.}
+}
+For sake of speed, the checks can be turned off with \code{check = FALSE}.
+
 When \code{X} is given, the default divisor is \eqn{N - 1} where \eqn{N}
 is the sample size.
 
