@@ -77,6 +77,7 @@ Var.VER(Rho, n = 100, Lambda, ...)
 Var.VRR(
   Rho,
   n = 100,
+  method = c("Pan-Frank", "Konishi"),
   Lambda,
   fun = c("pfd", "pfv", "pfc", "pf", "klv", "kl", "krv", "kr"),
   ...
@@ -108,6 +109,10 @@ function which it in turn calls. Otherwise ignored.}
 (although simple checks are done).}
 
 \item{tol.hg, maxiter.hg}{Passed to \code{Exv.r2()}; see description of that function.}
+
+\item{method}{For \code{Var.VRR()} (and \code{Var.VER()}), determines the method
+to obtain approximate variance in non-null conditions.
+Either \code{"Pan-Frank"} (default) or \code{"Konishi"}. See Details.}
 
 \item{fun}{For \code{Var.VRR()} (and \code{Var.VER()}), determines the function
 to be used to evaluate approximate variance. See Details.
@@ -156,23 +161,31 @@ where exact moments are returned.
 
 \code{Var.VRR()} returns the exact variance when \eqn{p = 2} or
 under the null condition (\eqn{\Rho} is the identity matrix).
-Otherwise, asymptotic variance is calculated with a function of choice,
-\code{AVar.VRR_xx}, with the suffix specified by the argument \code{fun}:
-\code{pfd}, \code{pfv}, \code{pfc}, \code{pf} are options for
-the Pan--Frank approach
-(usually, \code{pfd} or \code{pfc} will be the choice);
-\code{klv}, \code{kl}, \code{krv}, \code{kr} are equivalent variants
-from Konishi's asymptotic theory (usually, \code{klv} is the choice).
+Otherwise, asymptotic variance is calculated with the \code{method} of
+choice: either \code{"Pan-Frank"} (default) or \code{"Konishi"}.
+They correspond to Pan & Frank's heuristic approximation and Konishi's
+asymptotic theory, respectively (see Watanabe, 2022).
+
+In this case, calculations are handled by one of the internal functions
+\code{AVar.VRR_xx()} (\code{xx} is a suffix to specify R implementation).
+For completeness, it is possible to directly specify the function
+to be used with the argument \code{fun}: for the Pan--Frank method,
+\code{pfd} (default), \code{pfv}, and \code{pf}; and for the
+Konishi method, \code{klv} (default), \code{kl}, \code{krv}, and \code{kr}.
+Within each group, these function yield identical results but differ
+in speed (the defaults are the fastest).
 See \code{\link{AVar.VRR_xx}} for details of these functions.
 
-The option \code{fun = "pfc"} in \code{Var.VRR()} calls
-\code{AVar.VRR_pfc()}, which requires the extension package
-\code{eigvaldispRcpp}. The package have several options for fast evaluation
-of the approximate variance with \code{C++} functions via \code{Rcpp}.
+The Pan--Frank method takes a substantial amount of time to be executed
+when p is large. Several C++ functions are provided in the extension package
+\href{https://github.com/watanabe-j/eigvaldispRcpp}{\code{eigvaldispRcpp}} to
+speed-up the calculation. When this package is available, the default
+\code{fun} for the Pan--Frank method is set to \code{"pfc"}.
 The option for \code{C++} function is controlled by the argument
 \code{cppfun} which in turn is passed to \code{AVar.VRR_pfc()}
 (see \code{\link{AVar.VRR_xx}}). When this argument is provided, the argument
-\code{fun} is ignored.
+\code{fun} is ignored with a warning, unless one of the Konishi methods
+is used (in which case \code{cppfun} is ignored with a warning).
 
 Since the eigenvalue variance of a correlation matrix \eqn{V(R)} is simply
 \eqn{(p - 1)} times the relative eigenvalue variance \eqn{Vrel(R)} of
