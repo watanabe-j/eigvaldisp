@@ -16,6 +16,7 @@ VESa(
   m = switch(divisor, UB = N - 1, ML = N),
   center = TRUE,
   nv = 0,
+  check = TRUE,
   ...
 )
 
@@ -28,10 +29,20 @@ VRSa(
   m = switch(divisor, UB = N - 1, ML = N),
   center = TRUE,
   nv = 0,
+  check = TRUE,
   ...
 )
 
-VRRa(X, S, L, n = N - as.numeric(center), center = TRUE, nv = 0, ...)
+VRRa(
+  X,
+  S,
+  L,
+  n = N - as.numeric(center),
+  center = TRUE,
+  nv = 0,
+  check = TRUE,
+  ...
+)
 }
 \arguments{
 \item{X}{Data matrix from which covariance/corrrelation matrix is obtained.}
@@ -50,6 +61,9 @@ to decide the default value of \code{m}.}
 \item{center}{Logical to specify whether sample-mean-centering should be done.}
 
 \item{nv}{Numeric. Specify how many eigenvectors are to be retained; default 0.}
+
+\item{check}{Logical to specify whether structures of X, S, and L are checked
+(see Details in \code{\link{VE}}).}
 
 \item{...}{Arguments \code{sub}, \code{drop_0}, \code{tol} can be
 passed to \code{VE()}. Other arguments will not influence the result.}

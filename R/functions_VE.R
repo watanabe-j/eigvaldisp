@@ -293,6 +293,9 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #'
 #' @param n
 #'   Degrees of freedom; required unless X is provided.
+#' @param check
+#'   Logical to specify whether structures of X, S, and L are checked
+#'   (see Details in \code{\link{VE}}).
 #' @param ...
 #'   Arguments \code{sub}, \code{drop_0}, \code{tol} can be
 #'   passed to \code{VE()}. Other arguments will not influence the result.
