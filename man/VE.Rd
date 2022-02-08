@@ -114,7 +114,7 @@ VE(S = Sigma) # Same
 
 # For a random sample, sample covariance matrix or its eigenvalues
 N <- 20
-X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
+X <- rmvn(N = N, Sigma = Sigma)
 S <- cov(X)
 L <- eigen(S)$values
 VE(X = X)
@@ -147,7 +147,7 @@ VE(S = Sigma2, sub = 1:3)     # In the subspace of the first 3 PCs
 VE(S = Sigma2, drop_0 = TRUE) # Dropping zero eigenvalues (same in this case)
 
 # Sample from singular covariance
-X2 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma2, sqrt_method = "pivot")
+X2 <- rmvn(N = N, Sigma = Sigma2, sqrt_method = "pivot")
 VE(X = X2)                    # In the full space
 VE(X = X2, sub = 1:3)         # In the subspace of the first 3 PCs
 VE(X = X2, drop_0 = TRUE)     # Practically the same
@@ -161,7 +161,7 @@ eigen(cov(X2))$vectors[, 4]
 # a sample null space always encompasses the population null space.
 Lambda3 <- 9:0
 Sigma3 <- GenCov(evalues = Lambda3, evectors = "random")
-X3 <- eigvaldisp:::rmvn(N = 6, Sigma = Sigma3, sqrt_method = "pivot")
+X3 <- rmvn(N = 6, Sigma = Sigma3, sqrt_method = "pivot")
 eigS3 <- eigen(cov(X3))
 (Popul_null <- eigen(Sigma3)$vectors[, Lambda3 < 1e-12])
 (Sample_null <-eigS3$vectors[, eigS3$values < 1e-12])

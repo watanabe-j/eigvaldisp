@@ -132,7 +132,7 @@
 #'
 #' # For a random sample, sample covariance matrix or its eigenvalues
 #' N <- 20
-#' X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
+#' X <- rmvn(N = N, Sigma = Sigma)
 #' S <- cov(X)
 #' L <- eigen(S)$values
 #' VE(X = X)
@@ -165,7 +165,7 @@
 #' VE(S = Sigma2, drop_0 = TRUE) # Dropping zero eigenvalues (same in this case)
 #'
 #' # Sample from singular covariance
-#' X2 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma2, sqrt_method = "pivot")
+#' X2 <- rmvn(N = N, Sigma = Sigma2, sqrt_method = "pivot")
 #' VE(X = X2)                    # In the full space
 #' VE(X = X2, sub = 1:3)         # In the subspace of the first 3 PCs
 #' VE(X = X2, drop_0 = TRUE)     # Practically the same
@@ -179,7 +179,7 @@
 #' # a sample null space always encompasses the population null space.
 #' Lambda3 <- 9:0
 #' Sigma3 <- GenCov(evalues = Lambda3, evectors = "random")
-#' X3 <- eigvaldisp:::rmvn(N = 6, Sigma = Sigma3, sqrt_method = "pivot")
+#' X3 <- rmvn(N = 6, Sigma = Sigma3, sqrt_method = "pivot")
 #' eigS3 <- eigen(cov(X3))
 #' (Popul_null <- eigen(Sigma3)$vectors[, Lambda3 < 1e-12])
 #' (Sample_null <-eigS3$vectors[, eigS3$values < 1e-12])
@@ -342,7 +342,7 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #'
 #' N <- 20
 #' set.seed(375)
-#' X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
+#' X <- rmvn(N = N, Sigma = Sigma)
 #' S <- cov(X)
 #' L <- eigen(S)$values
 #'
@@ -369,7 +369,7 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' VE(S = Sigma2)
 #'
 #' N <- 20
-#' X2 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma2)
+#' X2 <- rmvn(N = N, Sigma = Sigma2)
 #'
 #' VESa(X = X2)
 #' # This is on average better than the un-corrected version
@@ -671,10 +671,10 @@ VRRa <- function(X, S, L, n,
 #' (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
 #' N <- 10
 #' set.seed(35638)
-#' X1 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
+#' X1 <- rmvn(N = N, Sigma = Sigma)
 #' cSigma <- chol(Sigma)
 #' set.seed(35638)
-#' X2 <- eigvaldisp:::rmvn(N = N, cSigma = cSigma)
+#' X2 <- rmvn(N = N, cSigma = cSigma)
 #' stopifnot(all.equal(X1, X2))
 #' # These are identical. Providing cSigma is quicker as it skips sqrtfun(Sigma),
 #' # so this may be useful when multiple simulations are to be run with
@@ -772,8 +772,7 @@ simulateVE <- function(b = 100L, X, Sigma, cSigma = sqrtfun(Sigma), N = nrow(X),
 ##### rmvn #####
 #' Generate multivariate normal variates
 #'
-#' \code{rmvn()} is an internal function to generate
-#' multivariate normal variates.
+#' \code{rmvn()} is a function to generate random multivariate normal variates.
 #'
 #' @rdname simulateVE
 #'
@@ -811,7 +810,7 @@ simulateVE <- function(b = 100L, X, Sigma, cSigma = sqrtfun(Sigma), N = nrow(X),
 #'
 #' @importFrom stats rnorm
 #'
-# #' @export
+#' @export
 #'
 rmvn <- function(N, p = 2L, s2 = 1, Sigma = s2 * diag(p), cSigma = sqrtfun(Sigma),
                  mean = rep_len(0, p), sqrt_method = "chol") {

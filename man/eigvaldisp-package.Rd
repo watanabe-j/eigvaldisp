@@ -38,7 +38,7 @@ EDI_pop$VR
 
 ## Simulate a multivariate normal sample
 N <- 20
-X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
+X <- rmvn(N = N, Sigma = Sigma)
 
 ## Calculating eigenvalue dispersion indices from the sample
 EDI_sam <- VE(X = X)

@@ -103,8 +103,7 @@ and eigenvalue dispersion indices
 sample covariance and correlation matrices are obtained.
 These are invisibly returned as a list.
 
-\code{rmvn()} is an internal function to generate
-multivariate normal variates.
+\code{rmvn()} is a function to generate random multivariate normal variates.
 }
 \details{
 When \code{simulateVE()} is called, either data (\code{X}),
@@ -125,10 +124,10 @@ Lambda <- c(4, 2, 1, 1)
 (Sigma <- GenCov(evalues = Lambda, evectors = "random"))
 N <- 10
 set.seed(35638)
-X1 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
+X1 <- rmvn(N = N, Sigma = Sigma)
 cSigma <- chol(Sigma)
 set.seed(35638)
-X2 <- eigvaldisp:::rmvn(N = N, cSigma = cSigma)
+X2 <- rmvn(N = N, cSigma = cSigma)
 stopifnot(all.equal(X1, X2))
 # These are identical. Providing cSigma is quicker as it skips sqrtfun(Sigma),
 # so this may be useful when multiple simulations are to be run with

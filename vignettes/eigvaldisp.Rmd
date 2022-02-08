@@ -89,11 +89,11 @@ It is trivial to calculate these eigenvalue dispersion indices from the eigenval
 The problem becomes evident when one comes to estimating population eigenvalue dispersion indices from a sample. It is well recognized that sample eigenvalues are always estimated with sampling bias and error [see, e.g., @Jolliffe2002]. Therefore, for example, even if all population eigenvalues are equal ($\V(\m{\Sigma}) = \Vr(\m{\Sigma}) = 0$, the sample estimates of these quantities are always (or almost surely) positive.
 
 To see this point, let us simulate a small multivariate normal sample from
-the population covariance matrix generated above (via the internal function `rmvn()`):
+the population covariance matrix generated above (via the function `rmvn()`):
 ```{r}
 ## Simulate a multivariate normal sample
 N <- 20
-X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
+X <- rmvn(N = N, Sigma = Sigma)
 cov(X)
 ## Reasonable estimate of Sigma
 
@@ -266,7 +266,7 @@ Exv.VRR(Lambda = eigen(Rho)$values, n = Ns - 1)
 ## Indeed, the latter's result varies from run to run
 
 
-## Profile of E[Vrel(S)] in simple conditions; p = 4 and n = 10, 
+## Profile of E[Vrel(S)] in simple conditions; p = 4 and n = 10,
 ## and single large (spiked) population eigenvalue
 xseq <- seq(0, 1, 0.01)
 plot(xseq, sapply(xseq, function(x) Exv.VRS(GenCov(p = 4, VR = x), n = 10)),
@@ -337,7 +337,7 @@ str(simres)
 This function generates random normal variates with the function `rmvn()` described below, and calculate eigenvalue dispersion indices via `svd()`. The first skip could be skipped by use of `stats::rWishart()` for this relatively simple task, but this extra step is retained because there is a future plan to extend the algorithm to matrix-variate normal conditions (where both columns and rows are correlated).
 
 ### `rmvn()`: generating multivariate normal sample
-This is an internal function used to generate a multivariate normal sample with known parameters.
+This is a function used to generate a multivariate normal sample with known parameters.
 
 `rmvn()` is rather similar to `mvtnorm::rmvnorm()` (by convergence, in biologists' words), but has been designed to work optimally for simple simulation studies. By default, `rmvn()` uses Cholesky factorization `chol()` to obtain a matrix square root of the covariance matrix (and this is slightly faster than `mvtnorm::rmvnorm(..., method = "chol")`). Options for different algorithms are available, as this default method fails when the covariance matrix is singular (the user is assumed to know when this happens). On the other hand, `mvtnorm::rmvnorm()` is robust in this sense, as its default algorithm can appropriately handle singular covariance matrices.
 
@@ -347,17 +347,17 @@ Quick examples:
 ```{r}
 ## Full-rank covariance matrix
 Sigma1 <- GenCov(evalues = c(4, 2, 1, 1), evectors = "random")
-X1 <- eigvaldisp:::rmvn(10, Sigma = Sigma1)
+X1 <- rmvn(10, Sigma = Sigma1)
 
 ## Singular covariance matrix (with only 1 eigenvalue equal to zero)
 Sigma2 <- GenCov(evalues = c(4, 2, 1, 0), evectors = "random")
-## Not run: eigvaldisp:::rmvn(10, Sigma = Sigma2) ## Fails
-X2 <- eigvaldisp:::rmvn(10, Sigma = Sigma2, sqrt_method = "chol_piv")
+## Not run: rmvn(10, Sigma = Sigma2) ## Fails
+X2 <- rmvn(10, Sigma = Sigma2, sqrt_method = "chol_piv")
 
 ## Singular covariance matrix (with >1 eigenvalue equal to zero)
 Sigma3 <- GenCov(evalues = c(4, 2, 0, 0), evectors = "random")
-X3 <- eigvaldisp:::rmvn(10, Sigma = Sigma3, sqrt_method = "chol_piv") ## May fail
-X3 <- eigvaldisp:::rmvn(10, Sigma = Sigma3, sqrt_method = "matsqrt")  ## Better
+X3 <- rmvn(10, Sigma = Sigma3, sqrt_method = "chol_piv") ## May fail
+X3 <- rmvn(10, Sigma = Sigma3, sqrt_method = "matsqrt")  ## Better
 ```
 
 

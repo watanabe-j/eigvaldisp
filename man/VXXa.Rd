@@ -118,7 +118,7 @@ VE(S = Sigma)
 
 N <- 20
 set.seed(375)
-X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
+X <- rmvn(N = N, Sigma = Sigma)
 S <- cov(X)
 L <- eigen(S)$values
 
@@ -145,7 +145,7 @@ VRRa(X = X)
 VE(S = Sigma2)
 
 N <- 20
-X2 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma2)
+X2 <- rmvn(N = N, Sigma = Sigma2)
 
 VESa(X = X2)
 # This is on average better than the un-corrected version
@@ -166,5 +166,5 @@ quantifying the magnitude of phenotypic integration. \emph{Evolution},
 \code{\link{Exv.VXX}} for expectation (bias) in the ordinary estimators
 
 \code{\link{Exv.VXXa}} for the expectation/variance of
-the adjusted estimators.
+the adjusted estimators
 }

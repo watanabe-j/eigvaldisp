@@ -88,7 +88,7 @@ the internal function `rmvn()`:
 ```
 ## Simulate a multivariate normal sample
 N <- 20
-X <- eigvaldisp:::rmvn(N = N, Sigma = Sigma)
+X <- rmvn(N = N, Sigma = Sigma)
 cov(X)
 #>            [,1]       [,2]       [,3]       [,4]
 #> [1,]  2.8116163  0.5779609  0.9517708 -1.3106853
