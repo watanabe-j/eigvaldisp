@@ -616,11 +616,11 @@ simulateVE <- function(b = 100L, X, Sigma, cSigma = sqrtfun(Sigma), N = nrow(X),
         Xi <- rmvn(cSigma = cSigma, N = N, sqrt_method = sqrt_method)
         ansS <- tryCatch(VE(Xi, center = center, scale. = FALSE, nv = nv,
                             sub = sub, divisor = divisor, m = m,
-                            drop_0 = drop_0, tol = tol),
+                            drop_0 = drop_0, tol = tol, check = FALSE),
                          error = function(e) list(-1, numeric(p)))
         ansR <- tryCatch(VE(Xi, center = center, scale. = TRUE, nv = nv,
                             sub = sub, divisor = divisor, m = m,
-                            drop_0 = drop_0, tol = tol),
+                            drop_0 = drop_0, tol = tol, check = FALSE),
                          error = function(e) list(-1, numeric(p)))
         if(ansS[[1]] < 0 || ansR[[1]] < 0) next
         ansS.VE[i] <- ansS$VE
