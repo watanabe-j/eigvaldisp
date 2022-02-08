@@ -293,12 +293,20 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #'
 #' @param n
 #'   Degrees of freedom; required unless X is provided.
+#' @param divisor,m
+#'   These are as in \code{\link{VE}} and influence eigenvalue magnitude
+#'   (and hence eigenvalue variance) of covariance matrices.
+#'   However, note that the corrected eigenvalue variance is independent of
+#'   the choice of divisor and hence is unaffected by these arguments.
 #' @param check
 #'   Logical to specify whether structures of X, S, and L are checked
 #'   (see Details in \code{\link{VE}}).
 #' @param ...
-#'   Arguments \code{sub}, \code{drop_0}, \code{tol} can be
-#'   passed to \code{VE()}. Other arguments will not influence the result.
+#'   Additional arguments are internally passed to \code{VE()}.
+#'   The arguments \code{sub}, \code{drop_0}, and \code{tol} can be used
+#'   to specify which eigenvalues are to be involved (see \code{\link{VE}}).
+#'   \code{scale.} does not take effect, as the choice is already implied
+#'   when these functions are used.
 #'
 #' @return
 #' A list similar to the output of \code{VE()}, with an additional element:
@@ -361,7 +369,7 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' X2 <- eigvaldisp:::rmvn(N = N, Sigma = Sigma2)
 #'
 #' VESa(X = X2)
-#' # This is better than the un-corrected version
+#' # This is on average better than the un-corrected version
 #'
 #' VRSa(X = X2)
 #' VRRa(X = X2)
