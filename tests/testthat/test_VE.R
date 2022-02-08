@@ -131,6 +131,7 @@ test_that("warnings and errors of VE()", {
         expect_error(temp <- F(S = S), "Provide n")
         expect_error(temp <- F(L = L), "Provide n")
         expect_error(temp <- F(S = S, L = L), "Provide n")
+        expect_warning(temp <- F(X = X, n = N - 1), "n was ignored")
         expect_warning(temp <- F(X = X, S = S), "S was ignored")
         expect_warning(temp <- F(X = X, L = L), "L was ignored")
         expect_warning(temp <- F(S = S, L = L, n = N - 1), "L was ignored")

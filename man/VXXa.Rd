@@ -11,7 +11,7 @@ VESa(
   X,
   S,
   L,
-  n = N - as.numeric(center),
+  n,
   divisor = c("UB", "ML"),
   m = switch(divisor, UB = N - 1, ML = N),
   center = TRUE,
@@ -24,7 +24,7 @@ VRSa(
   X,
   S,
   L,
-  n = N - as.numeric(center),
+  n,
   divisor = c("UB", "ML"),
   m = switch(divisor, UB = N - 1, ML = N),
   center = TRUE,
@@ -33,16 +33,7 @@ VRSa(
   ...
 )
 
-VRRa(
-  X,
-  S,
-  L,
-  n = N - as.numeric(center),
-  center = TRUE,
-  nv = 0,
-  check = TRUE,
-  ...
-)
+VRRa(X, S, L, n, center = TRUE, nv = 0, check = TRUE, ...)
 }
 \arguments{
 \item{X}{Data matrix from which covariance/corrrelation matrix is obtained.}
@@ -51,12 +42,13 @@ VRRa(
 
 \item{L}{Vector of eigenvalues.}
 
-\item{n}{Degrees of freedom; required unless X is provided.}
+\item{n}{Degrees of freedom in a length-1 numeric. Ignored with warning when
+\code{X} is provided; required otherwise (see Details).}
 
 \item{divisor, m}{These are as in \code{\link{VE}} and influence eigenvalue magnitude
-(and hence eigenvalue variance) of covariance matrices.
-However, note that the corrected eigenvalue variance is independent of
-the choice of divisor and hence is unaffected by these arguments.}
+(and hence uncorrected eigenvalue variance) of covariance matrices.
+However, note that the adjusted indices are independent of
+the choice of divisor and hence are unaffected by these arguments.}
 
 \item{center}{Logical to specify whether sample-mean-centering should be done.}
 
@@ -97,9 +89,11 @@ These functions are to be used with sample data matrix,
 covariance/correlation matrix, or eigenvalues, and not to be used with
 population quantities. Unless \code{X} is provided, the degrees of freedom
 \code{n} should be specified as this is required for adjustment.
+When \code{X} is provided, \code{n} is automatically set to be
+\code{nrow(X) - as.numeric(center)}.
 
-These functions internally call \code{VE(L = L, nv = 0, ...)} with
-appropriately constructed (or user-specified) \code{L},
+These functions internally call \code{VE(L = L, nv = 0, check = FALSE, ...)}
+with appropriately constructed (or user-specified) \code{L},
 and adjusted eigenvalue dispersion indices are appended to the outcome list.
 If \code{nv > 0}, eigenvectors are calculated before this function call
 and returned as well.

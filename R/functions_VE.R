@@ -267,9 +267,11 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' covariance/correlation matrix, or eigenvalues, and not to be used with
 #' population quantities. Unless \code{X} is provided, the degrees of freedom
 #' \code{n} should be specified as this is required for adjustment.
+#' When \code{X} is provided, \code{n} is automatically set to be
+#' \code{nrow(X) - as.numeric(center)}.
 #'
-#' These functions internally call \code{VE(L = L, nv = 0, ...)} with
-#' appropriately constructed (or user-specified) \code{L},
+#' These functions internally call \code{VE(L = L, nv = 0, check = FALSE, ...)}
+#' with appropriately constructed (or user-specified) \code{L},
 #' and adjusted eigenvalue dispersion indices are appended to the outcome list.
 #' If \code{nv > 0}, eigenvectors are calculated before this function call
 #' and returned as well.
@@ -292,12 +294,13 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' @inheritParams VE
 #'
 #' @param n
-#'   Degrees of freedom; required unless X is provided.
+#'   Degrees of freedom in a length-1 numeric. Ignored with warning when
+#'   \code{X} is provided; required otherwise (see Details).
 #' @param divisor,m
 #'   These are as in \code{\link{VE}} and influence eigenvalue magnitude
-#'   (and hence eigenvalue variance) of covariance matrices.
-#'   However, note that the corrected eigenvalue variance is independent of
-#'   the choice of divisor and hence is unaffected by these arguments.
+#'   (and hence uncorrected eigenvalue variance) of covariance matrices.
+#'   However, note that the adjusted indices are independent of
+#'   the choice of divisor and hence are unaffected by these arguments.
 #' @param check
 #'   Logical to specify whether structures of X, S, and L are checked
 #'   (see Details in \code{\link{VE}}).
@@ -325,7 +328,7 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' \code{\link{Exv.VXX}} for expectation (bias) in the ordinary estimators
 #'
 #' \code{\link{Exv.VXXa}} for the expectation/variance of
-#'   the adjusted estimators.
+#'   the adjusted estimators
 #'
 #' @references
 #' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
@@ -386,7 +389,7 @@ NULL
 #'
 #' @export
 #'
-VESa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
+VESa <- function(X, S, L, n, divisor = c("UB", "ML"),
                  m = switch(divisor, UB = N - 1, ML = N),
                  center = TRUE, nv = 0, check = TRUE, ...) {
     divisor <- match.arg(divisor)
@@ -411,8 +414,10 @@ VESa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
         L0 <- (L ^ 2)
         L <- L0 / m
         L <- c(L, rep_len(0, max(p - length(L), 0)))
+        if(!missing(n)) warning("n was ignored as X was provided")
+        n <- N - as.numeric(center)
     } else {
-        if(missing(n)) stop("Provide n (or X)")
+        if(missing(n)) stop("Provide n unless X is used")
         if(!missing(S)) {
             if(check) {
                 if(!missing(L)) warning("L was ignored as S was provided")
@@ -461,7 +466,7 @@ VESa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
 #'
 #' @export
 #'
-VRSa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
+VRSa <- function(X, S, L, n, divisor = c("UB", "ML"),
                  m = switch(divisor, UB = N - 1, ML = N),
                  center = TRUE, nv = 0, check = TRUE, ...) {
     divisor <- match.arg(divisor)
@@ -485,8 +490,10 @@ VRSa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
         L <- svd.X$d
         L <- (L ^ 2) / m
         L <- c(L, rep_len(0, max(p - length(L), 0)))
+        if(!missing(n)) warning("n was ignored as X was provided")
+        n <- N - as.numeric(center)
     } else {
-        if(missing(n)) stop("Provide n (or X)")
+        if(missing(n)) stop("Provide n unless X is used")
         if(!missing(S)) {
             if(check) {
                 if(!missing(L)) warning("L was ignored as S was provided")
@@ -532,7 +539,7 @@ VRSa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
 #'
 #' @export
 #'
-VRRa <- function(X, S, L, n = N - as.numeric(center),
+VRRa <- function(X, S, L, n,
                  center = TRUE, nv = 0, check = TRUE, ...) {
     if(!missing(X)) {
         if(check) {
@@ -554,8 +561,10 @@ VRRa <- function(X, S, L, n = N - as.numeric(center),
         L <- svd.X$d
         L <- (L ^ 2) / (N - 1)
         L <- c(L, rep_len(0, max(p - length(L), 0)))
+        if(!missing(n)) warning("n was ignored as X was provided")
+        n <- N - as.numeric(center)
     } else {
-        if(missing(n)) stop("Provide n (or X)")
+        if(missing(n)) stop("Provide n unless X is used")
         if(!missing(S)) {
             if(check) {
                 if(!missing(L)) warning("L was ignored as S was provided")
