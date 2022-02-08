@@ -377,9 +377,21 @@ NULL
 #'
 VESa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
                  m = switch(divisor, UB = N - 1, ML = N),
-                 center = TRUE, nv = 0, ...) {
+                 center = TRUE, nv = 0, check = TRUE, ...) {
     divisor <- match.arg(divisor)
     if(!missing(X)) {
+        if(check) {
+            if(!missing(S)) warning("S was ignored as X was provided")
+            if(!missing(L)) warning("L was ignored as X was provided")
+            if(length(dim(X)) != 2) {
+                stop("X must be a 2D matrix, but length(dim(X)) was not 2",
+                     "\n  If this is a vector of eigenvalues, pass it as L.")
+            }
+            if(isTRUE(all.equal(X, t(X)))) {
+                warning("X was expected to be a data matrix but looks symmetric.",
+                        "\n  Covariance/correlation matrix is to be passed as S.")
+            }
+        }
         X <- scale2(X, center = center, scale = FALSE)
         N <- nrow(X)
         p <- ncol(X)
@@ -391,14 +403,35 @@ VESa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
     } else {
         if(missing(n)) stop("Provide n (or X)")
         if(!missing(S)) {
+            if(check) {
+                if(!missing(L)) warning("L was ignored as S was provided")
+                if(length(dim(S)) != 2) {
+                    stop("S must be a 2D matrix, but length(dim(S)) was not 2",
+                         "\n  If this is a vector of eigenvalues, pass it as L.")
+                }
+                if(!isTRUE(all.equal(S, t(S)))) {
+                    stop("S must be a valid covariance/correlation matrix ",
+                         "but was not symmetric")
+                }
+            }
             p <- ncol(S)
             # if(scale.) S <- cov2cor(S)
             svd.X <- svd(S, nu = 0, nv = nv)
             L <- svd.X$d
+        } else if(missing(L)) { # FALSE if at least one of X, S, or L exists
+            stop("Provide one of X, S, or L")
+        } else if(check) {
+            if(length(dim(L)) > 1) {
+                if(sum(dim(L) != 1) != 1) { # Vector-like arrays are tolerated
+                    warning("L is expected to be a vector but looks like a non-1D ",
+                        "matrix/array.\n  Data matrix is to be passed as X.",
+                        "\n  Covariance/correlation matrix is to be passed as S.")
+                }
+            }
         }
         L0 <- L * n
     }
-    ans <- VE(L = L, nv = 0, ...)
+    ans <- VE(L = L, nv = 0, check = FALSE, ...)
     p <- length(ans$L)
     t1 <- sum(L0)
     t2 <- sum(L0 ^ 2)
@@ -419,9 +452,21 @@ VESa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
 #'
 VRSa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
                  m = switch(divisor, UB = N - 1, ML = N),
-                 center = TRUE, nv = 0, ...) {
+                 center = TRUE, nv = 0, check = TRUE, ...) {
     divisor <- match.arg(divisor)
     if(!missing(X)) {
+        if(check) {
+            if(!missing(S)) warning("S was ignored as X was provided")
+            if(!missing(L)) warning("L was ignored as X was provided")
+            if(length(dim(X)) != 2) {
+                stop("X must be a 2D matrix, but length(dim(X)) was not 2",
+                     "\n  If this is a vector of eigenvalues, pass it as L.")
+            }
+            if(isTRUE(all.equal(X, t(X)))) {
+                warning("X was expected to be a data matrix but looks symmetric.",
+                        "\n  Covariance/correlation matrix is to be passed as S.")
+            }
+        }
         X <- scale2(X, center = center, scale = FALSE)
         N <- nrow(X)
         p <- ncol(X)
@@ -432,13 +477,34 @@ VRSa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
     } else {
         if(missing(n)) stop("Provide n (or X)")
         if(!missing(S)) {
+            if(check) {
+                if(!missing(L)) warning("L was ignored as S was provided")
+                if(length(dim(S)) != 2) {
+                    stop("S must be a 2D matrix, but length(dim(S)) was not 2",
+                         "\n  If this is a vector of eigenvalues, pass it as L.")
+                }
+                if(!isTRUE(all.equal(S, t(S)))) {
+                    stop("S must be a valid covariance/correlation matrix ",
+                         "but was not symmetric")
+                }
+            }
             p <- ncol(S)
             # if(scale.) S <- cov2cor(S)
             svd.X <- svd(S, nu = 0, nv = nv)
             L <- svd.X$d
+        } else if(missing(L)) { # FALSE if at least one of X, S, or L exists
+            stop("Provide one of X, S, or L")
+        } else if(check) {
+            if(length(dim(L)) > 1) {
+                if(sum(dim(L) != 1) != 1) { # Vector-like arrays are tolerated
+                    warning("L is expected to be a vector but looks like a non-1D ",
+                        "matrix/array.\n  Data matrix is to be passed as X.",
+                        "\n  Covariance/correlation matrix is to be passed as S.")
+                }
+            }
         }
     }
-    ans <- VE(L = L, nv = 0, ...)
+    ans <- VE(L = L, nv = 0, check = FALSE, ...)
     p <- length(ans$L)
     ans$VRSa <- (ans$VR * (p * n + 2) - (p + 2)) / p / (n - 1)
     if(nv > 0) ans <- c(ans, list(U = svd.X$v))
@@ -456,8 +522,20 @@ VRSa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
 #' @export
 #'
 VRRa <- function(X, S, L, n = N - as.numeric(center),
-                 center = TRUE, nv = 0, ...) {
+                 center = TRUE, nv = 0, check = TRUE, ...) {
     if(!missing(X)) {
+        if(check) {
+            if(!missing(S)) warning("S was ignored as X was provided")
+            if(!missing(L)) warning("L was ignored as X was provided")
+            if(length(dim(X)) != 2) {
+                stop("X must be a 2D matrix, but length(dim(X)) was not 2",
+                     "\n  If this is a vector of eigenvalues, pass it as L.")
+            }
+            if(isTRUE(all.equal(X, t(X)))) {
+                warning("X was expected to be a data matrix but looks symmetric.",
+                        "\n  Covariance/correlation matrix is to be passed as S.")
+            }
+        }
         X <- scale2(X, center = center, scale = TRUE)
         N <- nrow(X)
         p <- ncol(X)
@@ -468,13 +546,34 @@ VRRa <- function(X, S, L, n = N - as.numeric(center),
     } else {
         if(missing(n)) stop("Provide n (or X)")
         if(!missing(S)) {
+            if(check) {
+                if(!missing(L)) warning("L was ignored as S was provided")
+                if(length(dim(S)) != 2) {
+                    stop("S must be a 2D matrix, but length(dim(S)) was not 2",
+                         "\n  If this is a vector of eigenvalues, pass it as L.")
+                }
+                if(!isTRUE(all.equal(S, t(S)))) {
+                    stop("S must be a valid covariance/correlation matrix ",
+                         "but was not symmetric")
+                }
+            }
             p <- ncol(S)
             if(TRUE) S <- cov2cor(S)
             svd.X <- svd(S, nu = 0, nv = nv)
             L <- svd.X$d
+        } else if(missing(L)) { # FALSE if at least one of X, S, or L exists
+            stop("Provide one of X, S, or L")
+        } else if(check) {
+            if(length(dim(L)) > 1) {
+                if(sum(dim(L) != 1) != 1) { # Vector-like arrays are tolerated
+                    warning("L is expected to be a vector but looks like a non-1D ",
+                        "matrix/array.\n  Data matrix is to be passed as X.",
+                        "\n  Covariance/correlation matrix is to be passed as S.")
+                }
+            }
         }
     }
-    ans <- VE(L = L, nv = 0, ...)
+    ans <- VE(L = L, nv = 0, check = FALSE, ...)
     # p <- length(ans$L)
     ans$VRRa <- (ans$VR * n - 1) / (n - 1)
     if(nv > 0) ans <- c(ans, list(U = svd.X$v))
