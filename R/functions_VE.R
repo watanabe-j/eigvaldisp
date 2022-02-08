@@ -201,7 +201,7 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
                 stop("X must be a 2D matrix, but length(dim(X)) was not 2",
                      "\n  If this is a vector of eigenvalues, pass it as L.")
             }
-            if(isTRUE(all.equal(X, t(X)))) {
+            if(isSymmetric(X)) {
                 warning("X was expected to be a data matrix but looks symmetric.",
                         "\n  Covariance/correlation matrix is to be passed as S.")
             }
@@ -398,7 +398,7 @@ VESa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
                 stop("X must be a 2D matrix, but length(dim(X)) was not 2",
                      "\n  If this is a vector of eigenvalues, pass it as L.")
             }
-            if(isTRUE(all.equal(X, t(X)))) {
+            if(isSymmetric(X)) {
                 warning("X was expected to be a data matrix but looks symmetric.",
                         "\n  Covariance/correlation matrix is to be passed as S.")
             }
@@ -473,7 +473,7 @@ VRSa <- function(X, S, L, n = N - as.numeric(center), divisor = c("UB", "ML"),
                 stop("X must be a 2D matrix, but length(dim(X)) was not 2",
                      "\n  If this is a vector of eigenvalues, pass it as L.")
             }
-            if(isTRUE(all.equal(X, t(X)))) {
+            if(isSymmetric(X)) {
                 warning("X was expected to be a data matrix but looks symmetric.",
                         "\n  Covariance/correlation matrix is to be passed as S.")
             }
@@ -542,7 +542,7 @@ VRRa <- function(X, S, L, n = N - as.numeric(center),
                 stop("X must be a 2D matrix, but length(dim(X)) was not 2",
                      "\n  If this is a vector of eigenvalues, pass it as L.")
             }
-            if(isTRUE(all.equal(X, t(X)))) {
+            if(isSymmetric(X)) {
                 warning("X was expected to be a data matrix but looks symmetric.",
                         "\n  Covariance/correlation matrix is to be passed as S.")
             }
