@@ -96,8 +96,8 @@ AVar.VRR_krv(Rho, n = 100, Lambda, ...)
 \item{var2.mode}{Whether \code{"exact"} or \code{"asymptotic"} expression is used for
 \eqn{Var(r^2)}.}
 
-\item{order.exv1, order.var2}{Used to specify the order of asymptotic expressions for
-\eqn{E(r)}/\eqn{Var(r^2)} when \code{exv1.mode}/\code{var2.mode} is
+\item{order.exv1, order.var2}{Used to specify the order of evaluation for asymptotic expressions of
+\eqn{E(r)} and \eqn{Var(r^2)} when \code{exv1.mode} and \code{var2.mode} is
 \code{"asymptotic"}; see \code{\link{Exv.rx}}.}
 
 \item{mode}{In \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()},
@@ -130,17 +130,18 @@ within function call, which is turned off on exit.
 
 \item{bd}{List of indices used for iteration (see Details).}
 
-\item{verbose}{When \code{"yes"} or \code{"inline"}, prWhen allowed, pogress of iteration is printed.
-Intended to be used with large \eqn{p} (hundreds or more).}
+\item{verbose}{When \code{"yes"} or \code{"inline"}, pogress of iteration is printed
+on console. \code{"no"} (default) turns off the printing.
+To be used in \code{AVar.VRR_pfd()} for large \eqn{p} (hundreds or more).}
 
 \item{cppfun}{Option to specify the C++ function to be used (see Details).}
 
-\item{nthreads}{Numeric to specify the number of threads used in OpenMP parallelization
+\item{nthreads}{Integer to specify the number of threads used in OpenMP parallelization
 in \code{"Cov_r2A"} and \code{"Cov_r2E"}. By default (0), the number of
 threads is automatically set to one-half of that of (logical) processors
 detected (by the \code{C++} function \code{omp_get_num_procs()}).
-Typically, setting this beyond the number of physical processors
-leads to slow-down.}
+Setting this beyond the number of physical processors can result in
+poorer performance, depending on the environment.}
 }
 \value{
 A numeric vector of \eqn{Var[Vrel(R)]}, corresponding to \code{n}.
@@ -190,8 +191,12 @@ which yield (almost) identical results:
 \item{\code{AVar.VRR_pfv()}}{Vectorized version. Much faster, but
 requires a large RAM space as \code{p} grows.}
 \item{\code{AVar.VRR_pfd()}}{Improvement over \code{AVar.VRR_pfv()}.
-Usually the best choice if pure \code{R} implementation is favored.}
-\item{\code{AVar.VRR_pfc()}}{Fast version using \code{Rcpp}.}
+Faster and more RAM-efficient. This is the default to be called in
+\code{Var.VRR(..., method = "Pan-Frank")}, unless the extension package
+\code{eigvaldispRcpp} is installed.}
+\item{\code{AVar.VRR_pfc()}}{Fast version using \code{Rcpp}.
+Requires the extension package \code{eigvaldispRcpp}; this is
+the default when this package is installed (and detected).}
 }
 \code{AVar.VRR_pfc()} implements the same algorithm as the others,
 but makes use of \code{C++} API via the package \code{Rcpp} for evaluation of
@@ -205,7 +210,7 @@ The Konishi approach is implemented in several functions:
 \item{\code{AVar.VRR_kl()}}{From Konishi (1979: corollary 2.2):
 \eqn{Vrel(R)} as function of eigenvalues. Prototype version.}
 \item{\code{AVar.VRR_klv()}}{Vectorized version of \code{AVar.VRR_kl()}.
-The best choice.}
+This is the default when \code{Var.VRR(..., method = "Konishi")}.}
 \item{\code{AVar.VRR_kr()}}{From Konishi (1979: theorem 6.2):
 \eqn{Vrel(R)} as function of correlation coefficients.}
 \item{\code{AVar.VRR_krv()}}{Vectorized version of \code{AVar.VRR_kr()};
@@ -215,15 +220,15 @@ for large \eqn{p} as the number of elements to be summed becomes large.}
 Empirically, these all yield the same result, but
 \code{AVar.VRR_klv()} is by far the fastest.
 
-The choice between different functions does not matter when \eqn{p = 2},
-when the exact variance is returned by default.
+The \code{AVar.VRR_pfx()} family functions by default return exact variance
+when \eqn{p = 2},
 If asymptotic result is desired, use \code{mode.var2 = "asymptotic"}.
 
 Options for \code{mode} in \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()}:
 \describe{
 \item{\code{"nested.for"}}{Only for \code{AVar.VRR_pf()}. Uses nested
 for loops, which is straifhgforward and RAM efficient but slow.}
-\item{\code{"for.ind"}/\code{"lapply"}}{Run the iteration along
+\item{\code{"for.ind"} (default)/\code{"lapply"}}{Run the iteration along
 an index vector to shorten computational time,
 with \code{for} loop and \code{lapply()}, respectively.}
 \item{\code{"mclapply"}/\code{"parLapply"}}{Only for \code{AVar.VRR_pfd()}.
@@ -260,7 +265,7 @@ The iteration can be parallelized with \code{mode = "mclapply"} or
 (which is required to run this function).
 The \code{C++} function is specified by the argument \code{cppfun}:
 \describe{
-\item{\code{"Cov_r2C"}}{Default. Serial evaluation with base
+\item{\code{"Cov_r2C"} (default)}{Serial evaluation with base
 \code{Rcpp} functionalities.}
 \item{\code{"Cov_r2A"} or \code{"Armadillo"}}{Using \code{RcppArmadillo}.
 Parallelized with OpenMP when the environment allows.}
@@ -282,42 +287,39 @@ the fastest in the development environment, closely followed by
 N <- 20
 Lambda <- c(4, 2, 1, 1)
 (Rho <- GenCov(evalues = Lambda / sum(Lambda) * 4, evectors = "Givens"))
-VE(S = Rho)$VR
-# Population value of Vrel(Rho)
 
 # Different choices for asymptotic variance of Vrel(R)
 # Variance from Pan-Frank method
-eigvaldisp:::AVar.VRR_pfd(Rho, n = N - 1) # Default
-eigvaldisp:::AVar.VRR_pf(Rho, n = N - 1)  # Slow for large p
-eigvaldisp:::AVar.VRR_pfv(Rho, n = N - 1) # Requires too much RAM for large p
+Var.VRR(Rho, n = N - 1) # By default, method = "Pan-Frank" and AVar.VRR_pfd() is called
+eigvaldisp:::AVar.VRR_pfd(Rho, n = N - 1) # Same as above
+Var.VRR(Rho, n = N - 1, fun = "pf")  # Calls AVar.VRR_pf(), which is slow for large p
+Var.VRR(Rho, n = N - 1, fun = "pfv") # Calls AVar.VRR_pfv(), which requires much RAM for large p
 # Various implementations with Rcpp (require eigvaldispRcpp):
-\dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1)}
-\dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1, cppfun = "Cov_r2A")}
-\dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1, cppfun = "Cov_r2E")}
-\dontrun{eigvaldisp:::AVar.VRR_pfc(Rho, n = N - 1, cppfun = "Cov_r2P")}
-# Equivalently, this calls AVar.VRR_pfc():
-\dontrun{Var.VRR(Rho, n = N - 1, cppfun = "Cov_r2P"))}
+\dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc")} # By default, cppfun = "Cov_r2C" is used
+\dontrun{Var.VRR(Rho, n = N - 1, cppfun = "Cov_r2A")}
+\dontrun{Var.VRR(Rho, n = N - 1, cppfun = "Cov_r2E")}
+\dontrun{Var.VRR(Rho, n = N - 1, cppfun = "Cov_r2P")}
+# When the argument cppfun is provided, fun need not be specified
 # The above results are identical
 
 # Variance from Konishi's theory
-eigvaldisp:::AVar.VRR_klv(Rho, n = N - 1) # Best choice
-eigvaldisp:::AVar.VRR_kl(Rho, n = N - 1)
-eigvaldisp:::AVar.VRR_krv(Rho, n = N - 1)
-eigvaldisp:::AVar.VRR_kr(Rho, n = N - 1)
-# These are identical, but the first one is fast
+Var.VRR(Rho, n = N - 1, method = "Konishi")  # By default for this method, AVar.VRR_klv() is called
+eigvaldisp:::AVar.VRR_klv(Rho, n = N - 1)    # Same as above
+Var.VRR(Rho, n = N - 1, fun = "kl")
+Var.VRR(Rho, n = N - 1, fun = "kr")
+Var.VRR(Rho, n = N - 1, fun = "krv")
+# The results are identical, but the last three are slower
 # On the other hand, these differ from that obtained with the Pan-Frank method
 
 # Example with p = 2
 Rho2 <- GenCov(evalues = c(1.5, 0.5), evectors = "Givens")
-Var.VRR(Rho2, n = N - 1)
+Var.VRR(Rho2, n = N - 1)  # When p = 2, this does not call AVar.VRR_pfd()
 eigvaldisp:::AVar.VRR_pfd(Rho2, n = N - 1)
-eigvaldisp:::AVar.VRR_klv(Rho2, n = N - 1)
-# Same (ane exact) by default
+# By default, the above returns the same, exact result
 
 eigvaldisp:::AVar.VRR_pfd(Rho2, n = N - 1, var2.mode = "asymptotic")
-eigvaldisp:::AVar.VRR_klv(Rho2, n = N - 1, var2.mode = "asymptotic")
+eigvaldisp:::AVar.VRR_klv(Rho2, n = N - 1)
 # These return different asymptotic expressions
-
 
 }
 \references{

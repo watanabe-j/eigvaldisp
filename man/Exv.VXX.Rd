@@ -148,7 +148,7 @@ covariance matrix \eqn{Var[Vrel(S)]}.
 \code{Var.VER()}: variance of eigenvalue variance of
 correlation matrix \eqn{Var[V(R)]}.
 
-\code{Var.VRR()}: variance of relative eigenvalue variance for a
+\code{Var.VRR()}: variance of relative eigenvalue variance of
 correlation matrix \eqn{Var[Vrel(R)]}.
 }
 \details{
@@ -197,15 +197,16 @@ practical demand for these functions (and \eqn{V(R)} itself).
 
 As detailed in Watanabe (2022), the distribution of \eqn{Vrel(R)} cannot be
 uniquely specified by eigenvalues alone. Hence, a full correlation
-matrix \code{R} should preferably be provided. Otherwise, a correlation
+matrix \code{Rho} should preferably be provided. Otherwise, a correlation
 matrix is constructed from the eigenvalues \code{Lambda} provided using
 the function \code{GenCov()} with randomly picked eigenvectors.
 
 On the other hand, the choice of eigenvectors does not matter for
 covariance matrices, thus either the full covariance matrix \code{Sigma} or
-vector of eigenvalues \code{Lambda} can be provided to yield identical results.
+vector of eigenvalues \code{Lambda} can be provided (although the latter
+is slightly faster if available).
 
-When \code{R} is provided, some simple checks are done: the matrix is
+When \code{Rho} is provided, some simple checks are done: the matrix is
 scaled to have diagonals of 1; and if any of these are unequal,
 an error is returned.
 
@@ -249,7 +250,7 @@ Var.VRR(Rho, N - 1)
 
 # Different choices for asymptotic variance of Vrel(R)
 # Variance from Pan-Frank method
-Var.VRR(Rho, N - 1, fun = "pfd") # Default
+Var.VRR(Rho, N - 1, method = "Pan-Frank") # Internally sets fun = "pfd"
 Var.VRR(Rho, N - 1, fun = "pf")  # Slow for large p
 Var.VRR(Rho, N - 1, fun = "pfv") # Requires too much RAM for large p
 \dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc")} # Requires eigvaldispRcpp
@@ -259,7 +260,7 @@ Var.VRR(Rho, N - 1, fun = "pfv") # Requires too much RAM for large p
 # The above results are identical (up to rounding error)
 
 # Variance from Konishi's theory
-Var.VRR(Rho, N - 1, fun = "klv") # Best choice
+Var.VRR(Rho, N - 1, method = "Konishi") # Internally sets fun = "klv"
 Var.VRR(Rho, N - 1, fun = "kl")
 Var.VRR(Rho, N - 1, fun = "krv")
 Var.VRR(Rho, N - 1, fun = "kr")
