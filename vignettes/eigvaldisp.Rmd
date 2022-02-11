@@ -284,21 +284,21 @@ abline(a = 0, b = 1, col = "gray", lty = 2)
 
 
 ### `AVar.VRR_*()` families: asymptotic variance of $\Vr(\m{R})$
-There are several internal functions to calculate asymptotic variance of $\Vr(\m{R})$, which are primarily to be called by `Var.VRR()`.
+There are several internal functions to calculate asymptotic variance of $\Vr(\m{R})$, which are primarily to be called by the front-end `Var.VRR()` (above).
 
-These are to accommodate two different approaches to obtain asymptotic variance of $\Vr(\m{R})$ as described by @Watanabe2021: one based on the approach of @PanFrank2004, and the other based on the theory of @Konishi1979. Empirically, the former tends to be more accurate in various conditions but requires nontrivial computational time when there are many variables ($p>200$ or so), whereas the latter tends to be slightly inaccurate but can be instantly evaluated.
+These are to accommodate two different approaches to obtain asymptotic variance of $\Vr(\m{R})$ as described by @Watanabe2021: one based on the approach of @PanFrank2004, and the other based on the theory of @Konishi1979. Empirically, the former tends to be more accurate in various conditions but requires nontrivial computational time when there are many variables ($p>200$ or so), whereas the latter tends to be slightly inaccurate but can be instantly evaluated. The two methods are usually used via `Var.VRR(..., method = "Pan-Frank")` (default) and `Var.VRR(..., method = "Konishi")`.
 
-At present, the approach of @PanFrank2004 is implemented with the functions `AVar.VRR_pf*()`. Of these, only `AVar.VRR_pfd()` and `AVar.VRR_pfc()` will be of practical interest. The two other functions, `AVar.VRR_pf()` and `AVar.VRR_pfv()`, are equivalent but substantially slower or requires too much RAM space as $p$ grows. The latter are retained for demonstrative purposes, as they more clearly show how the algorithm is implemented. `AVar.VRR_pfd()` is a pure R implementation which should suffice for $p$ up to ~100 or so. `AVar.VRR_pfc()` is a much faster implementation with C++ functions, which is provided in a separate extension package, `eigvaldispRcpp`. This enables evaluation for $p$ < 500 (say) in the order of seconds or minutes (although it still takes some time for larger matrices).
+At present, the approach of @PanFrank2004 is implemented with functions `AVar.VRR_pf*()`. By default, `Var.VRR(..., method = "Pan-Frank")` calls `AVar.VRR_pfd()`, which should be fast enough for $p$ up to ~100 or so. `AVar.VRR_pf()` and `AVar.VRR_pfv()` are equivalent but substantially slower or requires too much RAM space as $p$ grows. They are retained for demonstrative purposes, as they more clearly show how the algorithm is implemented. `AVar.VRR_pfc()` is an interface to much faster implementation with C++ functions which are provided in a separate extension package, `eigvaldispRcpp`. This enables evaluation for $p$ < 500 (say) in the order of seconds or minutes (although it still takes some time for larger matrices).
 
-The asymptotic variance from the theory of @Konishi1979 is also implemented in several functions, of which only `AVar.VRR_klv()` would be of practical use.
+The asymptotic variance from the theory of @Konishi1979 is also implemented in several functions, of which only `AVar.VRR_klv()`, called in `Var.VRR(..., method = "Konishi")` by default, would be of practical use.
 
-By default, `Var.VRR()` internally calls `AVar.VRR_pfd()`. The function to be called can be chosen by providing the suffix of one of these functions as the argument `fun`; e.g., `Var.VRR(..., fun = "klv")` to use `AVar.VRR_klv()`.
+For completeness, non-default functions can be called by using the argument `fun` in `Var.VRR()` to specify the suffix of the function, e.g., `Var.VRR(..., fun = "pfv")` to call `AVar.VRR_pfv()`.
 
 
 ```{r}
 ## Two different approaches with slightly different outcomes (in this case)
-eigvaldisp:::AVar.VRR_pfd(Rho, Ns - 1)
-eigvaldisp:::AVar.VRR_klv(Rho, Ns - 1)
+Var.VRR(Rho, Ns - 1, method = "Pan-Frank") ## Calls Avar.VRR_pfd()
+Var.VRR(Rho, Ns - 1, method = "Konishi")   ## Calls Avar.VRR_klv()
 ```
 
 

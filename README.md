@@ -83,8 +83,7 @@ The problem is the presence of sampling bias (and error),
 which renders inferences from a sample rather difficult.
 
 To see this, simulate a small multivariate normal sample from
-the same population covariance matrix using
-the internal function `rmvn()`:
+the same population covariance matrix using the function `rmvn()`:
 ```
 ## Simulate a multivariate normal sample
 N <- 20
