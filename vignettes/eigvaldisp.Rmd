@@ -225,7 +225,7 @@ $\Vr(\m{R})$                  | `Exv.VRR()` | `Var.VRR()`
 $\tilde{V}(\m{S})$            | `Exv.VESa()` | `Var.VESa()`
 $\bar{V}_\mathrm{rel}(\m{S})$ | `Exv.VRSa()` | `Var.VRSa()`
 $\bar{V}_\mathrm{rel}(\m{R})$ | `Exv.VRSa()` | `Var.VRSa()`
-*Note*: The functions for $\V(\m{R})$ are retained for completeness, but this statistic is almost redundant with $\Vr(\m{R})$ (above). No functions for "bias-corrected" version of this has been implemented.
+*Note*: The functions for $\V(\m{R})$ are retained for completeness, but this statistic is almost redundant with $\Vr(\m{R})$ (above). No functions for "bias-corrected" version of this have been implemented.
 
 These functions typically take two arguments: the population covariance or correlation matrix (`Sigma` or `Rho`, as appropriate), and the degrees of freedom `n`. They are (pseudo-)vectorized with respect to `n`, so that the output is a vector with the same length as `n`.
 
@@ -539,7 +539,7 @@ which reduces to $4(p - 1)(p + 2)(pn + 2) / p^3n(n - 1)(n + 2)$ under the null h
 The adjusted versions of $\Vr(\m{S})$ and $\Vr(\m{R})$ discussed here are:
 $$
 \bar{V}_\mathrm{rel}(\m{S}) = \frac{pn + 2}{p(n - 1)} \Vr(\m{S}) - \frac{p + 2}{p(n - 1)}; \\
-\bar{V}_\mathrm{rel}(\m{R}) = \frac{n}{n - 1} \Vr(\m{S}) - \frac{1}{n - 1}.
+\bar{V}_\mathrm{rel}(\m{R}) = \frac{n}{n - 1} \Vr(\m{R}) - \frac{1}{n - 1}.
 $$
 Moments of these adjusted estimators can be obtained from those of the ordinary ones described above.
 
