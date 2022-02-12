@@ -924,6 +924,7 @@ AVar.VRR_pfv <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
     Ls <- as.integer(KL %% 10 ^ d)
     rm(IJ, KL)
     exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
+    exv_r1 <- sqrt(2) * exv_r1
     Eij <- exv_r1[(Js - 1) * p + Is - (Js - 1) * (2 * p - Js + 2) / 2, ]
     Ekl <- exv_r1[(Ls - 1) * p + Ks - (Ls - 1) * (2 * p - Ls + 2) / 2, ]
     Eij_Ekl <- Eij * Ekl
@@ -939,7 +940,8 @@ AVar.VRR_pfv <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
     rm(Rij, Rkl, Rik, Rjl, Ril, Rjk)
     # cov_r2 <- 8 * Eij_Ekl * Cijkl + 4 * Cijkl ^ 2
     # ans <- colSums(var_r2) + colSums(cov_r2)
-    cov_r2 <- 4 * (2 * crossprod(Eij_Ekl, Cijkl) + crossprod(Cijkl))
+    # cov_r2 <- 4 * (2 * crossprod(Eij_Ekl, Cijkl) + crossprod(Cijkl))
+    cov_r2 <- 4 * (crossprod(Eij_Ekl, Cijkl) + crossprod(Cijkl))
     ans <- colSums(var_r2) + diag(cov_r2)
     4 * ans / (p * (p - 1))^2
 }
@@ -1028,7 +1030,8 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
         # rm(Is, Js, Ks, Ls)
         Cijkl <- c1fun(n, Rij, Rkl, Rik, Rjl, Ril, Rjk)
         # return(colSums(8 * Eij_Ekl * Cijkl + 4 * Cijkl ^ 2))
-        return(4 * diag(2 * crossprod(Eij_Ekl, Cijkl) + crossprod(Cijkl)))
+        # return(4 * diag(2 * crossprod(Eij_Ekl, Cijkl) + crossprod(Cijkl)))
+        return(4 * diag(crossprod(Eij_Ekl, Cijkl) + crossprod(Cijkl)))
         # rm(Eij_Ekl, Cijkl)
     }
     if(missing(Rho)) {
@@ -1049,6 +1052,7 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
     R_u <- Rho[upper.tri(Rho)]
     var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
     exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
+    exv_r1 <- sqrt(2) * exv_r1
     d <- digit(p)
     if(is.null(bd)) {
         a <- seq_len(p)
