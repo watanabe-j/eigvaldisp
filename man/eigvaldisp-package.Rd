@@ -90,5 +90,5 @@ known structure
 \code{\link{Exv.rx}}: Moments of correlation coefficients (internal functions)
 
 \code{\link{hgf}}, \code{\link{sqrt_methods}}, \code{\link{centering}},
-\code{\link{digit}}, \code{\link{divInd}}: Other internal utility functions
+\code{\link{digit}}: Other internal utility functions
 }

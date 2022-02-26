@@ -239,9 +239,9 @@ Windows environment. See \code{vignette("parallel")} for details.}
 whose lengths are about \eqn{p^4 / 8} and \eqn{p^4 / 4}. These take about
 \eqn{2*p^4} bytes of RAM; this can be prohibitively large for large \eqn{p}.
 
-\code{AVar.VRR_pfd()} divides index vectors into lists using the internal
-function \code{eigvaldisp:::divInd()}. The calculations are then done on
-elements of these lists to save RAM space.
+\code{AVar.VRR_pfd()} divides index vectors used internally in
+\code{AVar.VRR_pfv()} into lists, along whose elements calculations are done
+to save RAM space.
 The argument \code{max.size} controls the maximum size of resulting vectors;
 at least \code{max.size * (2 * length(n) + 6) * 8} bytes of RAM is required
 for storing temporary results (and more during computation);

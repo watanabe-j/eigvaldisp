@@ -191,45 +191,45 @@ digit <- function(x) {
     as.integer(floor(log(x, 10))) + 1L
 }
 
-##### divInd #####
-#' Divide index vector
-#'
-#' Utility function to divide a vector of index to a list.
-#' To be used internally in \code{AVar.VRr_pfd()}.
-#'
-#' The argument \code{Max} defines the maximum of \code{length(bd[[i]])} in
-#' \code{AVar.VRr_pfd}, which roughly defines the amount of RAM required
-#' (see description of that function).
-# #' The number of steps (s) is defined as the maximum integer that satisfies
-# #' the necessary condition: \code{(p + p - s) * (s + 1) / 2 < Max}
-# #' Alternatively, Length could be specified to define the length of the list.
-#'
-#' @param b
-#'   Vector to be divided into a list
-#' @param Max
-#'   Maximum acceptable length of vector that results from the divided list
-# #' @param Length
-# #'   Length of the list generated
-#'
-#' @return A list
-divInd <- function(b, Max = 2e6) { # , Length = 2) {
-    p <- length(b)
-    # if(missing(Max) && !missing(Length)) Max <- ceiling(nc / (Length - 1) - 1)
-    ans <- list()
-    while(p > 0) {
-        if((2 * p - 1) ^ 2 + 8 * (p - Max) < 0) {
-            s <- p - 1
-        } else {
-            s <- pmax(
-                floor((2 * p - 1 - sqrt((2 * p - 1) ^ 2 + 8 * (p - Max))) / 2),
-                0)
-        }
-        ans <- c(ans, list(b[1:(s + 1)]))
-        b <- b[-(1:(s + 1))]
-        p <- length(b)
-    }
-    return(ans)
-}
+# ##### divInd #####
+# #' Divide index vector
+# #'
+# #' Utility function to divide a vector of index to a list.
+# #' To be used internally in \code{AVar.VRr_pfd()}.
+# #'
+# #' The argument \code{Max} defines the maximum of \code{length(bd[[i]])} in
+# #' \code{AVar.VRr_pfd}, which roughly defines the amount of RAM required
+# #' (see description of that function).
+# # #' The number of steps (s) is defined as the maximum integer that satisfies
+# # #' the necessary condition: \code{(p + p - s) * (s + 1) / 2 < Max}
+# # #' Alternatively, Length could be specified to define the length of the list.
+# #'
+# #' @param b
+# #'   Vector to be divided into a list
+# #' @param Max
+# #'   Maximum acceptable length of vector that results from the divided list
+# # #' @param Length
+# # #'   Length of the list generated
+# #'
+# #' @return A list
+# divInd <- function(b, Max = 2e6) { # , Length = 2) {
+#     p <- length(b)
+#     # if(missing(Max) && !missing(Length)) Max <- ceiling(nc / (Length - 1) - 1)
+#     ans <- list()
+#     while(p > 0) {
+#         if((2 * p - 1) ^ 2 + 8 * (p - Max) < 0) {
+#             s <- p - 1
+#         } else {
+#             s <- pmax(
+#                 floor((2 * p - 1 - sqrt((2 * p - 1) ^ 2 + 8 * (p - Max))) / 2),
+#                 0)
+#         }
+#         ans <- c(ans, list(b[1:(s + 1)]))
+#         b <- b[-(1:(s + 1))]
+#         p <- length(b)
+#     }
+#     return(ans)
+# }
 
 ##### hgf #####
 #' Hypergeometric function wrapper
@@ -260,7 +260,7 @@ divInd <- function(b, Max = 2e6) { # , Length = 2) {
 #'
 #' @return A numeric vector corresponding to \code{x}
 #'
-#' @seealso \code{\link[hypergeo]{genhypergeo}}, 
+#' @seealso \code{\link[hypergeo]{genhypergeo}},
 #'   \code{\link[hypergeo]{hypergeo}}
 #'
 hgf <- function(a1, a2, b1, x, tol = 0, maxiter = 2000) {

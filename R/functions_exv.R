@@ -564,9 +564,9 @@ Var.VRR <- function(Rho, n = 100, method = c("Pan-Frank", "Konishi"), Lambda,
 # #' Alternatively, this list can be provided as the argument \code{bd}
 # #' (which should exactly match the one to be generated; use
 # #' \code{eigvaldisp:::divInd()}).
-#' \code{AVar.VRR_pfd()} divides index vectors into lists using the internal
-#' function \code{eigvaldisp:::divInd()}. The calculations are then done on
-#' elements of these lists to save RAM space.
+#' \code{AVar.VRR_pfd()} divides index vectors used internally in 
+#' \code{AVar.VRR_pfv()} into lists, along whose elements calculations are done
+#' to save RAM space.
 #' The argument \code{max.size} controls the maximum size of resulting vectors;
 #' at least \code{max.size * (2 * length(n) + 6) * 8} bytes of RAM is required
 #' for storing temporary results (and more during computation);
@@ -1001,6 +1001,23 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
         p1 <- cumsum(qr)[seq.int(lbd, 1)]
         p2 <- p1 - q + 1
         rbind(p1, p2)
+    }
+    divInd <- function(b, Max = 2e6) {
+        p <- length(b)
+        ans <- list()
+        while(p > 0) {
+            if((2 * p - 1) ^ 2 + 8 * (p - Max) < 0) {
+                s <- p - 1
+            } else {
+                s <- pmax(
+                 floor((2 * p - 1 - sqrt((2 * p - 1) ^ 2 + 8 * (p - Max))) / 2),
+                 0)
+            }
+            ans <- c(ans, list(b[1:(s + 1)]))
+            b <- b[-(1:(s + 1))]
+            p <- length(b)
+        }
+        return(ans)
     }
     e1fun <- switch(exv1.mode,
                     exact = function(n, x) Exv.r1(n, x, ...),
