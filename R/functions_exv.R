@@ -555,15 +555,18 @@ Var.VRR <- function(Rho, n = 100, method = c("Pan-Frank", "Konishi"), Lambda,
 #' whose lengths are about \eqn{p^4 / 8} and \eqn{p^4 / 4}. These take about
 #' \eqn{2*p^4} bytes of RAM; this can be prohibitively large for large \eqn{p}.
 #'
-#' \code{AVar.VRR_pfd()} divides the index vector \code{b} (used in
-#' \code{AVar.VRR_pfv()}) into a list \code{bd} using the internal function
-#' \code{eigvaldisp:::divInd()}. The calculations are then done on each element
-#' of this list to save RAM space.
-#' This process takes some time when \eqn{p} is large (~10 sec
-#' for \eqn{p = 1024}).
-#' Alternatively, this list can be provided as the argument \code{bd}
-#' (which should exactly match the one to be generated; use
-#' \code{eigvaldisp:::divInd()}).
+# #' \code{AVar.VRR_pfd()} divides the index vector \code{b} (used in
+# #' \code{AVar.VRR_pfv()}) into a list \code{bd} using the internal function
+# #' \code{eigvaldisp:::divInd()}. The calculations are then done on each element
+# #' of this list to save RAM space.
+# #' This process takes some time when \eqn{p} is large (~10 sec
+# #' for \eqn{p = 1024}).
+# #' Alternatively, this list can be provided as the argument \code{bd}
+# #' (which should exactly match the one to be generated; use
+# #' \code{eigvaldisp:::divInd()}).
+#' \code{AVar.VRR_pfd()} divides index vectors into lists using the internal
+#' function \code{eigvaldisp:::divInd()}. The calculations are then done on
+#' elements of these lists to save RAM space.
 #' The argument \code{max.size} controls the maximum size of resulting vectors;
 #' at least \code{max.size * (2 * length(n) + 6) * 8} bytes of RAM is required
 #' for storing temporary results (and more during computation);
@@ -635,8 +638,8 @@ Var.VRR <- function(Rho, n = 100, method = c("Pan-Frank", "Konishi"), Lambda,
 #'   (Used only when \code{mode = "parLapply"})
 #' @param max.size
 #'   Maximum size of vectors created internally (see Details).
-#' @param bd
-#'   List of indices used for iteration (see Details).
+# #' @param bd
+# #'   List of indices used for iteration (see Details).
 #' @param verbose
 #'   When \code{"yes"} or \code{"inline"}, pogress of iteration is printed
 #'   on console. \code{"no"} (default) turns off the printing.
@@ -912,17 +915,28 @@ AVar.VRR_pfv <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
     l_n <- length(n)
     R_u <- Rho[upper.tri(Rho)]
     var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
-    d <- digit(p)
     a <- seq_len(p)
-    A <- outer(as.integer(10 ^ d) * a, a, "+")
-    b <- t(A)[lower.tri(A)]
-    IJ <- rep.int(b, seq.int(length(b) - 1, 0))
-    KL <- rep_d(b)
-    Is <- as.integer((IJ %/% 10 ^ d) %% 10 ^ d)
-    Js <- as.integer(IJ %% 10 ^ d)
-    Ks <- as.integer((KL %/% 10 ^ d) %% 10 ^ d)
-    Ls <- as.integer(KL %% 10 ^ d)
-    rm(IJ, KL)
+    # d <- digit(p)
+    # A <- outer(as.integer(10 ^ d) * a, a, "+")
+    # b <- t(A)[lower.tri(A)]
+    # IJ <- rep.int(b, seq.int(length(b) - 1, 0))
+    # KL <- rep_d(b)
+    # Is <- as.integer((IJ %/% 10 ^ d) %% 10 ^ d)
+    # Js <- as.integer(IJ %% 10 ^ d)
+    # Ks <- as.integer((KL %/% 10 ^ d) %% 10 ^ d)
+    # Ls <- as.integer(KL %% 10 ^ d)
+    # rm(IJ, KL)
+    lb <- p * (p - 1) / 2
+    A <- matrix(rep.int(a, p), p, p)
+    lower_p <- lower.tri(A)
+    B1 <- matrix(rep.int(t(A)[lower_p], lb), lb, lb)
+    B2 <- matrix(rep.int(A[lower_p], lb), lb, lb)
+    lower_lb <- lower.tri(B1)
+    Is <- t(B1)[lower_lb]
+    Js <- t(B2)[lower_lb]
+    Ks <- B1[lower_lb]
+    Ls <- B2[lower_lb]
+    rm(B1, B2, lower_lb)
     exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
     exv_r1 <- sqrt(2) * exv_r1
     Eij <- exv_r1[(Js - 1) * p + Is - (Js - 1) * (2 * p - Js + 2) / 2, ]
@@ -962,7 +976,7 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
                          mc.cores = "auto", max.cores = parallel::detectCores(),
                          do.mcaffinity = TRUE,
                          affinity_mc = seq_len(max.cores), cl = NULL,
-                         max.size = 2e6, bd = NULL,
+                         max.size = 2e6, # bd = NULL,
                          verbose = c("no", "yes", "inline"), ...) {
     exv1.mode <- match.arg(exv1.mode)
     var1.mode <- match.arg(var1.mode)
@@ -1010,13 +1024,17 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
         function(i) invisible(NULL))
     Cov_r2m <- function(i) {
         disp(i)
-        IJ <- rep.int(bd[[i]], seq.int(I1[1, i], I1[2, i]) - 1)
-        KL <- rep_d(b, I2[1, i], I2[2, i])
-        Is <- as.integer((IJ %/% 10 ^ d) %% 10 ^ d)
-        Js <- as.integer(IJ %% 10 ^ d)
-        Ks <- as.integer((KL %/% 10 ^ d) %% 10 ^ d)
-        Ls <- as.integer(KL %% 10 ^ d)
+        # IJ <- rep.int(bd[[i]], seq.int(I1[1, i], I1[2, i]) - 1)
+        # KL <- rep_d(b, I2[1, i], I2[2, i])
+        # Is <- as.integer((IJ %/% 10 ^ d) %% 10 ^ d)
+        # Js <- as.integer(IJ %% 10 ^ d)
+        # Ks <- as.integer((KL %/% 10 ^ d) %% 10 ^ d)
+        # Ls <- as.integer(KL %% 10 ^ d)
         # rm(IJ, KL)
+        Is <- rep.int(b1d[[i]], seq.int(I1[1, i], I1[2, i]) - 1)
+        Js <- rep.int(b2d[[i]], seq.int(I1[1, i], I1[2, i]) - 1)
+        Ks <- rep_d(b1, I2[1, i], I2[2, i])
+        Ls <- rep_d(b2, I2[1, i], I2[2, i])
         Eij <- exv_r1[(Js - 1) * p + Is - (Js - 1) * (2 * p - Js + 2) / 2, ]
         Ekl <- exv_r1[(Ls - 1) * p + Ks - (Ls - 1) * (2 * p - Ls + 2) / 2, ]
         Eij_Ekl <- Eij * Ekl
@@ -1053,26 +1071,36 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
     var_r2 <- matrix(sapply(n, v2fun, x = R_u), ncol = l_n)
     exv_r1 <- matrix(sapply(n, e1fun, x = R_u), ncol = l_n)
     exv_r1 <- sqrt(2) * exv_r1
-    d <- digit(p)
-    if(is.null(bd)) {
-        a <- seq_len(p)
-        A <- outer(as.integer(10 ^ d) * a, a, "+")
-        b <- t(A)[lower.tri(A)]
-        bd <- divInd(b, Max = max.size)
-    }
-    I1 <- bd2I1(bd)
-    I2 <- length(b) - I1 + 1
-    lbd <- length(bd)
+    # d <- digit(p)
+    # if(is.null(bd)) {
+    #     a <- seq_len(p)
+    #     A <- outer(as.integer(10 ^ d) * a, a, "+")
+    #     b <- t(A)[lower.tri(A)]
+    #     bd <- divInd(b, Max = max.size)
+    # }
+    # I1 <- bd2I1(bd)
+    # I2 <- length(b) - I1 + 1
+    # lbd <- length(bd)
+    a <- seq_len(p)
+    A <- matrix(rep.int(a, p), p, p)
+    lower_p <- lower.tri(A)
+    b1 <- t(A)[lower_p]
+    b2 <- A[lower_p]
+    b1d <- divInd(b1, Max = max.size)
+    b2d <- divInd(b2, Max = max.size)
+    I1 <- bd2I1(b1d)
+    I2 <- length(b1) - I1 + 1
+    lbd <- length(b1d)
     cov_r2 <- numeric(l_n)
     if(verbose == "inline") cat(paste0(" Out of ", lbd, " iterations:"))
     if(mode == "for.ind") {
-        for(i in seq_along(bd)) {
+        for(i in seq_len(lbd)) {
             cov_r2 <- cov_r2 + Cov_r2m(i)
         }
         ans <- colSums(var_r2) + cov_r2
     } else {
         if(mode == "lapply") {
-            cov_r2 <- lapply(seq_along(bd), Cov_r2m)
+            cov_r2 <- lapply(seq_len(lbd), Cov_r2m)
         } else {
             # require(parallel)
             if(mc.cores == "auto") {
@@ -1083,7 +1111,7 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
                     try(invisible(parallel::mcaffinity(affinity_mc)),
                         silent = TRUE)
                 }
-                cov_r2 <- parallel::mclapply(seq_along(bd), Cov_r2m,
+                cov_r2 <- parallel::mclapply(seq_len(lbd), Cov_r2m,
                                              mc.cores = mc.cores)
             } else if(mode == "parLapply") {
                 if(is.null(cl)) {
@@ -1094,7 +1122,7 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
                             parallel::mcaffinity), silent = TRUE)
                     }
                 }
-                cov_r2 <- parallel::parLapply(cl = cl, seq_along(bd), Cov_r2m)
+                cov_r2 <- parallel::parLapply(cl = cl, seq_len(lbd), Cov_r2m)
             }
         }
         cov_r2 <- matrix(unlist(cov_r2), l_n)
@@ -1312,17 +1340,27 @@ AVar.VRR_krv <- function(Rho, n = 100, Lambda, ...) {
         warning("Rho was scaled to have diagonal elements of unity")
     }
     p <- ncol(Rho)
-    d <- digit(p)
     a <- seq_len(p)
-    A <- outer(as.integer(10 ^ d) * a, a, "+")
-    b <- A[lower.tri(A) | upper.tri(A)]
-    B <- matrix(rep.int(b, length(b)), length(b))
-    IJ <- t(B)[lower.tri(B)]
-    KL <- B[lower.tri(B)]
-    Is <- as.integer((IJ %/% 10 ^ d) %% 10 ^ d)
-    Js <- as.integer(IJ %% 10 ^ d)
-    Ks <- as.integer((KL %/% 10 ^ d) %% 10 ^ d)
-    Ls <- as.integer(KL %% 10 ^ d)
+    # d <- digit(p)
+    # A <- outer(as.integer(10 ^ d) * a, a, "+")
+    # b <- A[lower.tri(A) | upper.tri(A)]
+    # B <- matrix(rep.int(b, length(b)), length(b))
+    # IJ <- t(B)[lower.tri(B)]
+    # KL <- B[lower.tri(B)]
+    # Is <- as.integer((IJ %/% 10 ^ d) %% 10 ^ d)
+    # Js <- as.integer(IJ %% 10 ^ d)
+    # Ks <- as.integer((KL %/% 10 ^ d) %% 10 ^ d)
+    # Ls <- as.integer(KL %% 10 ^ d)
+    lb <- p * (p - 1)
+    A <- matrix(rep.int(a, p), p, p)
+    lu_p <- lower.tri(A) | upper.tri(A)
+    B1 <- matrix(rep.int(t(A)[lu_p], lb), lb, lb)
+    B2 <- matrix(rep.int(A[lu_p], lb), lb, lb)
+    lower_lb <- lower.tri(B1)
+    Is <- t(B1)[lower_lb]
+    Js <- t(B2)[lower_lb]
+    Ks <- B1[lower_lb]
+    Ls <- B2[lower_lb]
     Rij <- Rho[(Js - 1) * p + Is]
     Rkl <- Rho[(Ls - 1) * p + Ks]
     Rik <- Rho[(Ks - 1) * p + Is]

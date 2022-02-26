@@ -53,7 +53,6 @@ AVar.VRR_pfd(
   affinity_mc = seq_len(max.cores),
   cl = NULL,
   max.size = 2e+06,
-  bd = NULL,
   verbose = c("no", "yes", "inline"),
   ...
 )
@@ -127,8 +126,6 @@ within function call, which is turned off on exit.
 (Used only when \code{mode = "parLapply"})}
 
 \item{max.size}{Maximum size of vectors created internally (see Details).}
-
-\item{bd}{List of indices used for iteration (see Details).}
 
 \item{verbose}{When \code{"yes"} or \code{"inline"}, pogress of iteration is printed
 on console. \code{"no"} (default) turns off the printing.
@@ -242,15 +239,9 @@ Windows environment. See \code{vignette("parallel")} for details.}
 whose lengths are about \eqn{p^4 / 8} and \eqn{p^4 / 4}. These take about
 \eqn{2*p^4} bytes of RAM; this can be prohibitively large for large \eqn{p}.
 
-\code{AVar.VRR_pfd()} divides the index vector \code{b} (used in
-\code{AVar.VRR_pfv()}) into a list \code{bd} using the internal function
-\code{eigvaldisp:::divInd()}. The calculations are then done on each element
-of this list to save RAM space.
-This process takes some time when \eqn{p} is large (~10 sec
-for \eqn{p = 1024}).
-Alternatively, this list can be provided as the argument \code{bd}
-(which should exactly match the one to be generated; use
-\code{eigvaldisp:::divInd()}).
+\code{AVar.VRR_pfd()} divides index vectors into lists using the internal
+function \code{eigvaldisp:::divInd()}. The calculations are then done on
+elements of these lists to save RAM space.
 The argument \code{max.size} controls the maximum size of resulting vectors;
 at least \code{max.size * (2 * length(n) + 6) * 8} bytes of RAM is required
 for storing temporary results (and more during computation);
