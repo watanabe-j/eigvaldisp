@@ -195,8 +195,9 @@
 #'
 GenCov <- function(p = length(evalues), VR = 0.5, scale. = NULL,
                    evalues = "auto", evectors = "plain",
-                   shape = c("q-large", "elongate", "linearly_decreasing",
-                             "quadratically_decreasing"), q = 1,
+                   shape = c("q-large", "elongate", "exponentially_decreasing",
+                             "linearly_decreasing", "quadratically_decreasing"),
+                   q = 1, r = 0.5,
                    random_rotation = TRUE,
                    which_rotate = c("random", "head", "tail", "minmax"),
                    tol = 1e-12, maxiter = 5000L, seed = NULL,
@@ -228,6 +229,16 @@ GenCov <- function(p = length(evalues), VR = 0.5, scale. = NULL,
     S_fromUL <- function(evec = evec, evalues = evalues) {
         te <- t(evec)
         crossprod(te * evalues, te)
+    }
+    ## Function to get eigenvalues when shape == "exponentially_decreasing"
+    get_evalues_exd <- function(r, p = p) {
+        p * (1 - r) / (1 - r ^ p) * (r ^ seq.int(0, p - 1))
+    }
+    ## Objective function for optimizing r to yield desired VR
+    ## when shape == "exponentially_decreasing" and VR is provided
+    objfun_r_evalues <- function(r, VR = VR, p = p) {
+        evalues <- get_evalues_exd(r, p)
+        (VR - VE(L = evalues)$VR) ^ 2
     }
     ## How to choose rows and columns to rotate, when evectors = "Givens"
     sample_i <- switch(which_rotate,
@@ -282,16 +293,24 @@ GenCov <- function(p = length(evalues), VR = 0.5, scale. = NULL,
             } else if(q == p) {
                 evalues[1:p] <- 1
             } else {
-                r <- sqrt(VR)
-                evalues[1:q] <- rep.int(1 + r * sqrt((p - 1) * (p - q) / q),
+                sqVR <- sqrt(VR)
+                evalues[1:q] <- rep.int(1 + sqVR * sqrt((p - 1) * (p - q) / q),
                                         q) # / sqrt(p - 1)
-                evalues[(q + 1):p] <- rep.int(1 - r * sqrt(q * (p - 1) /
+                evalues[(q + 1):p] <- rep.int(1 - sqVR * sqrt(q * (p - 1) /
                                               (p - q)), p - q) # / sqrt(p - 1)
                 if(any(evalues < 0)) {
                     stop("Negative eigenvalues. ",
                          "Ensure VR < (p - q) / ((p - 1) * q)")
                 }
             }
+        } else if (shape == "exponentially_decreasing") {
+            if(!missing(VR)) {
+                if(!missing(r)) {
+                    warning("User-specified r was ignored as VR was provided")
+                }
+                r <- optimize(objfun_r_evalues, c(0, 1), VR = VR, p = p)$minimum
+            }
+            evalues <- get_evalues_exd(r, p = p)
         } else {
             if(!missing(VR)) {
                 warning("In the selected method, VR is fixed for a given p.\n",
