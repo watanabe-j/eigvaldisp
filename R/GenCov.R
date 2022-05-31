@@ -23,8 +23,13 @@
 #' The combination of \code{p}, \code{q}, and \code{VR} should be such that
 #' all resultant eigenvalues are nonnegative; an error is returned otherwise.
 #' Alternatively, gradually decreasing eigenvalues can be generated with
-#' \code{shape = "linearly_decreasing"} or \code{"quadratically_decreasing"}.
-#' See Watanabe (2022) for technical details.
+#' \code{shape = "exponentially_decreasing"}, \code{"linearly_decreasing"},
+#' or \code{"quadratically_decreasing"}.
+#' For the exponential decrease (e.g., Kirkpatrick 2009), eigenvalues decrease
+#' in magnitude at a constant rate \code{r}, which is either user-specified
+#' (default 0.5) or numerically optimized to yield desired \code{VR}
+#' when provided.
+#' For the other options, see Watanabe (2022) for details.
 #'
 #' Unless \code{evalues} is specified, the trace of the resultant matrix
 #' equals to \eqn{p} by default. The argument \code{scale.} can be used to
@@ -75,14 +80,22 @@
 #'     \item{"q-large"}{The \eqn{q} leading eigenvalues equally large,
 #'                      the rest \eqn{p - q} equally small}
 #'     \item{"elongate"}{Special case of \code{q-large} with \code{q = 1}}
+#'     \item{"exponentially_decreasing"}{Eigenvalues exponentially decreasing
+#'                                       either at given rate r (default) or
+#'                                       to yield desired VR}
 #'     \item{"linearly_decreasing"}{Eigenvalues linearly decreasing
 #'                                  in magnitude}
 #'     \item{"quadratically_decreasing"}{Eigenvalues quadratically decreasing}
 #'   }
 #'   User-specified \code{VR} is ignored in the last two options.
-#'   The terminology follows Watanabe (2022).
+#'   See Details.
 #' @param q
 #'   The number of large eigenvalues. To be used with \code{shape = q-large}.
+#' @param r
+#'   The rate of exponential decreasing of eigenvalues; (\eqn{i + 1})-th
+#'   eigenvalue is \eqn{r} times \eqn{i}th eigenvalue.
+#'   To be used with \code{shape = exponentially_decreasing}.
+#'   Ignored when \code{VR} is provided.
 #' @param evalues
 #'   Numeric vector of eigenvalues. If missing, eigenvalues are automatically
 #'   generated according to \code{p}, \code{VR}, \code{shape}, and \code{q}.
@@ -124,8 +137,10 @@
 #'       presumably produces strong, isolated correlations.}
 #'   }
 #' @param tol
-#'   Only relevant when \code{evectors = "MAP"}; numeric to specify the
-#'   tolerance against which convergence of eigenvectors is evaluated.
+#'   Only relevant when \code{evectors = "MAP"}, or
+#'   \code{shape = "exponentially_decreasing"} and \cod{VR} is provided;
+#'   numeric to specify the tolerance against which convergence of
+#'   eigenvectors or VR, respectively, is evaluated.
 #' @param maxiter
 #'   Only relevant when \code{evectors = "MAP"}; maximum number of iterations.
 #' @param seed
@@ -143,6 +158,10 @@
 #'  correlation matrices and their factors.
 #'  *BIT Numerical Mathematics* **40**, 640--651.
 #'  doi:[10.1023/A:1022384216930](https://doi.org/10.1023/A:1022384216930).
+#'
+#' Kirkpatrick, M. (2009) Patterns of quantitative genetic variation in
+#'  multiple dimensions. *Genetica*, **136**, 271--284.
+#'  doi:[10.1007/s10709-008-9302-6](https://doi/org/10.1007/s10709-008-9302-6).
 #'
 #' Waller, N. G. (2020). Generating correlation matrices with specified
 #'  eigenvalues using the method of alternating projections.
@@ -171,6 +190,12 @@
 #'
 #' # Relative eigenvalue variance = 0.25, with 1 and 2 large eigenvalues
 #' GenCov(evalues = c(3, 2, 1, 1))
+#'
+#' # Exponentially decreasing eigenvalues with rate r (default 0.5)
+#' GenCov(4, shape = "exponentially_decreasing", r = 0.5)
+#'
+#' # Exponentially decreasing eigenvalues with desired VR; r is ignored
+#' GenCov(4, VR = 0.5 ^ 2, shape = "exponentially_decreasing")
 #'
 #' # Linearly decreasing eigenvalues; VR, q, and evalues are ignored
 #' GenCov(4, shape = "linearly_decreasing")
@@ -230,7 +255,7 @@ GenCov <- function(p = length(evalues), VR = 0.5, scale. = NULL,
         te <- t(evec)
         crossprod(te * evalues, te)
     }
-    ## Function to get eigenvalues when shape == "exponentially_decreasing"
+    ## Function to get eigenvalues when shape = "exponentially_decreasing"
     get_evalues_exd <- function(r, p = p) {
         p * (1 - r) / (1 - r ^ p) * (r ^ seq.int(0, p - 1))
     }
@@ -308,7 +333,8 @@ GenCov <- function(p = length(evalues), VR = 0.5, scale. = NULL,
                 if(!missing(r)) {
                     warning("User-specified r was ignored as VR was provided")
                 }
-                r <- optimize(objfun_r_evalues, c(0, 1), VR = VR, p = p)$minimum
+                r <- optimize(objfun_r_evalues, c(0, 1), VR = VR, p = p,
+                              tol = tol)$minimum
             }
             evalues <- get_evalues_exd(r, p = p)
         } else {
