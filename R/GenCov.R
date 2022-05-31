@@ -90,11 +90,11 @@
 #'   User-specified \code{VR} is ignored in the last two options.
 #'   See Details.
 #' @param q
-#'   The number of large eigenvalues. To be used with \code{shape = q-large}.
+#'   The number of large eigenvalues. To be used with \code{shape = "q-large"}.
 #' @param r
 #'   The rate of exponential decreasing of eigenvalues; (\eqn{i + 1})-th
 #'   eigenvalue is \eqn{r} times \eqn{i}th eigenvalue.
-#'   To be used with \code{shape = exponentially_decreasing}.
+#'   To be used with \code{shape = "exponentially_decreasing"}.
 #'   Ignored when \code{VR} is provided.
 #' @param evalues
 #'   Numeric vector of eigenvalues. If missing, eigenvalues are automatically
@@ -138,7 +138,7 @@
 #'   }
 #' @param tol
 #'   Only relevant when \code{evectors = "MAP"}, or
-#'   \code{shape = "exponentially_decreasing"} and \cod{VR} is provided;
+#'   \code{shape = "exponentially_decreasing"} and \code{VR} is provided;
 #'   numeric to specify the tolerance against which convergence of
 #'   eigenvectors or VR, respectively, is evaluated.
 #' @param maxiter
@@ -161,7 +161,7 @@
 #'
 #' Kirkpatrick, M. (2009) Patterns of quantitative genetic variation in
 #'  multiple dimensions. *Genetica*, **136**, 271--284.
-#'  doi:[10.1007/s10709-008-9302-6](https://doi/org/10.1007/s10709-008-9302-6).
+#'  doi:[10.1007/s10709-008-9302-6](https://doi.org/10.1007/s10709-008-9302-6).
 #'
 #' Waller, N. G. (2020). Generating correlation matrices with specified
 #'  eigenvalues using the method of alternating projections.
@@ -176,7 +176,7 @@
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
 #'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
 #'
-#' @importFrom stats rnorm runif
+#' @importFrom stats rnorm runif optimize
 #'
 #' @export
 #'

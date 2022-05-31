@@ -85,9 +85,7 @@ function which it in turn calls. Otherwise ignored.}
 \item{Rho}{Population correlation matrix; assumed to be validly constructed
 (although simple checks are done).}
 
-\item{tol.hg}{Passed to \code{Exv.r2()}; see description of that function.}
-
-\item{maxiter.hg}{Passed to \code{Exv.r2()}; see description of that function.}
+\item{tol.hg, maxiter.hg}{Passed to \code{Exv.r2()}; see description of that function.}
 }
 \value{
 A numeric vector of the desired moment, corresponding to \code{n}.

@@ -10,8 +10,10 @@ GenCov(
   scale. = NULL,
   evalues = "auto",
   evectors = "plain",
-  shape = c("q-large", "elongate", "linearly_decreasing", "quadratically_decreasing"),
+  shape = c("q-large", "elongate", "exponentially_decreasing", "linearly_decreasing",
+    "quadratically_decreasing"),
   q = 1,
+  r = 0.5,
   random_rotation = TRUE,
   which_rotate = c("random", "head", "tail", "minmax"),
   tol = 1e-12,
@@ -59,14 +61,22 @@ ignored when \code{evalues} is provided.  Options allowed are:
 \item{"q-large"}{The \eqn{q} leading eigenvalues equally large,
 the rest \eqn{p - q} equally small}
 \item{"elongate"}{Special case of \code{q-large} with \code{q = 1}}
+\item{"exponentially_decreasing"}{Eigenvalues exponentially decreasing
+either at given rate r (default) or
+to yield desired VR}
 \item{"linearly_decreasing"}{Eigenvalues linearly decreasing
 in magnitude}
 \item{"quadratically_decreasing"}{Eigenvalues quadratically decreasing}
 }
 User-specified \code{VR} is ignored in the last two options.
-The terminology follows Watanabe (2022).}
+See Details.}
 
-\item{q}{The number of large eigenvalues. To be used with \code{shape = q-large}.}
+\item{q}{The number of large eigenvalues. To be used with \code{shape = "q-large"}.}
+
+\item{r}{The rate of exponential decreasing of eigenvalues; (\eqn{i + 1})-th
+eigenvalue is \eqn{r} times \eqn{i}th eigenvalue.
+To be used with \code{shape = "exponentially_decreasing"}.
+Ignored when \code{VR} is provided.}
 
 \item{random_rotation}{Only relevant when \code{evectors = "Givens"};
 logical to specify whether the initial diagonal matrix of eigenvalues
@@ -84,8 +94,10 @@ of the diagonal elements are rotated. This is slightly faster but
 presumably produces strong, isolated correlations.}
 }}
 
-\item{tol}{Only relevant when \code{evectors = "MAP"}; numeric to specify the
-tolerance against which convergence of eigenvectors is evaluated.}
+\item{tol}{Only relevant when \code{evectors = "MAP"}, or
+\code{shape = "exponentially_decreasing"} and \code{VR} is provided;
+numeric to specify the tolerance against which convergence of
+eigenvectors or VR, respectively, is evaluated.}
 
 \item{maxiter}{Only relevant when \code{evectors = "MAP"}; maximum number of iterations.}
 
@@ -123,8 +135,13 @@ Specifically, the larger ones are
 The combination of \code{p}, \code{q}, and \code{VR} should be such that
 all resultant eigenvalues are nonnegative; an error is returned otherwise.
 Alternatively, gradually decreasing eigenvalues can be generated with
-\code{shape = "linearly_decreasing"} or \code{"quadratically_decreasing"}.
-See Watanabe (2022) for technical details.
+\code{shape = "exponentially_decreasing"}, \code{"linearly_decreasing"},
+or \code{"quadratically_decreasing"}.
+For the exponential decrease (e.g., Kirkpatrick 2009), eigenvalues decrease
+in magnitude at a constant rate \code{r}, which is either user-specified
+(default 0.5) or numerically optimized to yield desired \code{VR}
+when provided.
+For the other options, see Watanabe (2022) for details.
 
 Unless \code{evalues} is specified, the trace of the resultant matrix
 equals to \eqn{p} by default. The argument \code{scale.} can be used to
@@ -171,6 +188,12 @@ GenCov(4, 0.5 ^ 2, q = 2)
 # Relative eigenvalue variance = 0.25, with 1 and 2 large eigenvalues
 GenCov(evalues = c(3, 2, 1, 1))
 
+# Exponentially decreasing eigenvalues with rate r (default 0.5)
+GenCov(4, shape = "exponentially_decreasing", r = 0.5)
+
+# Exponentially decreasing eigenvalues with desired VR; r is ignored
+GenCov(4, VR = 0.5 ^ 2, shape = "exponentially_decreasing")
+
 # Linearly decreasing eigenvalues; VR, q, and evalues are ignored
 GenCov(4, shape = "linearly_decreasing")
 
@@ -198,6 +221,10 @@ Davies, P. I. & Higham, N. J. (2000) Numerically stable generation of
 correlation matrices and their factors.
 \emph{BIT Numerical Mathematics} \strong{40}, 640--651.
 doi:\href{https://doi.org/10.1023/A:1022384216930}{10.1023/A:1022384216930}.
+
+Kirkpatrick, M. (2009) Patterns of quantitative genetic variation in
+multiple dimensions. \emph{Genetica}, \strong{136}, 271--284.
+doi:\href{https://doi.org/10.1007/s10709-008-9302-6}{10.1007/s10709-008-9302-6}.
 
 Waller, N. G. (2020). Generating correlation matrices with specified
 eigenvalues using the method of alternating projections.
