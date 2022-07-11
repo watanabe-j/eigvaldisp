@@ -505,11 +505,12 @@ $$
 where the following exact and asymptotic moments are inserted:
 $$
 \begin{align}
-\E(r_{ij}) =& \frac{2}{n} \left[ \Gamma\left(\frac{n+1}{2}\right) / \Gamma\left(\frac{n}{2}\right) \right]^2 \F\left(\frac{1}{2}, \frac{1}{2}; \frac{n +2}{2}; \rho_{ij}^2\right); \\
+\E(r_{ij}) =& \frac{2}{n} \left[ \Gamma\left(\frac{n+1}{2}\right) / \Gamma\left(\frac{n}{2}\right) \right]^2 \rho_{ij} \F\left(\frac{1}{2}, \frac{1}{2}; \frac{n +2}{2}; \rho_{ij}^2\right); \\
 \Cov(r_{ij}, r_{kl}) \approx & \frac{1}{n} \left[ \frac{1}{2} \rho_{ij}\rho_{kl}(\rho_{ik}^2 + \rho_{il}^2 + \rho_{jk}^2 + \rho_{jl}^2) + \rho_{ik}\rho_{jl} + \rho_{il}\rho_{jk} \right. \\ & \quad \left. \phantom{\frac{1}{2}}
 - \rho_{ij}\rho_{ik}\rho_{il} - \rho_{ij}\rho_{jk}\rho_{jl} - \rho_{ik}\rho_{jk}\rho_{kl} - \rho_{il}\rho_{jl}\rho_{kl} \right] .
 \end{align}
 $$
+(eq. 38 in @Watanabe2021 erroneously dropped $\rho_{ij}$ in the first equation.)
 
 However, this approach requires evaluation of $\sim p^4 / 4$ pairs of correlation coefficients, and can take nontrivial computational time. For this reason, the following asymptotic variance from the theory of @Konishi1979 might be useful when $p$ is large:
 $$
