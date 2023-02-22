@@ -20,8 +20,7 @@ See that paper for theoretical details.
 devtools::install_github("watanabe-j/eigvaldisp")
 ```
 If you have the packages `rmarkdown` and `knitr`, and have
-[pandoc](https://pandoc.org) (including pandoc-citeproc) installed
-on your machine, you can build a vignette by the option
+[`pandoc`](https://pandoc.org) installed on your machine (for `pandoc < 2.11`, `pandoc-citeproc` is required as well), you can build a vignette by the option
 `build_vignettes = TRUE` in `install_github()` (recommended).
 
 This package has the following dependencies:
