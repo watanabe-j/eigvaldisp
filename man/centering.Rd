@@ -16,8 +16,8 @@ scale2(x, center = TRUE, scale = FALSE)
 \item{center, scale}{Passed to \code{scale(x, ...)}}
 }
 \description{
-\code{mc(x)} is a short for \code{sweep(x, 2, colMeans(x))}.
+\code{mc(x)} is a short for \code{sweep(x, 2, colMeans(x))}
 
 \code{scale2(x)} is essentially \code{scale(x)},
-but returns 0 rather than NaN for constant columns.
+but returns 0 rather than \code{NaN} for constant columns
 }

@@ -5,7 +5,7 @@
 \alias{VESa}
 \alias{VRSa}
 \alias{VRRa}
-\title{``Bias-corrected'' eigenvalue dispersion indices}
+\title{\dQuote{Bias-corrected} eigenvalue dispersion indices}
 \usage{
 VESa(
   X,
@@ -36,32 +36,33 @@ VRSa(
 VRRa(X, S, L, n, center = TRUE, nv = 0, check = TRUE, ...)
 }
 \arguments{
-\item{X}{Data matrix from which covariance/corrrelation matrix is obtained.}
+\item{X}{Data matrix from which covariance/corrrelation matrix is obtained}
 
-\item{S}{Covariance/correlation matrix.}
+\item{S}{Covariance/correlation matrix}
 
-\item{L}{Vector of eigenvalues.}
+\item{L}{Vector of eigenvalues}
 
-\item{n}{Degrees of freedom in a length-1 numeric. Ignored with warning when
+\item{n}{Degrees of freedom in a length-1 numeric.  Ignored with warning when
 \code{X} is provided; required otherwise (see Details).}
 
 \item{divisor, m}{These are as in \code{\link{VE}} and influence eigenvalue magnitude
-(and hence uncorrected eigenvalue variance) of covariance matrices.
-However, note that the adjusted indices are independent of
+(and hence uncorrected eigenvalue variance) of covariance
+matrices.  However, note that the adjusted indices are independent of
 the choice of divisor and hence are unaffected by these arguments.}
 
-\item{center}{Logical to specify whether sample-mean-centering should be done.}
+\item{center}{Logical to specify whether sample-mean-centering should be done}
 
-\item{nv}{Numeric. Specify how many eigenvectors are to be retained; default 0.}
+\item{nv}{Numeric to specify how many eigenvectors are to be retained;
+default \code{0}}
 
 \item{check}{Logical to specify whether structures of X, S, and L are checked
-(see Details in \code{\link{VE}}).}
+(see Details in \code{\link{VE}})}
 
-\item{...}{Additional arguments are internally passed to \code{VE()}.
-The arguments \code{sub}, \code{drop_0}, and \code{tol} can be used
-to specify which eigenvalues are to be involved (see \code{\link{VE}}).
-\code{scale.} does not take effect, as the choice is already implied
-when these functions are used.}
+\item{...}{Additional arguments are internally passed to \code{VE()}.  The
+arguments \code{sub}, \code{drop_0}, and \code{tol} can be used
+to specify which eigenvalues are to be involved (see
+\code{\link{VE}}).  \code{scale.} does not take effect, as the choice
+is already implied when these functions are used.}
 }
 \value{
 A list similar to the output of \code{VE()}, with an additional element:
@@ -78,36 +79,36 @@ eigenvalue variance of correlation matrix}
 These functions calculate bias-corrected or adjusted
 eigenvalue dispersion indices
 
-\code{VESa}: bias-corrected eigenvalue variance of covariance matrix.
+\code{VESa}: bias-corrected eigenvalue variance of covariance matrix
 
-\code{VRSa}: adjusted relative eigenvalue variance of covariance matrix.
+\code{VRSa}: adjusted relative eigenvalue variance of covariance matrix
 
-\code{VRRa}: adjusted relative eigenvalue variance of correlation matrix.
+\code{VRRa}: adjusted relative eigenvalue variance of correlation matrix
 }
 \details{
 These functions are to be used with sample data matrix,
 covariance/correlation matrix, or eigenvalues, and not to be used with
-population quantities. Unless \code{X} is provided, the degrees of freedom
-\code{n} should be specified as this is required for adjustment.
-When \code{X} is provided, \code{n} is automatically set to be
+population quantities.  Unless \code{X} is provided, the degrees of freedom
+\code{n} should be specified as this is required for adjustment.  When
+\code{X} is provided, \code{n} is automatically set to be
 \code{nrow(X) - as.numeric(center)}.
 
 These functions internally call \code{VE(L = L, nv = 0, check = FALSE, ...)}
 with appropriately constructed (or user-specified) \code{L},
-and adjusted eigenvalue dispersion indices are appended to the outcome list.
-If \code{nv > 0}, eigenvectors are calculated before this function call
-and returned as well.
+and adjusted eigenvalue dispersion indices are appended to the outcome
+list.  If \code{nv > 0}, eigenvectors are calculated before this function
+call and returned as well.
 
 Bias correction is possible for eigenvalue variance of covariance matrices,
 but not straightforward for relative eigenvalue variance (of either
 covariance or correlation matrices), because the latter is a nonlinear
-function of the population value (see Watanabe, 2022).
-Although this could potentially be achievable for correlation matrices,
+function of the population value (see Watanabe, 2022).  Although this
+could potentially be achievable for correlation matrices,
 expression for its variance is not known to the author.
 
 The bias-corrected eigenvalue variance of a sample covariance matrix
-also has smaller variance than the uncorrected version.
-On the other hand, the adjusted relative eigenvalue variance of a
+also has smaller variance than the uncorrected version.  On the other hand,
+the adjusted relative eigenvalue variance of a
 sample covariance/correlation matrix has larger variance than
 the unadjusted version.
 }
@@ -156,9 +157,9 @@ VRRa(X = X2)
 
 }
 \references{
-Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. \doi{10.1111/evo.14382}.
 }
 \seealso{
 \code{\link{VE}} for the main function

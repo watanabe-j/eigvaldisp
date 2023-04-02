@@ -20,24 +20,23 @@ A numeric vector corresponding to \code{x}
 }
 \description{
 Wrapper for hypergeometric function with two upper and one lower arguments
-(or the classic hypergeometric function).
+(or the classic hypergeometric function)
 }
 \details{
 This function utilizes the function \code{genhypergeo} from
 the package \code{hypergeo}; when it appears to have failed,
 then the function \code{hypergeo} is used.
 
-Elements of \code{x} are assumed to be real numbers within \eqn{[-1, 1]}.
-Complex arguments/returns are not assumed. No check is done.
+Elements of \code{x} are assumed to be real numbers within
+\eqn{[-1, 1]}.  Complex arguments/returns are not assumed.  No check is done.
 
 Tries to reduce computational time by dropping duplicated values from
 \code{x} while trying to retain its original \code{names} and \code{dim}.
 
 This function primarily uses \code{hypergeo::genhypergeo()}, as this seems
 to be more numerically stable than \code{hypergeo::hypergeo()} in some
-conditions tested in development.
-For the present purpose, \code{gsl::hyperg_2F1} may suffice,
-but this has not been implemented.
+conditions tested in development.  For the present purpose,
+\code{gsl::hyperg_2F1} may suffice, but this has not been implemented.
 }
 \seealso{
 \code{\link[hypergeo]{genhypergeo}},

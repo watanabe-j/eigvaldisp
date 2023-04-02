@@ -87,129 +87,139 @@ AVar.VRR_krv(Rho, n = 100, Lambda, ...)
 \item{Lambda}{Numeric vector of population eigenvalues.}
 
 \item{exv1.mode}{Whether \code{"exact"} or \code{"asymptotic"} expression is used for
-\eqn{E(r)}.}
+\eqn{\mathrm{E}(r)}{E(r)}.}
 
 \item{var1.mode}{Whether \code{"exact"} or \code{"asymptotic"} expression is used for
-\eqn{Cov(rij, rkl)}. (At present, only \code{"asymptotic"} is allowed.)}
+\eqn{\mathrm{Cov}(r_{ij}, r_{kl})}{Cov(r_ij, r_kl)}.  (At present,
+only \code{"asymptotic"} is allowed.)}
 
 \item{var2.mode}{Whether \code{"exact"} or \code{"asymptotic"} expression is used for
-\eqn{Var(r^2)}.}
+\eqn{\mathrm{Var}(r^2)}{Var(r^2)}.}
 
 \item{order.exv1, order.var2}{Used to specify the order of evaluation for asymptotic expressions of
-\eqn{E(r)} and \eqn{Var(r^2)} when \code{exv1.mode} and \code{var2.mode} is
+\eqn{\mathrm{E}(r)}{E(r)} and \eqn{\mathrm{Var}(r^2)}{Var(r^2)}
+when \code{exv1.mode} and \code{var2.mode} is
 \code{"asymptotic"}; see \code{\link{Exv.rx}}.}
 
 \item{mode}{In \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()},
 specifies the mode of iterations (see Details).}
 
 \item{...}{In the \code{pf} family functions, passed to \code{Exv.r1()} and
-\code{Var.r2()} (when the corresponding modes are \code{"exact"}).
-Otherwise ignored.}
+\code{Var.r2()} (when the corresponding modes are
+\code{"exact"}).  Otherwise ignored.}
 
-\item{mc.cores}{Number of cores to be used (numeric/integer). When \code{"auto"} (default),
-set to \code{min(c(ceiling(p / 2), max.cores))}, which usually works well.
-(Used only when \code{mode = "mclapply"}, or \code{"parLapply"})}
+\item{mc.cores}{Number of cores to be used (numeric/integer).  When \code{"auto"}
+(default), set to \code{min(c(ceiling(p / 2), max.cores))}, which usually
+works well.  (Used only when \code{mode = "mclapply"}, or
+\code{"parLapply"})}
 
-\item{max.cores}{Maximum number of cores to be used.
-(Used only when \code{mode = "mclapply"}, or \code{"parLapply"})}
+\item{max.cores}{Maximum number of cores to be used.  (Used only when
+\code{mode = "mclapply"}, or \code{"parLapply"})}
 
 \item{do.mcaffinity}{Whether to run \code{parallel::mcaffinity()}, which seems required in
-some Linux environments to assign threads to multiple cores.
-(Used only when \code{mode = "mclapply"}, or \code{"parLapply"})}
+some Linux environments to assign threads to multiple cores.  (Used only
+when \code{mode = "mclapply"}, or \code{"parLapply"})}
 
-\item{affinity_mc}{Argument of \code{parallel::mcaffinity()} to specify assignment of threads.
-(Used only when \code{mode = "mclapply"}, or \code{"parLapply"})}
+\item{affinity_mc}{Argument of \code{parallel::mcaffinity()} to specify assignment of
+threads.  (Used only when \code{mode = "mclapply"}, or \code{"parLapply"})}
 
 \item{cl}{A cluster object (made by \code{parallel::makeCluster()}); when already
-created, one can be specified with this argument. Otherwise, one is created
-within function call, which is turned off on exit.
-(Used only when \code{mode = "parLapply"})}
+created, one can be specified with this argument.  Otherwise, one is
+created within function call, which is turned off on exit.  (Used only
+when \code{mode = "parLapply"})}
 
 \item{max.size}{Maximum size of vectors created internally (see Details).}
 
 \item{verbose}{When \code{"yes"} or \code{"inline"}, pogress of iteration is printed
-on console. \code{"no"} (default) turns off the printing.
-To be used in \code{AVar.VRR_pfd()} for large \eqn{p} (hundreds or more).}
+on console.  \code{"no"} (default) turns off the printing.  To be used
+in \code{AVar.VRR_pfd()} for large \eqn{p} (hundreds or more).}
 
-\item{cppfun}{Option to specify the C++ function to be used (see Details).}
+\item{cppfun}{Option to specify the \proglang{C++} function to be used (see Details).}
 
-\item{nthreads}{Integer to specify the number of threads used in OpenMP parallelization
-in \code{"Cov_r2A"} and \code{"Cov_r2E"}. By default (0), the number of
-threads is automatically set to one-half of that of (logical) processors
-detected (by the \code{C++} function \code{omp_get_num_procs()}).
-Setting this beyond the number of physical processors can result in
-poorer performance, depending on the environment.}
+\item{nthreads}{Integer to specify the number of threads used in \proglang{OpenMP}
+parallelization in \code{"Cov_r2A"} and \code{"Cov_r2E"}.  By default
+(\code{0}), the number of threads is automatically set to one-half of
+that of (logical) processors detected (by the \proglang{C++} function
+\code{omp_get_num_procs()}).  Setting this beyond the number of physical
+processors can result in poorer performance, depending on the environment.}
 }
 \value{
-A numeric vector of \eqn{Var[Vrel(R)]}, corresponding to \code{n}.
+A numeric vector of \eqn{\mathrm{Var}[V_{\mathrm{rel}}(\mathbf{R})]}{Var[Vrel(R)]}, corresponding to \code{n}.
 }
 \description{
 Functions to obtain approximate variance of relative eigenvalue variance
-of correlation matrix \eqn{Var[Vrel(R)]}. There are several versions
-for each of two different expressions: \code{pf*} and \code{k*} families.
+of correlation matrix
+\eqn{\mathrm{Var}[V_{\mathrm{rel}}(\mathbf{R})]}{Var[Vrel(R)]}.  There are
+several versions for each of two different expressions:
+\code{pf*} and \code{k*} families.
 
-\code{AVar.VRR_pf()}: asymptotic and approximate variance of \eqn{Vrel(R)}
-based on Pan & Frank's (2004) approach.  Prototype version.
+\code{AVar.VRR_pf()}: asymptotic and approximate variance of
+\eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)}
+based on Pan and Frank's (2004) approach.  Prototype version.
 
-\code{AVar.VRR_pfv()}: vectorized version of \code{AVar.VRR_pf()}.
-Much faster, but requires a large RAM space as \code{p} grows.
+\code{AVar.VRR_pfv()}: vectorized version of \code{AVar.VRR_pf()}; much
+faster, but requires a large RAM space as \eqn{p} grows
 
-\code{AVar.VRR_pfd()}: further improvement over \code{AVar.VRR_pfv()}.
+\code{AVar.VRR_pfd()}: further improvement over \code{AVar.VRR_pfv()}
 
-\code{AVar.VRR_pfc()}: fast version using \code{Rcpp}. Requires
-the extension package \code{eigvaldispRcpp}.
+\code{AVar.VRR_pfc()}: fast version using \pkg{Rcpp}; requires
+the extension package \pkg{eigvaldispRcpp}
 
 \code{AVar.VRR_kl()}: asymptotic variance from Konishi's theory:
-\eqn{Vrel(R)} as function of eigenvalues.
+\eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} as function of eigenvalues
 
-\code{AVar.VRR_klv()}: vectorized version of \code{AVar.VRR_kl()}.
+\code{AVar.VRR_klv()}: vectorized version of \code{AVar.VRR_kl()}
 
 \code{AVar.VRR_kr()}: asymptotic variance from Konishi's theory:
-\eqn{Vrel(R)} as function of correlation coefficients
+\eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} as function of correlation
+coefficients
 
-\code{AVar.VRR_krv()}: vectorized version of \code{AVar.VRR_kr()}.
+\code{AVar.VRR_krv()}: vectorized version of \code{AVar.VRR_kr()}
 }
 \details{
 Watanabe (2022) presented two approaches to evaluate approximate variance
-of the relative eigenvalue variance of a correlation matrix \eqn{Vrel(R)}.
-One is Pan & Frank's (2004) heuristic approximation (eqs. 28 and 36--38 in
-Watanabe 2022). The other is based on Konishi's (1979) asymptotic
-theory (eq. 39 in Watanabe 2022). Simulations showed that the former tends
-to be more accurate, but the latter is much faster. This is mainly because
+of the relative eigenvalue variance of a correlation matrix
+\eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)}.  One is Pan and Frank's (2004)
+heuristic approximation (eqs. 28 and 36--38 in
+Watanabe 2022).  The other is based on Konishi's (1979) asymptotic
+theory (eq. 39 in Watanabe 2022).  Simulations showed that the former tends
+to be more accurate, but the latter is much faster.  This is mainly because
 the Pan--Frank approach involves evaluation of covariances in \eqn{~p^4 / 4}
-pairs of (squared) correlation coefficients.
-(That said, the speed will not be a practical concern unless \eqn{p}
-exceeds a few hundreds.)
+pairs of (squared) correlation coefficients.  (That said, the speed
+will not be a practical concern unless \eqn{p} exceeds a few hundreds.)
 
 The Pan--Frank approach is at present implemented in several functions
 which yield (almost) identical results:
 \describe{
-\item{\code{AVar.VRR_pf()}}{Prototype version. Simplest implementation.}
-\item{\code{AVar.VRR_pfv()}}{Vectorized version. Much faster, but
-requires a large RAM space as \code{p} grows.}
-\item{\code{AVar.VRR_pfd()}}{Improvement over \code{AVar.VRR_pfv()}.
-Faster and more RAM-efficient. This is the default to be called in
-\code{Var.VRR(..., method = "Pan-Frank")}, unless the extension package
-\code{eigvaldispRcpp} is installed.}
-\item{\code{AVar.VRR_pfc()}}{Fast version using \code{Rcpp}.
-Requires the extension package \code{eigvaldispRcpp}; this is
+\item{\code{AVar.VRR_pf()}}{Prototype version.  Simplest implementation.}
+\item{\code{AVar.VRR_pfv()}}{Vectorized version.  Much faster, but
+requires a large RAM space as \eqn{p} grows.}
+\item{\code{AVar.VRR_pfd()}}{Improvement over
+\code{AVar.VRR_pfv()}.  Faster and more RAM-efficient.  This is
+the default to be called in \code{Var.VRR(..., method = "Pan-Frank")},
+unless the extension package \pkg{eigvaldispRcpp} is installed.}
+\item{\code{AVar.VRR_pfc()}}{Fast version using \pkg{Rcpp}.  Requires
+the extension package \pkg{eigvaldispRcpp}; this is
 the default when this package is installed (and detected).}
 }
 \code{AVar.VRR_pfc()} implements the same algorithm as the others,
-but makes use of \code{C++} API via the package \code{Rcpp} for evaluation of
-the sum of covariance across pairs of squared correlation coefficients.
-This version works much faster than vectorized \code{R} implementations.
-Note that the output can slightly differ from those of pure \code{R}
-implementations (by the order of ~1e-9).
+but makes use of \proglang{C++} API via the package \pkg{Rcpp} for
+evaluation of the sum of covariance across pairs of squared correlation
+coefficients.  This version works much faster than vectorized \R
+implementations.  Note that the output can slightly differ from those of
+pure \R implementations (by the order of ~\code{1e-9}).
 
 The Konishi approach is implemented in several functions:
 \describe{
 \item{\code{AVar.VRR_kl()}}{From Konishi (1979: corollary 2.2):
-\eqn{Vrel(R)} as function of eigenvalues. Prototype version.}
-\item{\code{AVar.VRR_klv()}}{Vectorized version of \code{AVar.VRR_kl()}.
-This is the default when \code{Var.VRR(..., method = "Konishi")}.}
+\eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} as function of
+eigenvalues.  Prototype version.}
+\item{\code{AVar.VRR_klv()}}{Vectorized version of
+\code{AVar.VRR_kl()}.  This is the default when
+\code{Var.VRR(..., method = "Konishi")}.}
 \item{\code{AVar.VRR_kr()}}{From Konishi (1979: theorem 6.2):
-\eqn{Vrel(R)} as function of correlation coefficients.}
+\eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} as function of
+correlation coefficients.}
 \item{\code{AVar.VRR_krv()}}{Vectorized version of \code{AVar.VRR_kr()};
 slightly faster for moderate \eqn{p}, but not particularly fast
 for large \eqn{p} as the number of elements to be summed becomes large.}
@@ -223,51 +233,54 @@ If asymptotic result is desired, use \code{mode.var2 = "asymptotic"}.
 
 Options for \code{mode} in \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()}:
 \describe{
-\item{\code{"nested.for"}}{Only for \code{AVar.VRR_pf()}. Uses nested
+\item{\code{"nested.for"}}{Only for \code{AVar.VRR_pf()}.  Uses nested
 for loops, which is straifhgforward and RAM efficient but slow.}
 \item{\code{"for.ind"} (default)/\code{"lapply"}}{Run the iteration along
 an index vector to shorten computational time,
 with \code{for} loop and \code{lapply()}, respectively.}
-\item{\code{"mclapply"}/\code{"parLapply"}}{Only for \code{AVar.VRR_pfd()}.
-Parallelize the same iteration by
+\item{\code{"mclapply"}/\code{"parLapply"}}{Only for
+\code{AVar.VRR_pfd()}.  Parallelize the same iteration by
 forking and socketing, respectively, with the named functions in the
-package \code{parallel}. Note that the former doesn't work in the
-Windows environment. See \code{vignette("parallel")} for details.}
+package \pkg{parallel}.  Note that the former doesn't work in the
+Windows environment.  See \code{vignette("parallel")} for details.}
 }
 
 \code{AVar.VRR_pfv()} internally generates vectors and matrices
-whose lengths are about \eqn{p^4 / 8} and \eqn{p^4 / 4}. These take about
-\eqn{2*p^4} bytes of RAM; this can be prohibitively large for large \eqn{p}.
+whose lengths are about \eqn{p^4 / 8} and \eqn{p^4 / 4}.  These take about
+\eqn{2p^4} bytes of RAM; this can be prohibitively large for large \eqn{p}.
 
 \code{AVar.VRR_pfd()} divides index vectors used internally in
 \code{AVar.VRR_pfv()} into lists, along whose elements calculations are done
-to save RAM space.
-The argument \code{max.size} controls the maximum size of resulting vectors;
-at least \code{max.size * (2 * length(n) + 6) * 8} bytes of RAM is required
-for storing temporary results (and more during computation);
-e.g., ~2e7 seems good for 16 GB RAM, ~4e8 for 256 GB.
-However, performance does not seem to improve past 1e6--1e7 presumably
-because memory allocation takes substantial time for large objects.
-The iteration can be parallelized with \code{mode = "mclapply"} or
-\code{"parLapply"}, but be careful about RAM limitations.
+to save RAM space.  The argument \code{max.size} controls the maximum size
+of resulting vectors; at least \code{max.size * (2 * length(n) + 6) * 8}
+bytes of RAM is required for storing temporary results (and more
+during computation); e.g., ~\code{2e7} seems good for 16 GB RAM,
+~\code{4e8} for 256 GB.  However, performance does not seem to improve
+past \code{1e6}--\code{1e7} presumably because memory allocation takes
+substantial time for large objects.  The iteration can be parallelized
+with \code{mode = "mclapply"} or \code{"parLapply"},
+but be careful about RAM limitations.
 
 \code{AVar.VRR_pfc()} provides a faster implementation with one of the
-\code{C++} functions defined in the extension package \code{eigvaldispRcpp}
-(which is required to run this function).
-The \code{C++} function is specified by the argument \code{cppfun}:
+\proglang{C++} functions defined in the extension package
+\pkg{eigvaldispRcpp} (which is required to run this function).  The
+\proglang{C++} function is specified by the argument \code{cppfun}:
 \describe{
 \item{\code{"Cov_r2C"} (default)}{Serial evaluation with base
-\code{Rcpp} functionalities.}
-\item{\code{"Cov_r2A"} or \code{"Armadillo"}}{Using \code{RcppArmadillo}.
-Parallelized with OpenMP when the environment allows.}
-\item{\code{"Cov_r2E"} or \code{"Eigen"}}{Using \code{RcppEigen}.
-Parallelized with OpenMP when the environment allows.}
-\item{\code{"Cov_r2P"} or \code{"Parallel"}}{Using \code{RcppParallel}.
-Parallelized with IntelTBB when the environment allows.}
+\pkg{Rcpp} functionalities.}
+\item{\code{"Cov_r2A"} or \code{"Armadillo"}}{Using
+\pkg{RcppArmadillo}.  Parallelized with \proglang{OpenMP} when
+the environment allows.}
+\item{\code{"Cov_r2E"} or \code{"Eigen"}}{Using
+\pkg{RcppEigen}.  Parallelized with \proglang{OpenMP} when
+the environment allows.}
+\item{\code{"Cov_r2P"} or \code{"Parallel"}}{Using
+\pkg{RcppParallel}.  Parallelized with \proglang{IntelTBB} when
+the environment allows.}
 }
-The default option would be sufficiently fast for up to p = 100 or so.
-The latter three options aim at speeding-up the calculation via
-parallelization with other \code{Rcpp}-related packages. Although these
+The default option would be sufficiently fast for up to \eqn{p = 100} or
+so.  The latter three options aim at speeding-up the calculation via
+parallelization with other \pkg{Rcpp}-related packages.  Although these
 would have similar performance in most environments, \code{"Cov_r2E"} seems
 the fastest in the development environment, closely followed by
 \code{"Cov_r2A"}.
@@ -314,19 +327,19 @@ eigvaldisp:::AVar.VRR_klv(Rho2, n = N - 1)
 
 }
 \references{
-Konishi, S. (1979). Asymptotic expansions for the distributions of statistics
+Konishi, S. (1979) Asymptotic expansions for the distributions of statistics
 based on the sample correlation matrix in principal componenet analysis.
 \emph{Hiroshima Mathematical Journal} \strong{9}, 647--700.
-doi:\href{https://doi.org/10.32917/hmj/1206134750}{10.32917/hmj/1206134750}.
+\doi{10.32917/hmj/1206134750}.
 
-Pan, W. & Frank, K. A. (2004). An approximation to the distribution of the
+Pan, W. and Frank, K. A. (2004) An approximation to the distribution of the
 product of two dependent correlation coefficients. \emph{Journal of Statistical
 Computation and Simulation} \strong{74}, 419--443.
-doi:\href{https://doi.org/10.1080/00949650310001596822}{10.1080/00949650310001596822}.
+\doi{10.1080/00949650310001596822}.
 
-Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. \doi{10.1111/evo.14382}.
 }
 \seealso{
 \code{\link{Exv.VXX}} for main moment functions

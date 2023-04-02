@@ -65,9 +65,9 @@ EDI_sam$VR
 
 }
 \references{
-Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. \doi{10.1111/evo.14382}.
 }
 \seealso{
 \code{\link{VE}}: Calculate eigenvalue dispersion indices
@@ -77,9 +77,9 @@ quantifying the magnitude of phenotypic integration. \emph{Evolution},
 \code{\link{AVar.VRR_xx}}: Approximate variance of relative eigenvalue
 variance of correlation matrix (internal functions)
 
-\code{\link{VXXa}}: ``Bias-corrected'' eigenvalue dispersion indices
+\code{\link{VXXa}}: \dQuote{Bias-corrected} eigenvalue dispersion indices
 
-\code{\link{Exv.VXXa}}: Moments of ``bias-corrected'' eigenvalue dispersion
+\code{\link{Exv.VXXa}}: Moments of \dQuote{bias-corrected} eigenvalue dispersion
 indices
 
 \code{\link{simulateVE}}: Simulate eigenvalue dispersion indices

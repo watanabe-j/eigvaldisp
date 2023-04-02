@@ -5,33 +5,33 @@
 #'
 #' Cholesky factors are useful in simulating multivariate normal variates,
 #' but \code{chol(A)} by default returns an error unless \code{A} is strictly
-#' positive definite (i.e., singular matrices are not allowed).
-#' One way to avoid this is to use \code{chol(A, pivot = TRUE)} and arrange
-#' the columns appropriately (see the documentation of \link[base]{chol}).
-#' \code{chol_piv(A)} is a utility to conduct this.
+#' positive definite (i.e., singular matrices are not allowed).  One
+#' way to avoid this is to use \code{chol(A, pivot = TRUE)} and arrange
+#' the columns appropriately (see the documentation of
+#' \link[base]{chol}).  \code{chol_piv(A)} is a utility to conduct this.
 #'
 #' Unexpectedly, however, this can still fail in certain situations,
-#' e.g., when more than one eigenvalues are 0.
-#' This is despite that a Cholesky factorization can be defined for any
+#' e.g., when more than one eigenvalues are 0.  This is despite that a
+#' Cholesky factorization can be defined for any
 #' nonnegative definite matrix, as can be confirmed via QR factorization,
-#' (e.g., Schott, 2017; although this factor may not be unique).
-#' \code{chol_piv()} returns a warning in this case.
-#' \code{chol_qr()} handles this factorization via a naive implementation;
+#' (e.g., Schott, 2017; although this factor may not be
+#' unique).  \code{chol_piv()} returns a warning in this case.  \code{chol_qr()}
+#' handles this factorization via a naive implementation;
 #' first taking a matrix square root via eigendecomposition (\code{matsqrt(A)})
-#' and then conducting QR factorization of this (with pivoting).
-#' This allows for a correct Cholesky factorization of
+#' and then conducting QR factorization of this (with pivoting).  This allows
+#' for a correct Cholesky factorization of
 #' any positive semidefinite matrix, although for most simulation purposes
 #' the matrix square root by \code{matsqrt()} usually suffices.
 #'
 #' @name sqrt_methods
 #' @param A
-#'   Numeric matrix, assumed to be symmetric.
+#'   Numeric matrix, assumed to be symmetric
 #' @param method
 #'   Either \code{"svd"} (default) or \code{"eigen"} to specify
-#'   the function to be used for eigendecomposition. Results should be
+#'   the function to be used for eigendecomposition.  Results should be
 #'   identical, but svd would be faster in most environments.
 #' @references
-#'   Schott, J. R. (2017). *Matrix Analysis for Statistics*, 3rd edition.
+#'   Schott, J. R. (2017) *Matrix Analysis for Statistics*, 3rd edition.
 #'     John Wiley & Sons, Hoboken, New Jersey.
 #' @seealso \code{\link[base]{chol}}, \code{\link[base]{qr}}
 #' @examples
@@ -59,11 +59,11 @@ NULL
 #' Matrix square root
 #'
 #' \code{matsqrt(A)} returns a matrix square root of \code{A}
-#' with spectral or singular value decomposition.
+#' with spectral or singular value decomposition
 #'
 #' @rdname sqrt_methods
 #' @return
-#'   \code{matsqrt(A)}: Symmetric matrix which is a square root of \code{A}.
+#'   \code{matsqrt(A)}: Symmetric matrix which is a square root of \code{A}
 matsqrt <- function(A, method = c("svd", "eigen")) {
     method <- match.arg(method)
     if(method == "svd") {
@@ -83,14 +83,13 @@ matsqrt <- function(A, method = c("svd", "eigen")) {
 #' Cholesky factorization with pivoting
 #'
 #' \code{chol_piv(A)} conducts Cholesky factorization of \code{A}
-#' with "pivoting".
-#' \code{crossprod(chol_piv(A))} will be equal to \code{A},
-#' unless multiple zero eigenvalues exist
+#' with \dQuote{pivoting}.   \code{crossprod(chol_piv(A))} will be equal to
+#' \code{A}, unless multiple zero eigenvalues exist
 #' (in which case the results can be spurious; a warning results).
 #' @rdname sqrt_methods
 #' @return
 #'   \code{chol_piv(A)}/\code{chol_qr(A)}: Upper triangular matrix
-#'   which is a Cholesky factor of \code{A}.
+#'   which is a Cholesky factor of \code{A}
 chol_piv <- function(A) {
     cA <- suppressWarnings(chol(A, pivot = TRUE))
     if(attr(cA, "rank") < ncol(A) - 1) {
@@ -108,11 +107,10 @@ chol_piv <- function(A) {
 #' Cholesky factorization with QR decomposition
 #'
 #' \code{chol_qr(A)} conducts Cholesky factorization of \code{A}
-#' with QR factorization.
-#' \code{crossprod(chol_qr(A))} is equal to \code{A},
-#' even with multiple zero eigenvalues.
-#' This is more reliable, but slower than \code{chol_piv()}.
-#' \code{matsqrt()}, which is called internally, usually suffices.
+#' with QR factorization.  \code{crossprod(chol_qr(A))} is equal to \code{A},
+#' even with multiple zero eigenvalues.  This is more reliable, but slower
+#' than \code{chol_piv()}.  \code{matsqrt()}, which is called internally,
+#' usually suffices.
 #'
 #' @rdname sqrt_methods
 # #' @return
@@ -131,7 +129,7 @@ chol_qr <- function(A, method = c("svd", "eigen")) {
 ##### chol_qrsvd #####
 #' Cholesky factorization with QR decomposition and SVD
 #'
-#' \code{chol_qrsvd(A)} is essentially \code{chol_qr(A, method = "svd")}.
+#' \code{chol_qrsvd(A)} is essentially \code{chol_qr(A, method = "svd")}
 #'
 #' @rdname sqrt_methods
 chol_qrsvd <- function(A) {
@@ -156,7 +154,7 @@ NULL
 ##### mc, scale2 #####
 #' Utility for centering
 #'
-#' \code{mc(x)} is a short for \code{sweep(x, 2, colMeans(x))}.
+#' \code{mc(x)} is a short for \code{sweep(x, 2, colMeans(x))}
 #' @rdname centering
 mc <- function(x) {
     sweep(x, 2, colMeans(x))
@@ -166,7 +164,7 @@ mc <- function(x) {
 #' Utility for scaling
 #'
 #' \code{scale2(x)} is essentially \code{scale(x)},
-#' but returns 0 rather than NaN for constant columns.
+#' but returns 0 rather than \code{NaN} for constant columns
 #' @rdname centering
 scale2 <- function(x, center = TRUE, scale = FALSE) {
     ans <- scale(x, center = center, scale = scale)
@@ -178,12 +176,12 @@ scale2 <- function(x, center = TRUE, scale = FALSE) {
 ##### digit #####
 #' Obtain number of digits
 #'
-#' Internal utility function to obtain the number of digit of an integer.
-#' For internal use in \code{AVar.VRr_pfx()} functions (and others).
+#' Internal utility function to obtain the number of digit of an integer.  For
+#' internal use in \code{AVar.VRr_pfx()} functions (and others).
 #'
 #' @param x
-#'   The object whose number of digits is to be obtained.
-#'   Length can be >1. Integer or integer-like numeric are assumed.
+#'   The object whose number of digits is to be obtained.  Length can
+#'   be >1.  Integer or integer-like numeric are assumed.
 #'
 #' @return The number of digits, as an integer vector
 #'
@@ -235,23 +233,22 @@ digit <- function(x) {
 #' Hypergeometric function wrapper
 #'
 #' Wrapper for hypergeometric function with two upper and one lower arguments
-#' (or the classic hypergeometric function).
+#' (or the classic hypergeometric function)
 #'
 #' This function utilizes the function \code{genhypergeo} from
 #' the package \code{hypergeo}; when it appears to have failed,
 #' then the function \code{hypergeo} is used.
 #'
-#' Elements of \code{x} are assumed to be real numbers within \eqn{[-1, 1]}.
-#' Complex arguments/returns are not assumed. No check is done.
+#' Elements of \code{x} are assumed to be real numbers within
+#' \eqn{[-1, 1]}.  Complex arguments/returns are not assumed.  No check is done.
 #'
 #' Tries to reduce computational time by dropping duplicated values from
 #' \code{x} while trying to retain its original \code{names} and \code{dim}.
 #'
 #' This function primarily uses \code{hypergeo::genhypergeo()}, as this seems
 #' to be more numerically stable than \code{hypergeo::hypergeo()} in some
-#' conditions tested in development.
-#' For the present purpose, \code{gsl::hyperg_2F1} may suffice,
-#' but this has not been implemented.
+#' conditions tested in development.  For the present purpose,
+#' \code{gsl::hyperg_2F1} may suffice, but this has not been implemented.
 #'
 #' @param a1,a2 Parameters in the numerator
 #' @param b1    Parameter in the denominator

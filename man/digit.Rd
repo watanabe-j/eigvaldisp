@@ -7,13 +7,13 @@
 digit(x)
 }
 \arguments{
-\item{x}{The object whose number of digits is to be obtained.
-Length can be >1. Integer or integer-like numeric are assumed.}
+\item{x}{The object whose number of digits is to be obtained.  Length can
+be >1.  Integer or integer-like numeric are assumed.}
 }
 \value{
 The number of digits, as an integer vector
 }
 \description{
-Internal utility function to obtain the number of digit of an integer.
-For internal use in \code{AVar.VRr_pfx()} functions (and others).
+Internal utility function to obtain the number of digit of an integer.  For
+internal use in \code{AVar.VRr_pfx()} functions (and others).
 }

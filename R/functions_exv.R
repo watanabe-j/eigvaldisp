@@ -3,54 +3,57 @@
 #'
 #' Functions to calculate expectation/variance of (relative) eigenvalue variance
 #' of sample covariance/correlation matrices for a given population
-#' covariance/correlation matrix and degrees of freedom \eqn{n}.
+#' covariance/correlation matrix and degrees of freedom \eqn{n}
 #'
 #' \code{Exv.VES()}, \code{Var.VES()}, and \code{Exv.VRR()} return exact
-#' moments.
-#' \code{Exv.VRS()} and \code{Var.VRS()} return approximations based
+#' moments.  \code{Exv.VRS()} and \code{Var.VRS()} return approximations based
 #' on the delta method, except under the null condition
-#' (\eqn{\Sigma} proportional to the identity matrix)
+#' (\eqn{\mathbf{\Sigma}}{\Sigma} proportional to the identity matrix)
 #' where exact moments are returned.
 #'
 #' \code{Var.VRR()} returns the exact variance when \eqn{p = 2} or
-#' under the null condition (\eqn{\Rho} is the identity matrix).
-#' Otherwise, asymptotic variance is calculated with the \code{method} of
-#' choice: either \code{"Pan-Frank"} (default) or \code{"Konishi"}.
-#' They correspond to Pan & Frank's heuristic approximation and Konishi's
+#' under the null condition (\eqn{\mathbf{P}}{\Rho} is the identity
+#' matrix).  Otherwise, asymptotic variance is calculated with the \code{method}
+#' of choice: either \code{"Pan-Frank"} (default) or \code{"Konishi"}.  They
+#' correspond to Pan and Frank's heuristic approximation and Konishi's
 #' asymptotic theory, respectively (see Watanabe, 2022).
 #'
 #' In this case, calculations are handled by one of the internal functions
-#' \code{AVar.VRR_xx()} (\code{xx} is a suffix to specify R implementation).
-#' For completeness, it is possible to directly specify the function
-#' to be used with the argument \code{fun}: for the Pan--Frank method,
-#' \code{pfd} (default), \code{pfv}, and \code{pf}; and for the
-#' Konishi method, \code{klv} (default), \code{kl}, \code{krv}, and \code{kr}.
-#' Within each group, these function yield identical results but differ
-#' in speed (the defaults are the fastest).
-#' See \code{\link{AVar.VRR_xx}} for details of these functions.
+#' \code{AVar.VRR_xx()} (\code{xx} is a suffix to specify \R
+#' implementation).  For completeness, it is possible to directly specify the
+#' function to be used with the argument \code{fun}: for the Pan--Frank method,
+#' \code{"pfd"} (default), \code{"pfv"}, and \code{"pf"}; and for the
+#' Konishi method, \code{"klv"} (default), \code{"kl"}, \code{"krv"}, and
+#' \code{"kr"}.  Within each group, these function yield identical results but
+#' differ in speed (the defaults are the fastest).  See
+#' \code{\link{AVar.VRR_xx}} for details of these functions.
 #'
 #' The Pan--Frank method takes a substantial amount of time to be executed
-#' when p is large. Several C++ functions are provided in the extension package
-#' [\code{eigvaldispRcpp}](https://github.com/watanabe-j/eigvaldispRcpp) to
-#' speed-up the calculation. When this package is available, the default
-#' \code{fun} for the Pan--Frank method is set to \code{"pfc"}.
-#' The option for \code{C++} function is controlled by the argument
+#' when \eqn{p} is large.  Several \proglang{C++} functions are provided in
+#' the extension package
+#' [\pkg{eigvaldispRcpp}](https://github.com/watanabe-j/eigvaldispRcpp) to
+#' speed-up the calculation.  When this package is available, the default
+#' \code{fun} for the Pan--Frank method is set to \code{"pfc"}.  The
+#' option for \proglang{C++} function is controlled by the argument
 #' \code{cppfun} which in turn is passed to \code{AVar.VRR_pfc()}
-#' (see \code{\link{AVar.VRR_xx}}). When this argument is provided, the argument
-#' \code{fun} is ignored with a warning, unless one of the Konishi methods
-#' is used (in which case \code{cppfun} is ignored with a warning).
+#' (see \code{\link{AVar.VRR_xx}}).  When this argument is provided, the
+#' argument \code{fun} is ignored with a warning, unless one of the Konishi
+#' methods is used (in which case \code{cppfun} is ignored with a warning).
 #'
-#' Since the eigenvalue variance of a correlation matrix \eqn{V(R)} is simply
-#' \eqn{(p - 1)} times the relative eigenvalue variance \eqn{Vrel(R)} of
-#' the same matrix, their distributions are identical up to this scaling.
-#' Hence, \code{Exv.VER()} and \code{Var.VER()} calls \code{Exv.VRR()} and
-#' \code{Var.VRR()} (respectively), whose outputs are scaled and returned.
-#' These functions are provided for completeness, although there will be little
-#' practical demand for these functions (and \eqn{V(R)} itself).
+#' Since the eigenvalue variance of a correlation matrix
+#' \eqn{V(\mathbf{R})}{V(R)} is simply \eqn{(p - 1)} times the
+#' relative eigenvalue variance \eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} of
+#' the same matrix, their distributions are identical up to this
+#' scaling.  Hence, \code{Exv.VER()} and \code{Var.VER()} calls \code{Exv.VRR()}
+#' and \code{Var.VRR()} (respectively), whose outputs are scaled and
+#' returned.  These functions are provided for completeness, although
+#' there will be little practical demand for these functions (and
+#' \eqn{V(\mathbf{R})}{V(R)} itself).
 #'
-#' As detailed in Watanabe (2022), the distribution of \eqn{Vrel(R)} cannot be
-#' uniquely specified by eigenvalues alone. Hence, a full correlation
-#' matrix \code{Rho} should preferably be provided. Otherwise, a correlation
+#' As detailed in Watanabe (2022), the distribution of
+#' \eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} cannot be
+#' uniquely specified by eigenvalues alone.  Hence, a full correlation
+#' matrix \code{Rho} should preferably be provided.  Otherwise, a correlation
 #' matrix is constructed from the eigenvalues \code{Lambda} provided using
 #' the function \code{GenCov()} with randomly picked eigenvectors.
 #'
@@ -95,30 +98,31 @@
 #'   Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped.
 #' @param tol
 #'   For covariance-related functions, this is the tolerance/threshold
-#'   to be used with drop_0. For correlation-related functions,
+#'   to be used with drop_0.  For correlation-related functions,
 #'   this is passed to \code{Exv.r2()} along with other arguments.
 #' @param tol.hg,maxiter.hg
 #'   Passed to \code{Exv.r2()}; see description of that function.
 #' @param method
 #'   For \code{Var.VRR()} (and \code{Var.VER()}), determines the method
-#'   to obtain approximate variance in non-null conditions.
-#'   Either \code{"Pan-Frank"} (default) or \code{"Konishi"}. See Details.
+#'   to obtain approximate variance in non-null conditions.  Either
+#'   \code{"Pan-Frank"} (default) or \code{"Konishi"}.  See \dQuote{Details}.
 #' @param fun
 #'   For \code{Var.VRR()} (and \code{Var.VER()}), determines the function
-#'   to be used to evaluate approximate variance. See Details.
-#'   Options allowed are: \code{"pfd"}, \code{"pfv"}, \code{"pfc"}, \code{"pf"},
-#'   \code{"klv"}, \code{"kl"}, \code{"krv"}, and \code{"kr"}.
+#'   to be used to evaluate approximate variance.  See
+#'   \dQuote{Details}.  Options allowed are: \code{"pfd"}, \code{"pfv"},
+#'   \code{"pfc"}, \code{"pf"}, \code{"klv"}, \code{"kl"}, \code{"krv"},
+#'   and \code{"kr"}.
 #' @param ...
 #'   In \code{Var.VRR()}, additional arguments are passed to an internal
-#'   function which it in turn calls. Otherwise ignored.
+#'   function which it in turn calls.  Otherwise ignored.
 #'
 #' @return
 #' A numeric vector of the desired moment, corresponding to \code{n}.
 #'
 #' @references
-#' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
+#' Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
-#'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'  **76**, 4--28. \doi{10.1111/evo.14382}.
 #'
 #' @seealso
 #' \code{\link{VE}} for estimation
@@ -128,7 +132,7 @@
 #' \code{\link{Exv.rx}} for internal functions for moments of
 #'   correlation coefficients
 #'
-#' \code{\link{Exv.VXXa}} for moments of ``bias-corrected'' versions
+#' \code{\link{Exv.VXXa}} for moments of \dQuote{bias-corrected} versions
 #'
 #' @examples
 #' # Covariance matrix
@@ -170,7 +174,7 @@
 #' Var.VRR(Rho, N - 1, fun = "pfv") # Requires too much RAM for large p
 #' \dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc")} # Requires eigvaldispRcpp
 #' \dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc", cppfun = "Cov_r2P")}
-#' # The last two use C++ functions provided by extension package eigvaldispRcpp
+#' # The last two use \proglang{C++} functions provided by extension package eigvaldispRcpp
 #' # fun = "pfc"' can be omitted in the last call.
 #' # The above results are identical (up to rounding error)
 #'
@@ -189,7 +193,7 @@ NULL
 #' Expectation of eigenvalue variance of covariance matrix
 #'
 #' \code{Exv.VES()}: expectation of eigenvalue variance of covariance matrix
-#' \eqn{E[V(S)]}.
+#' \eqn{\mathrm{E}[V(\mathbf{S})]}{E[V(S)]}
 #'
 #' @rdname Exv.VXX
 #'
@@ -217,7 +221,7 @@ Exv.VES <- function(Sigma, n = 100, Lambda, divisor = c("UB", "ML"),
 #' Expectation of relative eigenvalue variance of covariance matrix
 #'
 #' \code{Exv.VRS()}: expectation of relative eigenvalue variance of
-#' covariance matrix \eqn{E[Vrel(S)]}.
+#' covariance matrix \eqn{\mathrm{E}[V_{\mathrm{rel}}(\mathbf{S})]}{E[Vrel(S)]}
 #'
 #' @rdname Exv.VXX
 #'
@@ -249,7 +253,7 @@ Exv.VRS <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
 #' Expectation of eigenvalue variance of correlation matrix
 #'
 #' \code{Exv.VER()}: expectation of eigenvalue variance of correlation
-#' matrix \eqn{E[V(R)]}.
+#' matrix \eqn{\mathrm{E}[V(\mathbf{R})]}{E[V(R)]}
 #'
 #' @rdname Exv.VXX
 #'
@@ -280,7 +284,8 @@ Exv.VER <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
 #' Expectation of relative eigenvalue variance of correlation matrix
 #'
 #' \code{Exv.VRR()}: expectation of relative eigenvalue variance of
-#' correlation matrix \eqn{E[Vrel(R)]}.
+#' correlation matrix
+#' \eqn{\mathrm{E}[V_{\mathrm{rel}}(\mathbf{R})]}{E[Vrel(R)]}
 #'
 #' @rdname Exv.VXX
 #'
@@ -313,7 +318,7 @@ Exv.VRR <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
 #' Variance of eigenvalue variance of covariance matrix
 #'
 #' \code{Var.VES()}: variance of eigenvalue variance of
-#' covariance matrix \eqn{Var[V(S)]}.
+#' covariance matrix \eqn{\mathrm{Var}[V(\mathbf{S})]}{Var[V(S)]}
 #'
 #' @rdname Exv.VXX
 #'
@@ -346,7 +351,8 @@ Var.VES <- function(Sigma, n = 100, Lambda, divisor = c("UB", "ML"),
 #' Variance of relative eigenvalue variance of covariance matrix
 #'
 #' \code{Var.VRS()}: variance of relative eigenvalue variance of
-#' covariance matrix \eqn{Var[Vrel(S)]}.
+#' covariance matrix
+#' \eqn{\mathrm{Var}[V_{\mathrm{rel}}(\mathbf{S})]}{Var[Vrel(S)]}
 #'
 #' @rdname Exv.VXX
 #'
@@ -384,7 +390,7 @@ Var.VRS <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
 #' Variance of eigenvalue variance of correlation matrix
 #'
 #' \code{Var.VER()}: variance of eigenvalue variance of
-#' correlation matrix \eqn{Var[V(R)]}.
+#' correlation matrix \eqn{\mathrm{Var}[V(\mathbf{R})]}{Var[V(R)]}
 #'
 #' @rdname Exv.VXX
 #'
@@ -413,7 +419,8 @@ Var.VER <- function(Rho, n = 100, Lambda, ...) {
 #' Variance of relative eigenvalue variance of correlation matrix
 #'
 #' \code{Var.VRR()}: variance of relative eigenvalue variance of
-#' correlation matrix \eqn{Var[Vrel(R)]}.
+#' correlation matrix
+#' \eqn{\mathrm{Var}[V_{\mathrm{rel}}(\mathbf{R})]}{Var[Vrel(R)]}
 #'
 #' @rdname Exv.VXX
 #'
@@ -483,49 +490,54 @@ Var.VRR <- function(Rho, n = 100, method = c("Pan-Frank", "Konishi"), Lambda,
 #' Approximate variance of relative eigenvalue variance of correlation matrix
 #'
 #' Functions to obtain approximate variance of relative eigenvalue variance
-#' of correlation matrix \eqn{Var[Vrel(R)]}. There are several versions
-#' for each of two different expressions: \code{pf*} and \code{k*} families.
+#' of correlation matrix
+#' \eqn{\mathrm{Var}[V_{\mathrm{rel}}(\mathbf{R})]}{Var[Vrel(R)]}.  There are
+#' several versions for each of two different expressions:
+#' \code{pf*} and \code{k*} families.
 #'
 #' Watanabe (2022) presented two approaches to evaluate approximate variance
-#' of the relative eigenvalue variance of a correlation matrix \eqn{Vrel(R)}.
-#' One is Pan & Frank's (2004) heuristic approximation (eqs. 28 and 36--38 in
-#' Watanabe 2022). The other is based on Konishi's (1979) asymptotic
-#' theory (eq. 39 in Watanabe 2022). Simulations showed that the former tends
-#' to be more accurate, but the latter is much faster. This is mainly because
+#' of the relative eigenvalue variance of a correlation matrix
+#' \eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)}.  One is Pan and Frank's (2004)
+#' heuristic approximation (eqs. 28 and 36--38 in
+#' Watanabe 2022).  The other is based on Konishi's (1979) asymptotic
+#' theory (eq. 39 in Watanabe 2022).  Simulations showed that the former tends
+#' to be more accurate, but the latter is much faster.  This is mainly because
 #' the Pan--Frank approach involves evaluation of covariances in \eqn{~p^4 / 4}
-#' pairs of (squared) correlation coefficients.
-#' (That said, the speed will not be a practical concern unless \eqn{p}
-#' exceeds a few hundreds.)
+#' pairs of (squared) correlation coefficients.  (That said, the speed
+#' will not be a practical concern unless \eqn{p} exceeds a few hundreds.)
 #'
 #' The Pan--Frank approach is at present implemented in several functions
 #' which yield (almost) identical results:
 #' \describe{
-#'   \item{\code{AVar.VRR_pf()}}{Prototype version. Simplest implementation.}
-#'   \item{\code{AVar.VRR_pfv()}}{Vectorized version. Much faster, but
-#'     requires a large RAM space as \code{p} grows.}
-#'   \item{\code{AVar.VRR_pfd()}}{Improvement over \code{AVar.VRR_pfv()}.
-#'     Faster and more RAM-efficient. This is the default to be called in
-#'     \code{Var.VRR(..., method = "Pan-Frank")}, unless the extension package
-#'     \code{eigvaldispRcpp} is installed.}
-#'   \item{\code{AVar.VRR_pfc()}}{Fast version using \code{Rcpp}.
-#'     Requires the extension package \code{eigvaldispRcpp}; this is
+#'   \item{\code{AVar.VRR_pf()}}{Prototype version.  Simplest implementation.}
+#'   \item{\code{AVar.VRR_pfv()}}{Vectorized version.  Much faster, but
+#'     requires a large RAM space as \eqn{p} grows.}
+#'   \item{\code{AVar.VRR_pfd()}}{Improvement over
+#'     \code{AVar.VRR_pfv()}.  Faster and more RAM-efficient.  This is
+#'     the default to be called in \code{Var.VRR(..., method = "Pan-Frank")},
+#'     unless the extension package \pkg{eigvaldispRcpp} is installed.}
+#'   \item{\code{AVar.VRR_pfc()}}{Fast version using \pkg{Rcpp}.  Requires
+#'     the extension package \pkg{eigvaldispRcpp}; this is
 #'     the default when this package is installed (and detected).}
 #' }
 #' \code{AVar.VRR_pfc()} implements the same algorithm as the others,
-#' but makes use of \code{C++} API via the package \code{Rcpp} for evaluation of
-#' the sum of covariance across pairs of squared correlation coefficients.
-#' This version works much faster than vectorized \code{R} implementations.
-#' Note that the output can slightly differ from those of pure \code{R}
-#' implementations (by the order of ~1e-9).
+#' but makes use of \proglang{C++} API via the package \pkg{Rcpp} for
+#' evaluation of the sum of covariance across pairs of squared correlation
+#' coefficients.  This version works much faster than vectorized \R
+#' implementations.  Note that the output can slightly differ from those of
+#' pure \R implementations (by the order of ~\code{1e-9}).
 #'
 #' The Konishi approach is implemented in several functions:
 #' \describe{
 #'   \item{\code{AVar.VRR_kl()}}{From Konishi (1979: corollary 2.2):
-#'     \eqn{Vrel(R)} as function of eigenvalues. Prototype version.}
-#'   \item{\code{AVar.VRR_klv()}}{Vectorized version of \code{AVar.VRR_kl()}.
-#'     This is the default when \code{Var.VRR(..., method = "Konishi")}.}
+#'     \eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} as function of
+#'     eigenvalues.  Prototype version.}
+#'   \item{\code{AVar.VRR_klv()}}{Vectorized version of
+#'     \code{AVar.VRR_kl()}.  This is the default when
+#'     \code{Var.VRR(..., method = "Konishi")}.}
 #'   \item{\code{AVar.VRR_kr()}}{From Konishi (1979: theorem 6.2):
-#'     \eqn{Vrel(R)} as function of correlation coefficients.}
+#'     \eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} as function of
+#'     correlation coefficients.}
 #'   \item{\code{AVar.VRR_krv()}}{Vectorized version of \code{AVar.VRR_kr()};
 #'     slightly faster for moderate \eqn{p}, but not particularly fast
 #'     for large \eqn{p} as the number of elements to be summed becomes large.}
@@ -539,21 +551,21 @@ Var.VRR <- function(Rho, n = 100, method = c("Pan-Frank", "Konishi"), Lambda,
 #'
 #' Options for \code{mode} in \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()}:
 #' \describe{
-#'   \item{\code{"nested.for"}}{Only for \code{AVar.VRR_pf()}. Uses nested
+#'   \item{\code{"nested.for"}}{Only for \code{AVar.VRR_pf()}.  Uses nested
 #'     for loops, which is straifhgforward and RAM efficient but slow.}
 #'   \item{\code{"for.ind"} (default)/\code{"lapply"}}{Run the iteration along
 #'     an index vector to shorten computational time,
 #'     with \code{for} loop and \code{lapply()}, respectively.}
-#'   \item{\code{"mclapply"}/\code{"parLapply"}}{Only for \code{AVar.VRR_pfd()}.
-#'     Parallelize the same iteration by
+#'   \item{\code{"mclapply"}/\code{"parLapply"}}{Only for
+#'     \code{AVar.VRR_pfd()}.  Parallelize the same iteration by
 #'     forking and socketing, respectively, with the named functions in the
-#'     package \code{parallel}. Note that the former doesn't work in the
-#'     Windows environment. See \code{vignette("parallel")} for details.}
+#'     package \pkg{parallel}.  Note that the former doesn't work in the
+#'     Windows environment.  See \code{vignette("parallel")} for details.}
 #' }
 #'
 #' \code{AVar.VRR_pfv()} internally generates vectors and matrices
-#' whose lengths are about \eqn{p^4 / 8} and \eqn{p^4 / 4}. These take about
-#' \eqn{2*p^4} bytes of RAM; this can be prohibitively large for large \eqn{p}.
+#' whose lengths are about \eqn{p^4 / 8} and \eqn{p^4 / 4}.  These take about
+#' \eqn{2p^4} bytes of RAM; this can be prohibitively large for large \eqn{p}.
 #'
 # #' \code{AVar.VRR_pfd()} divides the index vector \code{b} (used in
 # #' \code{AVar.VRR_pfv()}) into a list \code{bd} using the internal function
@@ -564,35 +576,38 @@ Var.VRR <- function(Rho, n = 100, method = c("Pan-Frank", "Konishi"), Lambda,
 # #' Alternatively, this list can be provided as the argument \code{bd}
 # #' (which should exactly match the one to be generated; use
 # #' \code{eigvaldisp:::divInd()}).
-#' \code{AVar.VRR_pfd()} divides index vectors used internally in 
+#' \code{AVar.VRR_pfd()} divides index vectors used internally in
 #' \code{AVar.VRR_pfv()} into lists, along whose elements calculations are done
-#' to save RAM space.
-#' The argument \code{max.size} controls the maximum size of resulting vectors;
-#' at least \code{max.size * (2 * length(n) + 6) * 8} bytes of RAM is required
-#' for storing temporary results (and more during computation);
-#' e.g., ~2e7 seems good for 16 GB RAM, ~4e8 for 256 GB.
-#' However, performance does not seem to improve past 1e6--1e7 presumably
-#' because memory allocation takes substantial time for large objects.
-#' The iteration can be parallelized with \code{mode = "mclapply"} or
-#' \code{"parLapply"}, but be careful about RAM limitations.
+#' to save RAM space.  The argument \code{max.size} controls the maximum size
+#' of resulting vectors; at least \code{max.size * (2 * length(n) + 6) * 8}
+#' bytes of RAM is required for storing temporary results (and more
+#' during computation); e.g., ~\code{2e7} seems good for 16 GB RAM,
+#' ~\code{4e8} for 256 GB.  However, performance does not seem to improve
+#' past \code{1e6}--\code{1e7} presumably because memory allocation takes
+#' substantial time for large objects.  The iteration can be parallelized
+#' with \code{mode = "mclapply"} or \code{"parLapply"},
+#' but be careful about RAM limitations.
 #'
 #' \code{AVar.VRR_pfc()} provides a faster implementation with one of the
-#' \code{C++} functions defined in the extension package \code{eigvaldispRcpp}
-#' (which is required to run this function).
-#' The \code{C++} function is specified by the argument \code{cppfun}:
+#' \proglang{C++} functions defined in the extension package
+#' \pkg{eigvaldispRcpp} (which is required to run this function).  The
+#' \proglang{C++} function is specified by the argument \code{cppfun}:
 #' \describe{
 #'   \item{\code{"Cov_r2C"} (default)}{Serial evaluation with base
-#'     \code{Rcpp} functionalities.}
-#'   \item{\code{"Cov_r2A"} or \code{"Armadillo"}}{Using \code{RcppArmadillo}.
-#'     Parallelized with OpenMP when the environment allows.}
-#'   \item{\code{"Cov_r2E"} or \code{"Eigen"}}{Using \code{RcppEigen}.
-#'     Parallelized with OpenMP when the environment allows.}
-#'   \item{\code{"Cov_r2P"} or \code{"Parallel"}}{Using \code{RcppParallel}.
-#'     Parallelized with IntelTBB when the environment allows.}
+#'     \pkg{Rcpp} functionalities.}
+#'   \item{\code{"Cov_r2A"} or \code{"Armadillo"}}{Using
+#'     \pkg{RcppArmadillo}.  Parallelized with \proglang{OpenMP} when
+#'     the environment allows.}
+#'   \item{\code{"Cov_r2E"} or \code{"Eigen"}}{Using
+#'     \pkg{RcppEigen}.  Parallelized with \proglang{OpenMP} when
+#'     the environment allows.}
+#'   \item{\code{"Cov_r2P"} or \code{"Parallel"}}{Using
+#'     \pkg{RcppParallel}.  Parallelized with \proglang{IntelTBB} when
+#'     the environment allows.}
 #' }
-#' The default option would be sufficiently fast for up to p = 100 or so.
-#' The latter three options aim at speeding-up the calculation via
-#' parallelization with other \code{Rcpp}-related packages. Although these
+#' The default option would be sufficiently fast for up to \eqn{p = 100} or
+#' so.  The latter three options aim at speeding-up the calculation via
+#' parallelization with other \pkg{Rcpp}-related packages.  Although these
 #' would have similar performance in most environments, \code{"Cov_r2E"} seems
 #' the fastest in the development environment, closely followed by
 #' \code{"Cov_r2A"}.
@@ -603,78 +618,81 @@ Var.VRR <- function(Rho, n = 100, method = c("Pan-Frank", "Konishi"), Lambda,
 #'
 #' @param exv1.mode
 #'   Whether \code{"exact"} or \code{"asymptotic"} expression is used for
-#'   \eqn{E(r)}.
+#'   \eqn{\mathrm{E}(r)}{E(r)}.
 #' @param var2.mode
 #'   Whether \code{"exact"} or \code{"asymptotic"} expression is used for
-#'   \eqn{Var(r^2)}.
+#'   \eqn{\mathrm{Var}(r^2)}{Var(r^2)}.
 #' @param var1.mode
 #'   Whether \code{"exact"} or \code{"asymptotic"} expression is used for
-#'   \eqn{Cov(rij, rkl)}. (At present, only \code{"asymptotic"} is allowed.)
+#'   \eqn{\mathrm{Cov}(r_{ij}, r_{kl})}{Cov(r_ij, r_kl)}.  (At present,
+#'   only \code{"asymptotic"} is allowed.)
 #' @param order.exv1,order.var2
 #'   Used to specify the order of evaluation for asymptotic expressions of
-#'   \eqn{E(r)} and \eqn{Var(r^2)} when \code{exv1.mode} and \code{var2.mode} is
+#'   \eqn{\mathrm{E}(r)}{E(r)} and \eqn{\mathrm{Var}(r^2)}{Var(r^2)}
+#'   when \code{exv1.mode} and \code{var2.mode} is
 #'   \code{"asymptotic"}; see \code{\link{Exv.rx}}.
 #' @param mode
 #'   In \code{AVar.VRR_pf()} and \code{AVar.VRR_pfd()},
 #'   specifies the mode of iterations (see Details).
 #' @param mc.cores
-#'   Number of cores to be used (numeric/integer). When \code{"auto"} (default),
-#'   set to \code{min(c(ceiling(p / 2), max.cores))}, which usually works well.
-#'   (Used only when \code{mode = "mclapply"}, or \code{"parLapply"})
+#'   Number of cores to be used (numeric/integer).  When \code{"auto"}
+#'   (default), set to \code{min(c(ceiling(p / 2), max.cores))}, which usually
+#'   works well.  (Used only when \code{mode = "mclapply"}, or
+#'   \code{"parLapply"})
 #' @param max.cores
-#'   Maximum number of cores to be used.
-#'   (Used only when \code{mode = "mclapply"}, or \code{"parLapply"})
+#'   Maximum number of cores to be used.  (Used only when
+#'   \code{mode = "mclapply"}, or \code{"parLapply"})
 #' @param do.mcaffinity
 #'   Whether to run \code{parallel::mcaffinity()}, which seems required in
-#'   some Linux environments to assign threads to multiple cores.
-#'   (Used only when \code{mode = "mclapply"}, or \code{"parLapply"})
+#'   some Linux environments to assign threads to multiple cores.  (Used only
+#'   when \code{mode = "mclapply"}, or \code{"parLapply"})
 #' @param affinity_mc
-#'   Argument of \code{parallel::mcaffinity()} to specify assignment of threads.
-#'   (Used only when \code{mode = "mclapply"}, or \code{"parLapply"})
+#'   Argument of \code{parallel::mcaffinity()} to specify assignment of
+#'   threads.  (Used only when \code{mode = "mclapply"}, or \code{"parLapply"})
 #' @param cl
 #'   A cluster object (made by \code{parallel::makeCluster()}); when already
-#'   created, one can be specified with this argument. Otherwise, one is created
-#'   within function call, which is turned off on exit.
-#'   (Used only when \code{mode = "parLapply"})
+#'   created, one can be specified with this argument.  Otherwise, one is
+#'   created within function call, which is turned off on exit.  (Used only
+#'   when \code{mode = "parLapply"})
 #' @param max.size
 #'   Maximum size of vectors created internally (see Details).
 # #' @param bd
 # #'   List of indices used for iteration (see Details).
 #' @param verbose
 #'   When \code{"yes"} or \code{"inline"}, pogress of iteration is printed
-#'   on console. \code{"no"} (default) turns off the printing.
-#'   To be used in \code{AVar.VRR_pfd()} for large \eqn{p} (hundreds or more).
+#'   on console.  \code{"no"} (default) turns off the printing.  To be used
+#'   in \code{AVar.VRR_pfd()} for large \eqn{p} (hundreds or more).
 #' @param cppfun
-#'   Option to specify the C++ function to be used (see Details).
+#'   Option to specify the \proglang{C++} function to be used (see Details).
 #' @param nthreads
-#'   Integer to specify the number of threads used in OpenMP parallelization
-#'   in \code{"Cov_r2A"} and \code{"Cov_r2E"}. By default (0), the number of
-#'   threads is automatically set to one-half of that of (logical) processors
-#'   detected (by the \code{C++} function \code{omp_get_num_procs()}).
-#'   Setting this beyond the number of physical processors can result in
-#'   poorer performance, depending on the environment.
+#'   Integer to specify the number of threads used in \proglang{OpenMP}
+#'   parallelization in \code{"Cov_r2A"} and \code{"Cov_r2E"}.  By default
+#'   (\code{0}), the number of threads is automatically set to one-half of
+#'   that of (logical) processors detected (by the \proglang{C++} function
+#'   \code{omp_get_num_procs()}).  Setting this beyond the number of physical
+#'   processors can result in poorer performance, depending on the environment.
 #' @param ...
 #'   In the \code{pf} family functions, passed to \code{Exv.r1()} and
-#'   \code{Var.r2()} (when the corresponding modes are \code{"exact"}).
-#'   Otherwise ignored.
+#'   \code{Var.r2()} (when the corresponding modes are
+#'   \code{"exact"}).  Otherwise ignored.
 #'
 #' @return
-#' A numeric vector of \eqn{Var[Vrel(R)]}, corresponding to \code{n}.
+#' A numeric vector of \eqn{\mathrm{Var}[V_{\mathrm{rel}}(\mathbf{R})]}{Var[Vrel(R)]}, corresponding to \code{n}.
 #'
 #' @references
-#' Konishi, S. (1979). Asymptotic expansions for the distributions of statistics
+#' Konishi, S. (1979) Asymptotic expansions for the distributions of statistics
 #'  based on the sample correlation matrix in principal componenet analysis.
 #'  *Hiroshima Mathematical Journal* **9**, 647--700.
-#'  doi:[10.32917/hmj/1206134750](https://doi.org/10.32917/hmj/1206134750).
+#'  \doi{10.32917/hmj/1206134750}.
 #'
-#' Pan, W. & Frank, K. A. (2004). An approximation to the distribution of the
+#' Pan, W. and Frank, K. A. (2004) An approximation to the distribution of the
 #'  product of two dependent correlation coefficients. *Journal of Statistical
 #'  Computation and Simulation* **74**, 419--443.
-#'  doi:[10.1080/00949650310001596822](https://doi.org/10.1080/00949650310001596822).
+#'  \doi{10.1080/00949650310001596822}.
 #'
-#' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
+#' Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
-#'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'  **76**, 4--28. \doi{10.1111/evo.14382}.
 #'
 #' @seealso \code{\link{Exv.VXX}} for main moment functions
 #'
@@ -723,8 +741,9 @@ NULL
 ##### AVar.VRR_pf #####
 #' Approximate variance of relative eigenvalue variance of correlation matrix
 #'
-#' \code{AVar.VRR_pf()}: asymptotic and approximate variance of \eqn{Vrel(R)}
-#' based on Pan & Frank's (2004) approach.  Prototype version.
+#' \code{AVar.VRR_pf()}: asymptotic and approximate variance of
+#' \eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)}
+#' based on Pan and Frank's (2004) approach.  Prototype version.
 #'
 #' @rdname AVar.VRR_xx
 #'
@@ -867,8 +886,8 @@ AVar.VRR_pf <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptotic
 #' Approximate variance of relative eigenvalue variance of correlation matrix,
 #' vectorized
 #'
-#' \code{AVar.VRR_pfv()}: vectorized version of \code{AVar.VRR_pf()}.
-#' Much faster, but requires a large RAM space as \code{p} grows.
+#' \code{AVar.VRR_pfv()}: vectorized version of \code{AVar.VRR_pf()}; much
+#' faster, but requires a large RAM space as \eqn{p} grows
 #'
 #' @rdname AVar.VRR_xx
 #'
@@ -964,7 +983,7 @@ AVar.VRR_pfv <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
 #' Approximate variance of relative eigenvalue variance of correlation matrix,
 #' vectorized
 #'
-#' \code{AVar.VRR_pfd()}: further improvement over \code{AVar.VRR_pfv()}.
+#' \code{AVar.VRR_pfd()}: further improvement over \code{AVar.VRR_pfv()}
 #'
 #' @rdname AVar.VRR_xx
 #'
@@ -1153,13 +1172,13 @@ AVar.VRR_pfd <- function(Rho, n = 100, Lambda, exv1.mode = c("exact", "asymptoti
 #' Approximate variance of relative eigenvalue variance of correlation matrix,
 #' with Rcpp
 #'
-#' \code{AVar.VRR_pfc()}: fast version using \code{Rcpp}. Requires
-#' the extension package \code{eigvaldispRcpp}.
+#' \code{AVar.VRR_pfc()}: fast version using \pkg{Rcpp}; requires
+#' the extension package \pkg{eigvaldispRcpp}
 #'
 # #' When the function to be used (specified by cppfun) is not found,
 # #' an attempt is made to sourceCpp() the .cpp file in the present directory.
 # #' It is recommended to do, e.g., sourceCpp("Cov.r2C.cpp")
-# #' to compile the C++ code beforehand as this typically takes several seconds.
+# #' to compile the \proglang{C++} code beforehand as this typically takes several seconds.
 #'
 #' @rdname AVar.VRR_xx
 #'
@@ -1221,7 +1240,7 @@ AVar.VRR_pfc <- function(Rho, n = 100, Lambda, cppfun = "Cov_r2C",
 #' Asymptotic variance of relative eigenvalue variance of correlation matrix
 #'
 #' \code{AVar.VRR_kl()}: asymptotic variance from Konishi's theory:
-#' \eqn{Vrel(R)} as function of eigenvalues.
+#' \eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} as function of eigenvalues
 #'
 #' @rdname AVar.VRR_xx
 #'
@@ -1258,7 +1277,7 @@ AVar.VRR_kl <- function(Rho, n = 100, Lambda, ...) {
 ##### AVar.VRR_klv #####
 #' Asymptotic variance of relative eigenvalue variance of correlation matrix
 #'
-#' \code{AVar.VRR_klv()}: vectorized version of \code{AVar.VRR_kl()}.
+#' \code{AVar.VRR_klv()}: vectorized version of \code{AVar.VRR_kl()}
 #'
 #' @rdname AVar.VRR_xx
 #'
@@ -1293,7 +1312,8 @@ AVar.VRR_klv <- function(Rho, n = 100, Lambda, ...) {
 #' Asymptotic variance of relative eigenvalue variance of correlation matrix
 #'
 #' \code{AVar.VRR_kr()}: asymptotic variance from Konishi's theory:
-#' \eqn{Vrel(R)} as function of correlation coefficients
+#' \eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} as function of correlation
+#' coefficients
 #'
 #' @rdname AVar.VRR_xx
 #'
@@ -1330,7 +1350,7 @@ AVar.VRR_kr <- function(Rho, n = 100, Lambda, ...) {
 ##### AVar.VRR_krv #####
 #' Asymptotic variance of relative eigenvalue variance of correlation matrix
 #'
-#' \code{AVar.VRR_krv()}: vectorized version of \code{AVar.VRR_kr()}.
+#' \code{AVar.VRR_krv()}: vectorized version of \code{AVar.VRR_kr()}
 #'
 #' @rdname AVar.VRR_xx
 #'
@@ -1390,10 +1410,10 @@ AVar.VRR_krv <- function(Rho, n = 100, Lambda, ...) {
 }
 
 ##### Exv.VXXa #####
-#' Moments of ``bias-corrected'' eigenvalue dispersion indices
+#' Moments of \dQuote{bias-corrected} eigenvalue dispersion indices
 #'
 #' Functions to calculate expectation/variance of eigenvalue dispersion indices
-#' of covariance/correlation matrices.
+#' of covariance/correlation matrices
 #'
 #' Usage is identical to that of the corresponding unadjusted versions
 #' (see \code{\link{Exv.VXX}}), which are in most cases called internally.
@@ -1406,12 +1426,12 @@ AVar.VRR_krv <- function(Rho, n = 100, Lambda, ...) {
 #' A numeric vector of the desired moment, corresponding to \code{n}.
 #'
 #' @references
-#' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
+#' Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
-#'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'  **76**, 4--28. \doi{10.1111/evo.14382}.
 #'
 #' @seealso
-#' \code{\link{VXXa}} for ``bias-corrected'' estimators
+#' \code{\link{VXXa}} for \dQuote{bias-corrected} estimators
 #'
 #' \code{\link{Exv.VXX}} for moments of unajusted versions
 #'
@@ -1457,8 +1477,8 @@ NULL
 #' Expectation of bias-corrected eigenvalue variance of covariance matrix
 #'
 #' \code{Exv.VESa()}: expectation of unbiased eigenvalue variance of
-#' covariance matrix. Of little practical use because
-#' this is just the population value \eqn{V(\Sigma)}.
+#' covariance matrix; of little practical use because
+#' this is just the population value \eqn{V(\mathbf{\Sigma})}{V(\Sigma)}
 #'
 #' @rdname Exv.VXXa
 #'
@@ -1484,7 +1504,7 @@ Exv.VESa <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
 #' Expectation of adjusted relative eigenvalue variance of covariance matrix
 #'
 #' \code{Exv.VRSa()}: expectation of adjusted relative eigenvalue variance
-#' of covariance matrix.
+#' of covariance matrix
 #'
 #' @rdname Exv.VXXa
 #'
@@ -1510,7 +1530,7 @@ Exv.VRSa <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
 #' Expectation of adjusted relative eigenvalue variance of correlation matrix
 #'
 #' \code{Exv.VRRa()}: expectation of adjusted relative eigenvalue variance
-#' of correlation matrix.
+#' of correlation matrix
 #'
 #' @rdname Exv.VXXa
 #'
@@ -1542,7 +1562,7 @@ Exv.VRRa <- function(Rho, n = 100, Lambda, tol = .Machine$double.eps * 100,
 #' Variance of bias-corrected eigenvalue variance of covariance matrix
 #'
 #' \code{Var.VESa()}: variance of unbiased eigenvalue variance of
-#' covariance matrix.
+#' covariance matrix
 #'
 #' @rdname Exv.VXXa
 #'
@@ -1573,7 +1593,7 @@ Var.VESa <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
 #' Variance of adjusted relative eigenvalue variance of covariance matrix
 #'
 #' \code{Var.VRSa()}: variance of adjusted relative eigenvalue variance of
-#' covariance matrix.
+#' covariance matrix
 #'
 #' @rdname Exv.VXXa
 #'
@@ -1600,7 +1620,7 @@ Var.VRSa <- function(Sigma, n = 100, Lambda, drop_0 = FALSE,
 #' Variance of adjusted relative eigenvalue variance of covariance matrix
 #'
 #' \code{Var.VRRa()}: variance of adjusted relative eigenvalue variance
-#' of correlation matrix.
+#' of correlation matrix
 #'
 #' @rdname Exv.VXXa
 #'

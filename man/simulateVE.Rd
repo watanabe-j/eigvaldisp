@@ -33,83 +33,84 @@ rmvn(
 )
 }
 \arguments{
-\item{b}{Number of iterations.}
+\item{b}{Number of iterations}
 
 \item{X}{(Optional) Data matrix; when \code{Sigma} and \code{cSigma} are missing,
 the sample covariance matrix from \code{X} is used as
-the population covariance matrix in simulations (parametric bootstrapping).}
+the population covariance matrix in simulations (parametric bootstrapping)}
 
 \item{Sigma}{Population covariance matrix, assumed validly constructed;
 by default a spherical covariance is used;
-ignored when \code{cSigma} is provided.}
+ignored when \code{cSigma} is provided}
 
-\item{cSigma}{Cholesky factor of \code{Sigma}; this can be specified instead of \code{Sigma}.
-Potentially useful when multiple simulations are run for the same \code{Sigma}
-(although this will not substantially improve speed for a single call of
-\code{simulateVE(Sigma = ...)}, where \code{sqrtfun(Sigma)} is called only once).}
+\item{cSigma}{Cholesky factor of \code{Sigma}; this can be specified instead of
+\code{Sigma}.  Potentially useful when multiple simulations are run for
+the same \code{Sigma} (although this will not substantially improve
+speed for a single call of \code{simulateVE(Sigma = ...)}, where
+\code{sqrtfun(Sigma)} is called only once).}
 
-\item{N}{Sample size in each iteration or each run of \code{rmvn()}.}
+\item{N}{Sample size in each iteration or each run of \code{rmvn()}}
 
-\item{divisor, m, nv, drop_0, tol, center, scale., sub}{These arguments are passed to \code{VE()}.
-\code{center} and \code{scale.} are also used construct \code{Sigma}
+\item{divisor, m, nv, drop_0, tol, center, scale., sub}{These arguments are passed to \code{VE()}.  \code{center} and
+\code{scale.} are also used construct \code{Sigma}
 when \code{X} is provided.}
 
 \item{sqrt_method}{Method for matrix square root, which defines the internal function
-\code{sqrtfun()}. Choose one from the following:
+\code{sqrtfun()}.  Choose one from the following:
 \code{"chol"} or \code{"default"} for \code{chol()},
 \code{"chol_piv"} or \code{"pivot"} for \code{chol_piv()},
 \code{"chol_qr"} or \code{"qr"} for \code{chol_qr()},
-\code{"matsqrt"} or \code{"sqrt"} for \code{matsqrt()}.
-See \code{\link{sqrt_methods}} for details.
-Ignored when \code{cSigma} is provided.}
+\code{"matsqrt"} or \code{"sqrt"} for \code{matsqrt()}.  See
+\code{\link{sqrt_methods}} for details.  Ignored
+when \code{cSigma} is provided.}
 
-\item{p}{Number of variables; ignored when \code{Sigma} or \code{cSigma} is provided.}
+\item{p}{Number of variables; ignored when \code{Sigma} or \code{cSigma} is provided}
 
 \item{s2}{Population variance used for the spherical condition;
-ignored when \code{Sigma} or \code{cSigma} is provided.}
+ignored when \code{Sigma} or \code{cSigma} is provided}
 
-\item{mean}{Population mean vector; default is a \eqn{p} vector of 0's.}
+\item{mean}{Population mean vector; default is a \code{p} vector of \code{0}'s}
 }
 \value{
 \code{simulateVE()} invisiblly returns a list containing the following:
 \describe{
-\item{VES}{Eigenvalue variance of covariance matrix V(S) (b vector)}
-\item{VRS}{Relative eigenvalue variance of covariance matrix Vrel(S)
-(b vector)}
-\item{LS}{Eigenvalues of covariance matrix (p * b matrix)}
-\item{VER}{Eigenvalue variance of correlation matrix V(R) (b vector)}
-\item{VRR}{Relative eigenvalue variance of correlation matrix Vrel(R)
-(b vector)}
-\item{LR}{Eigenvalues of correlation matrix (p * b matrix)}
+\item{\code{$VES}}{Eigenvalue variance of covariance matrix \eqn{V(\mathbf{S})}{V(S)} (\code{b} vector)}
+\item{\code{$VRS}}{Relative eigenvalue variance of covariance matrix \eqn{V_{\mathrm{rel}}(\mathbf{S})}{Vrel(S)}
+(\code{b} vector)}
+\item{\code{$LS}}{Eigenvalues of covariance matrix (\code{p * b} matrix)}
+\item{\code{$VER}}{Eigenvalue variance of correlation matrix \eqn{V(\mathbf{R})}{V(R)} (\code{b} vector)}
+\item{\code{$VRR}}{Relative eigenvalue variance of correlation matrix \eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)}
+(\code{b} vector)}
+\item{\code{$LR}}{Eigenvalues of correlation matrix (\code{p * b} matrix)}
 (the following elements are appended only when \code{nv > 0})
-\item{US}{Eigenvectors of covariance matrix (p * nv * b array)}
-\item{UR}{Eigenvectors of correlation matrix (p * nv * b array)}
-\item{US.org}{Eigenvectors of population covariance matrix
-(p * nv matrix)}
-\item{UR.org}{Eigenvectors of population correlation matrix
-(p * nv matrix)}
-(\code{US.org} and \code{UR.org} are provided
+\item{\code{$US}}{Eigenvectors of covariance matrix (\code{p * nv * b} array)}
+\item{\code{$UR}}{Eigenvectors of correlation matrix (\code{p * nv * b} array)}
+\item{\code{$US.org}}{Eigenvectors of population covariance matrix
+(\code{p * nv} matrix)}
+\item{\code{$UR.org}}{Eigenvectors of population correlation matrix
+(\code{p * nv} matrix)}
+(\code{$US.org} and \code{$UR.org} are provided
 as references for signs of eigenvectors)
 }
 
-\code{rmvn()} returns a \eqn{N * p} matrix with
+\code{rmvn()} returns a \code{N * p} matrix with
 the specified population mean and covariance.
 }
 \description{
 \code{simulateVE()} iteratively generates multivariate normal variates,
 from which eigenvalues, eigenvectors (optional, if \code{nv > 0}),
 and eigenvalue dispersion indices
-(both unstandardized \eqn{V} and standardized \eqn{Vrel}) of
-sample covariance and correlation matrices are obtained.
-These are invisibly returned as a list.
+(both unstandardized \eqn{V} and standardized \eqn{V_\mathrm{rel}}{Vrel}) of
+sample covariance and correlation matrices are obtained.  These
+are invisibly returned as a list.
 
-\code{rmvn()} is a function to generate random multivariate normal variates.
+\code{rmvn()} is a function to generate random multivariate normal variates
 }
 \details{
 When \code{simulateVE()} is called, either data (\code{X}),
 a covariance matrix (\code{Sigma}),
-or its Cholesky factor (\code{cSigma}) should be given.
-Specify the sample size \code{N} as well, unless \code{X} is provided.
+or its Cholesky factor (\code{cSigma}) should be given.  Specify
+the sample size \code{N} as well, unless \code{X} is provided.
 
 \code{simulateVE()} does not actually calculate sample covariance/correlation
 matrices, but instead directly obtain eigenvalues and eigenvectors of these
@@ -136,7 +137,7 @@ stopifnot(all.equal(X1, X2))
 # A small simulation
 sim_result <- simulateVE(b = 50L, Sigma = Sigma, N = N)
 str(sim_result)
-# Results are returned as a list (see "Value" for details)
+# Results are returned as a list (see \dQuote{Value} for details)
 
 # Syntax for parametric bootstrapping
 param_boot <- simulateVE(b = 50L, X = X1)

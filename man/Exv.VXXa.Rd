@@ -8,7 +8,7 @@
 \alias{Var.VESa}
 \alias{Var.VRSa}
 \alias{Var.VRRa}
-\title{Moments of ``bias-corrected'' eigenvalue dispersion indices}
+\title{Moments of \dQuote{bias-corrected} eigenvalue dispersion indices}
 \usage{
 Exv.VESa(
   Sigma,
@@ -76,11 +76,11 @@ Var.VRRa(
 \item{drop_0}{Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped.}
 
 \item{tol}{For covariance-related functions, this is the tolerance/threshold
-to be used with drop_0. For correlation-related functions,
+to be used with drop_0.  For correlation-related functions,
 this is passed to \code{Exv.r2()} along with other arguments.}
 
 \item{...}{In \code{Var.VRR()}, additional arguments are passed to an internal
-function which it in turn calls. Otherwise ignored.}
+function which it in turn calls.  Otherwise ignored.}
 
 \item{Rho}{Population correlation matrix; assumed to be validly constructed
 (although simple checks are done).}
@@ -92,26 +92,26 @@ A numeric vector of the desired moment, corresponding to \code{n}.
 }
 \description{
 Functions to calculate expectation/variance of eigenvalue dispersion indices
-of covariance/correlation matrices.
+of covariance/correlation matrices
 
 \code{Exv.VESa()}: expectation of unbiased eigenvalue variance of
-covariance matrix. Of little practical use because
-this is just the population value \eqn{V(\Sigma)}.
+covariance matrix; of little practical use because
+this is just the population value \eqn{V(\mathbf{\Sigma})}{V(\Sigma)}
 
 \code{Exv.VRSa()}: expectation of adjusted relative eigenvalue variance
-of covariance matrix.
+of covariance matrix
 
 \code{Exv.VRRa()}: expectation of adjusted relative eigenvalue variance
-of correlation matrix.
+of correlation matrix
 
 \code{Var.VESa()}: variance of unbiased eigenvalue variance of
-covariance matrix.
+covariance matrix
 
 \code{Var.VRSa()}: variance of adjusted relative eigenvalue variance of
-covariance matrix.
+covariance matrix
 
 \code{Var.VRRa()}: variance of adjusted relative eigenvalue variance
-of correlation matrix.
+of correlation matrix
 }
 \details{
 Usage is identical to that of the corresponding unadjusted versions
@@ -155,12 +155,12 @@ Var.VRRa(Rho, n = N - 1, fun = "klv") # Konishi's theory
 
 }
 \references{
-Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. \doi{10.1111/evo.14382}.
 }
 \seealso{
-\code{\link{VXXa}} for ``bias-corrected'' estimators
+\code{\link{VXXa}} for \dQuote{bias-corrected} estimators
 
 \code{\link{Exv.VXX}} for moments of unajusted versions
 }

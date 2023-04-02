@@ -2,19 +2,19 @@
 #' Calculate eigenvalue dispersion indices
 #'
 #' Function to calculate eigenvalue variance \eqn{V} and
-#' relative eigenvalue variance \eqn{Vrel}
+#' relative eigenvalue variance \eqn{V_\mathrm{rel}}{Vrel}
 #' of a covariance/correlation matrix, either from a data matrix \code{X}
-#' or a covariance/correlation matrix \code{S}.
+#' or a covariance/correlation matrix \code{S}
 #'
 #' Provide one of a data matrix (\code{X}), covariance/correlation matrix
-#' (\code{S}), or vector of eigenvalues (\code{L}).
-#' These arguments take precedence over one another in this order;
+#' (\code{S}), or vector of eigenvalues (\code{L}).  These
+#' arguments take precedence over one another in this order;
 #' if more than one of them are provided, the one with less precedence is
 #' ignored with warning.
 #'
 #' \code{X} must be a 2D numeric matrix, with rows representing
-#' observations and columns variables. When relevant, \code{S} must be a valid
-#' covariance/correlation matrix. With \code{check = TRUE} (default),
+#' observations and columns variables.  When relevant, \code{S} must be a valid
+#' covariance/correlation matrix.  With \code{check = TRUE} (default),
 #' basic structure checks are done on \code{X}, \code{S}, or \code{L}:
 #' \itemize{
 #'   \item{If \code{X} or \code{S} (when relevant) is a non-2D matrix/array,
@@ -32,85 +32,85 @@
 #' is the sample size.
 #'
 #' Sometimes it might be desirable to evaluate eigenvalue dispersion
-#' in a selected subspace, rather than in the full space.
-#' For this, provide the argument \code{sub} to restrict calculations to
-#' the subspace corresponding to the specified eigenvalues/vectors.
-#' Alternatively, set \code{drop_0 = TRUE} to drop
-#' zero eigenvalues from calculation.
-#' The former way would be more useful when the subspace of interest is known
-#' a priori. The latter is ad hoc, automatically dropping zero eigenvalues
+#' in a selected subspace, rather than in the full space.  For this,
+#' provide the argument \code{sub} to restrict calculations to the subspace
+#' corresponding to the specified eigenvalues/vectors.  Alternatively,
+#' set \code{drop_0 = TRUE} to drop zero eigenvalues from calculation.  The
+#' former way would be more useful when the subspace of interest is known
+#' a priori.  The latter is ad hoc, automatically dropping zero eigenvalues
 #' whose magnitudes are below the specified tolerance.
 #'
 #' @param X
-#'   Data matrix from which covariance/corrrelation matrix is obtained.
+#'   Data matrix from which covariance/corrrelation matrix is obtained
 #' @param S
-#'   Covariance/correlation matrix.
+#'   Covariance/correlation matrix
 #' @param L
-#'   Vector of eigenvalues.
+#'   Vector of eigenvalues
 #' @param center
-#'   Logical to specify whether sample-mean-centering should be done.
+#'   Logical to specify whether sample-mean-centering should be done
 #' @param scale.
 #'   Logical to specify whether SD-scaling should be done
-#'   (that is, when \code{TRUE}, the analysis is on the correlation matrix).
-#'   When \code{S} is provided (but \code{X} is not), this is converted to
-#'   a correlation matrix by \code{stats::cov2cor()}.
+#'   (that is, when \code{TRUE}, the analysis is on the correlation
+#'   matrix).  When \code{S} is provided (but \code{X} is not), this is
+#'   converted to a correlation matrix by \code{stats::cov2cor()}.
 #' @param divisor
 #'   Either \code{"UB"} (default) or \code{"ML"},
-#'   to decide the default value of \code{m}.
+#'   to decide the default value of \code{m}
 #' @param m
-#'   Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2022)).
+#'   Divisor for the sample covariance matrix (\eqn{n_*} in Watanabe (2022))
 #' @param nv
-#'   Numeric. Specify how many eigenvectors are to be retained; default 0.
+#'   Numeric to specify how many eigenvectors are to be retained;
+#'   default \code{0}
 #' @param sub
 #'   Numeric/integer vector to specify the range of eigenvalue indices
-#'   to be involved; used to exclude some subspace.
+#'   to be involved; used to exclude some subspace
 #' @param drop_0
-#'   Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped.
+#'   Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped
 #' @param tol
-#'   Tolerance to be used with \code{drop_0}.
+#'   Tolerance to be used with \code{drop_0}
 #' @param check
-#'   Logical to specify whether structures of X, S, and L are checked
-#'   (see Details).
+#'   Logical to specify whether structures of \code{X}, \code{S}, and \code{L}
+#'   are checked (see \dQuote{Details})
 #'
 #' @return
 #'   A list containing the following numeric objects:
 #'   \describe{
-#'     \item{VE}{Eigenvalue variance (\eqn{V}):
+#'     \item{\code{$VE}}{Eigenvalue variance (\eqn{V}):
 #'       \code{sum( (L - meanL)^2 ) / length(L)}}
-#'     \item{VR}{Relative eigenvalue variance (\eqn{Vrel}):
+#'     \item{\code{$VR}}{Relative eigenvalue variance (\eqn{V_\mathrm{rel}}{Vrel}):
 #'       \code{VE / ( (length(L) - 1) * meanL^2)}}
-#'     \item{meanL}{Mean (average) of the eigenvalues \code{L}}
-#'     \item{L}{Vector of eigenvalues}
-#'     \item{U}{Matrix of eigenvectors, appended only when \code{nv > 0}}
+#'     \item{\code{$meanL}}{Mean (average) of the eigenvalues \code{L}}
+#'     \item{\code{$L}}{Vector of eigenvalues}
+#'     \item{\code{$U}}{Matrix of eigenvectors, appended only when \code{nv > 0}}
 #'   }
 #'
 #' @references
-#' Cheverud, J. M., Rutledge, J. J., & Atchley, W. R. (1983). Quantitative
+#' Cheverud, J. M., Rutledge, J. J. and Atchley, W. R. (1983) Quantitative
 #'  genetics of development: genetic correlations among age-specific trait
 #'  values and the evolution of ontogeny. *Evolution* **37**, 5--42.
-#'  doi:[10.1111/j.1558-5646.1983.tb05619.x](https://doi.org/10.1111/j.1558-5646.1983.tb05619.x).
+#'  \doi{10.1111/j.1558-5646.1983.tb05619.x}.
 #'
-#' Haber, A. (2011). A comparative analysis of integration indices.
+#' Haber, A. (2011) A comparative analysis of integration indices.
 #'  *Evolutionary Biology* **38**, 476--488.
-#'  doi:[10.1007/s11692-011-9137-4](https://doi.org/10.1007/s11692-011-9137-4).
+#'  \doi{10.1007/s11692-011-9137-4}.
 #'
-#' Pavlicev, M., Cheverud, J. M., & Wagner, G. P. (2009). Measuring
+#' Pavlicev, M., Cheverud, J. M. and Wagner, G. P. (2009) Measuring
 #'  morphological integration using eigenvalue variance. *Evolutionary Biology*
 #'  **36**, 157--170.
-#'  doi:[10.1007/s11692-008-9042-7](https://doi.org/10.1007/s11692-008-9042-7).
+#'  \doi{10.1007/s11692-008-9042-7}.
 #'
-#' Van Valen, L. (1974). Multivariate structural statistics in natural history.
+#' Van Valen, L. (1974) Multivariate structural statistics in natural history.
 #'  *Journal of Theoretical Biology* **45**, 235--247.
-#'  doi:[10.1016/0022-5193(74)90053-8](https://doi.org/10.1016/0022-5193(74)90053-8).
+#'  \doi{10.1016/0022-5193(74)90053-8}.
 #'
-#' Wagner, G. P. (1984). On the eigenvalue distribution of genetic and
+#' Wagner, G. P. (1984) On the eigenvalue distribution of genetic and
 #'  phenotypic dispersion matrices: evidence for a nonrandom organization
 #'  of quantitative character variation. *Journal of Mathematical Biology*
-#'  **7**, 77--95. doi:[10.1007/BF00275224](https://doi.org/10.1007/BF00275224).
+#'  **7**, 77--95. \doi{10.1007/BF00275224}.
 #'
-#' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
+#' Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
-#'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'  **76**, 4--28. \doi{10.1111/evo.14382}.
 #'
 #' @importFrom stats cov2cor
 #'
@@ -258,34 +258,34 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 
 
 ##### VXXa #####
-#' ``Bias-corrected'' eigenvalue dispersion indices
+#' \dQuote{Bias-corrected} eigenvalue dispersion indices
 #'
 #' These functions calculate bias-corrected or adjusted
 #' eigenvalue dispersion indices
 #'
 #' These functions are to be used with sample data matrix,
 #' covariance/correlation matrix, or eigenvalues, and not to be used with
-#' population quantities. Unless \code{X} is provided, the degrees of freedom
-#' \code{n} should be specified as this is required for adjustment.
-#' When \code{X} is provided, \code{n} is automatically set to be
+#' population quantities.  Unless \code{X} is provided, the degrees of freedom
+#' \code{n} should be specified as this is required for adjustment.  When
+#' \code{X} is provided, \code{n} is automatically set to be
 #' \code{nrow(X) - as.numeric(center)}.
 #'
 #' These functions internally call \code{VE(L = L, nv = 0, check = FALSE, ...)}
 #' with appropriately constructed (or user-specified) \code{L},
-#' and adjusted eigenvalue dispersion indices are appended to the outcome list.
-#' If \code{nv > 0}, eigenvectors are calculated before this function call
-#' and returned as well.
+#' and adjusted eigenvalue dispersion indices are appended to the outcome
+#' list.  If \code{nv > 0}, eigenvectors are calculated before this function
+#' call and returned as well.
 #'
 #' Bias correction is possible for eigenvalue variance of covariance matrices,
 #' but not straightforward for relative eigenvalue variance (of either
 #' covariance or correlation matrices), because the latter is a nonlinear
-#' function of the population value (see Watanabe, 2022).
-#' Although this could potentially be achievable for correlation matrices,
+#' function of the population value (see Watanabe, 2022).  Although this
+#' could potentially be achievable for correlation matrices,
 #' expression for its variance is not known to the author.
 #'
 #' The bias-corrected eigenvalue variance of a sample covariance matrix
-#' also has smaller variance than the uncorrected version.
-#' On the other hand, the adjusted relative eigenvalue variance of a
+#' also has smaller variance than the uncorrected version.  On the other hand,
+#' the adjusted relative eigenvalue variance of a
 #' sample covariance/correlation matrix has larger variance than
 #' the unadjusted version.
 #'
@@ -294,22 +294,22 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #' @inheritParams VE
 #'
 #' @param n
-#'   Degrees of freedom in a length-1 numeric. Ignored with warning when
+#'   Degrees of freedom in a length-1 numeric.  Ignored with warning when
 #'   \code{X} is provided; required otherwise (see Details).
 #' @param divisor,m
 #'   These are as in \code{\link{VE}} and influence eigenvalue magnitude
-#'   (and hence uncorrected eigenvalue variance) of covariance matrices.
-#'   However, note that the adjusted indices are independent of
+#'   (and hence uncorrected eigenvalue variance) of covariance
+#'   matrices.  However, note that the adjusted indices are independent of
 #'   the choice of divisor and hence are unaffected by these arguments.
 #' @param check
 #'   Logical to specify whether structures of X, S, and L are checked
-#'   (see Details in \code{\link{VE}}).
+#'   (see Details in \code{\link{VE}})
 #' @param ...
-#'   Additional arguments are internally passed to \code{VE()}.
-#'   The arguments \code{sub}, \code{drop_0}, and \code{tol} can be used
-#'   to specify which eigenvalues are to be involved (see \code{\link{VE}}).
-#'   \code{scale.} does not take effect, as the choice is already implied
-#'   when these functions are used.
+#'   Additional arguments are internally passed to \code{VE()}.  The
+#'   arguments \code{sub}, \code{drop_0}, and \code{tol} can be used
+#'   to specify which eigenvalues are to be involved (see
+#'   \code{\link{VE}}).  \code{scale.} does not take effect, as the choice
+#'   is already implied when these functions are used.
 #'
 #' @return
 #' A list similar to the output of \code{VE()}, with an additional element:
@@ -331,9 +331,9 @@ VE <- function(X, S, L, center = TRUE, scale. = FALSE,
 #'   the adjusted estimators
 #'
 #' @references
-#' Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
+#' Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
 #'  quantifying the magnitude of phenotypic integration. *Evolution*,
-#'  **76**, 4--28. doi:[10.1111/evo.14382](https://doi.org/10.1111/evo.14382).
+#'  **76**, 4--28. \doi{10.1111/evo.14382}.
 #'
 #' @examples
 #' # Spherical covariance matrix (VE = VR = 0)
@@ -383,7 +383,7 @@ NULL
 ##### VESa #####
 #' Bias-corrected eigenvalue variance of covariance matrix
 #'
-#' \code{VESa}: bias-corrected eigenvalue variance of covariance matrix.
+#' \code{VESa}: bias-corrected eigenvalue variance of covariance matrix
 #'
 #' @rdname VXXa
 #'
@@ -460,7 +460,7 @@ VESa <- function(X, S, L, n, divisor = c("UB", "ML"),
 ##### VRSa #####
 #' Adjusted relative eigenvalue variance of covariance matrix
 #'
-#' \code{VRSa}: adjusted relative eigenvalue variance of covariance matrix.
+#' \code{VRSa}: adjusted relative eigenvalue variance of covariance matrix
 #'
 #' @rdname VXXa
 #'
@@ -533,7 +533,7 @@ VRSa <- function(X, S, L, n, divisor = c("UB", "ML"),
 ##### VRRa #####
 #' Adjusted relative eigenvalue variance of correlation matrix
 #'
-#' \code{VRRa}: adjusted relative eigenvalue variance of correlation matrix.
+#' \code{VRRa}: adjusted relative eigenvalue variance of correlation matrix
 #'
 #' @rdname VXXa
 #'
@@ -608,14 +608,14 @@ VRRa <- function(X, S, L, n,
 #' \code{simulateVE()} iteratively generates multivariate normal variates,
 #' from which eigenvalues, eigenvectors (optional, if \code{nv > 0}),
 #' and eigenvalue dispersion indices
-#' (both unstandardized \eqn{V} and standardized \eqn{Vrel}) of
-#' sample covariance and correlation matrices are obtained.
-#' These are invisibly returned as a list.
+#' (both unstandardized \eqn{V} and standardized \eqn{V_\mathrm{rel}}{Vrel}) of
+#' sample covariance and correlation matrices are obtained.  These
+#' are invisibly returned as a list.
 #'
 #' When \code{simulateVE()} is called, either data (\code{X}),
 #' a covariance matrix (\code{Sigma}),
-#' or its Cholesky factor (\code{cSigma}) should be given.
-#' Specify the sample size \code{N} as well, unless \code{X} is provided.
+#' or its Cholesky factor (\code{cSigma}) should be given.  Specify
+#' the sample size \code{N} as well, unless \code{X} is provided.
 #'
 #' \code{simulateVE()} does not actually calculate sample covariance/correlation
 #' matrices, but instead directly obtain eigenvalues and eigenvectors of these
@@ -628,36 +628,36 @@ VRRa <- function(X, S, L, n,
 # #' @inheritParams rmvn
 # #' @inheritParams VE
 #' @param b
-#'   Number of iterations.
+#'   Number of iterations
 #' @param X
 #'   (Optional) Data matrix; when \code{Sigma} and \code{cSigma} are missing,
 #'   the sample covariance matrix from \code{X} is used as
-#'   the population covariance matrix in simulations (parametric bootstrapping).
+#'   the population covariance matrix in simulations (parametric bootstrapping)
 # #' @param Sigma,cSigma,N   passed to rmvn
 #' @param divisor,m,nv,drop_0,tol,center,scale.,sub
-#'   These arguments are passed to \code{VE()}.
-#'   \code{center} and \code{scale.} are also used construct \code{Sigma}
+#'   These arguments are passed to \code{VE()}.  \code{center} and
+#'   \code{scale.} are also used construct \code{Sigma}
 #'   when \code{X} is provided.
 #'
 #' @return
 #'   \code{simulateVE()} invisiblly returns a list containing the following:
 #'   \describe{
-#'     \item{VES}{Eigenvalue variance of covariance matrix V(S) (b vector)}
-#'     \item{VRS}{Relative eigenvalue variance of covariance matrix Vrel(S)
-#'       (b vector)}
-#'     \item{LS}{Eigenvalues of covariance matrix (p * b matrix)}
-#'     \item{VER}{Eigenvalue variance of correlation matrix V(R) (b vector)}
-#'     \item{VRR}{Relative eigenvalue variance of correlation matrix Vrel(R)
-#'       (b vector)}
-#'     \item{LR}{Eigenvalues of correlation matrix (p * b matrix)}
+#'     \item{\code{$VES}}{Eigenvalue variance of covariance matrix \eqn{V(\mathbf{S})}{V(S)} (\code{b} vector)}
+#'     \item{\code{$VRS}}{Relative eigenvalue variance of covariance matrix \eqn{V_{\mathrm{rel}}(\mathbf{S})}{Vrel(S)}
+#'       (\code{b} vector)}
+#'     \item{\code{$LS}}{Eigenvalues of covariance matrix (\code{p * b} matrix)}
+#'     \item{\code{$VER}}{Eigenvalue variance of correlation matrix \eqn{V(\mathbf{R})}{V(R)} (\code{b} vector)}
+#'     \item{\code{$VRR}}{Relative eigenvalue variance of correlation matrix \eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)}
+#'       (\code{b} vector)}
+#'     \item{\code{$LR}}{Eigenvalues of correlation matrix (\code{p * b} matrix)}
 #'     (the following elements are appended only when \code{nv > 0})
-#'     \item{US}{Eigenvectors of covariance matrix (p * nv * b array)}
-#'     \item{UR}{Eigenvectors of correlation matrix (p * nv * b array)}
-#'     \item{US.org}{Eigenvectors of population covariance matrix
-#'       (p * nv matrix)}
-#'     \item{UR.org}{Eigenvectors of population correlation matrix
-#'       (p * nv matrix)}
-#'     (\code{US.org} and \code{UR.org} are provided
+#'     \item{\code{$US}}{Eigenvectors of covariance matrix (\code{p * nv * b} array)}
+#'     \item{\code{$UR}}{Eigenvectors of correlation matrix (\code{p * nv * b} array)}
+#'     \item{\code{$US.org}}{Eigenvectors of population covariance matrix
+#'       (\code{p * nv} matrix)}
+#'     \item{\code{$UR.org}}{Eigenvectors of population correlation matrix
+#'       (\code{p * nv} matrix)}
+#'     (\code{$US.org} and \code{$UR.org} are provided
 #'     as references for signs of eigenvectors)
 #'   }
 #' @seealso \code{\link{VE}}, \code{\link{sqrt_methods}}
@@ -683,7 +683,7 @@ VRRa <- function(X, S, L, n,
 #' # A small simulation
 #' sim_result <- simulateVE(b = 50L, Sigma = Sigma, N = N)
 #' str(sim_result)
-#' # Results are returned as a list (see "Value" for details)
+#' # Results are returned as a list (see \dQuote{Value} for details)
 #'
 #' # Syntax for parametric bootstrapping
 #' param_boot <- simulateVE(b = 50L, X = X1)
@@ -772,40 +772,41 @@ simulateVE <- function(b = 100L, X, Sigma, cSigma = sqrtfun(Sigma), N = nrow(X),
 ##### rmvn #####
 #' Generate multivariate normal variates
 #'
-#' \code{rmvn()} is a function to generate random multivariate normal variates.
+#' \code{rmvn()} is a function to generate random multivariate normal variates
 #'
 #' @rdname simulateVE
 #'
 #' @param N
-#'   Sample size in each iteration or each run of \code{rmvn()}.
+#'   Sample size in each iteration or each run of \code{rmvn()}
 #' @param p
-#'   Number of variables; ignored when \code{Sigma} or \code{cSigma} is provided.
+#'   Number of variables; ignored when \code{Sigma} or \code{cSigma} is provided
 #' @param s2
 #'   Population variance used for the spherical condition;
-#'   ignored when \code{Sigma} or \code{cSigma} is provided.
+#'   ignored when \code{Sigma} or \code{cSigma} is provided
 #' @param Sigma
 #'   Population covariance matrix, assumed validly constructed;
 #'   by default a spherical covariance is used;
-#'   ignored when \code{cSigma} is provided.
+#'   ignored when \code{cSigma} is provided
 #' @param cSigma
-#'   Cholesky factor of \code{Sigma}; this can be specified instead of \code{Sigma}.
-#'   Potentially useful when multiple simulations are run for the same \code{Sigma}
-#'   (although this will not substantially improve speed for a single call of
-#'   \code{simulateVE(Sigma = ...)}, where \code{sqrtfun(Sigma)} is called only once).
+#'   Cholesky factor of \code{Sigma}; this can be specified instead of
+#'   \code{Sigma}.  Potentially useful when multiple simulations are run for
+#'   the same \code{Sigma} (although this will not substantially improve
+#'   speed for a single call of \code{simulateVE(Sigma = ...)}, where
+#'   \code{sqrtfun(Sigma)} is called only once).
 #' @param mean
-#'   Population mean vector; default is a \eqn{p} vector of 0's.
+#'   Population mean vector; default is a \code{p} vector of \code{0}'s
 #' @param sqrt_method
 #'   Method for matrix square root, which defines the internal function
-#'   \code{sqrtfun()}. Choose one from the following:
+#'   \code{sqrtfun()}.  Choose one from the following:
 #'   \code{"chol"} or \code{"default"} for \code{chol()},
 #'   \code{"chol_piv"} or \code{"pivot"} for \code{chol_piv()},
 #'   \code{"chol_qr"} or \code{"qr"} for \code{chol_qr()},
-#'   \code{"matsqrt"} or \code{"sqrt"} for \code{matsqrt()}.
-#'   See \code{\link{sqrt_methods}} for details.
-#'   Ignored when \code{cSigma} is provided.
+#'   \code{"matsqrt"} or \code{"sqrt"} for \code{matsqrt()}.  See
+#'   \code{\link{sqrt_methods}} for details.  Ignored
+#'   when \code{cSigma} is provided.
 #'
 #' @return
-#'   \code{rmvn()} returns a \eqn{N * p} matrix with
+#'   \code{rmvn()} returns a \code{N * p} matrix with
 #'   the specified population mean and covariance.
 #'
 #' @importFrom stats rnorm

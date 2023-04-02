@@ -20,64 +20,65 @@ VE(
 )
 }
 \arguments{
-\item{X}{Data matrix from which covariance/corrrelation matrix is obtained.}
+\item{X}{Data matrix from which covariance/corrrelation matrix is obtained}
 
-\item{S}{Covariance/correlation matrix.}
+\item{S}{Covariance/correlation matrix}
 
-\item{L}{Vector of eigenvalues.}
+\item{L}{Vector of eigenvalues}
 
-\item{center}{Logical to specify whether sample-mean-centering should be done.}
+\item{center}{Logical to specify whether sample-mean-centering should be done}
 
 \item{scale.}{Logical to specify whether SD-scaling should be done
-(that is, when \code{TRUE}, the analysis is on the correlation matrix).
-When \code{S} is provided (but \code{X} is not), this is converted to
-a correlation matrix by \code{stats::cov2cor()}.}
+(that is, when \code{TRUE}, the analysis is on the correlation
+matrix).  When \code{S} is provided (but \code{X} is not), this is
+converted to a correlation matrix by \code{stats::cov2cor()}.}
 
 \item{divisor}{Either \code{"UB"} (default) or \code{"ML"},
-to decide the default value of \code{m}.}
+to decide the default value of \code{m}}
 
-\item{m}{Divisor for the sample covariance matrix (\eqn{n*} in Watanabe (2022)).}
+\item{m}{Divisor for the sample covariance matrix (\eqn{n_*} in Watanabe (2022))}
 
-\item{nv}{Numeric. Specify how many eigenvectors are to be retained; default 0.}
+\item{nv}{Numeric to specify how many eigenvectors are to be retained;
+default \code{0}}
 
 \item{sub}{Numeric/integer vector to specify the range of eigenvalue indices
-to be involved; used to exclude some subspace.}
+to be involved; used to exclude some subspace}
 
-\item{drop_0}{Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped.}
+\item{drop_0}{Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped}
 
-\item{tol}{Tolerance to be used with \code{drop_0}.}
+\item{tol}{Tolerance to be used with \code{drop_0}}
 
-\item{check}{Logical to specify whether structures of X, S, and L are checked
-(see Details).}
+\item{check}{Logical to specify whether structures of \code{X}, \code{S}, and \code{L}
+are checked (see \dQuote{Details})}
 }
 \value{
 A list containing the following numeric objects:
 \describe{
-\item{VE}{Eigenvalue variance (\eqn{V}):
+\item{\code{$VE}}{Eigenvalue variance (\eqn{V}):
 \code{sum( (L - meanL)^2 ) / length(L)}}
-\item{VR}{Relative eigenvalue variance (\eqn{Vrel}):
+\item{\code{$VR}}{Relative eigenvalue variance (\eqn{V_\mathrm{rel}}{Vrel}):
 \code{VE / ( (length(L) - 1) * meanL^2)}}
-\item{meanL}{Mean (average) of the eigenvalues \code{L}}
-\item{L}{Vector of eigenvalues}
-\item{U}{Matrix of eigenvectors, appended only when \code{nv > 0}}
+\item{\code{$meanL}}{Mean (average) of the eigenvalues \code{L}}
+\item{\code{$L}}{Vector of eigenvalues}
+\item{\code{$U}}{Matrix of eigenvectors, appended only when \code{nv > 0}}
 }
 }
 \description{
 Function to calculate eigenvalue variance \eqn{V} and
-relative eigenvalue variance \eqn{Vrel}
+relative eigenvalue variance \eqn{V_\mathrm{rel}}{Vrel}
 of a covariance/correlation matrix, either from a data matrix \code{X}
-or a covariance/correlation matrix \code{S}.
+or a covariance/correlation matrix \code{S}
 }
 \details{
 Provide one of a data matrix (\code{X}), covariance/correlation matrix
-(\code{S}), or vector of eigenvalues (\code{L}).
-These arguments take precedence over one another in this order;
+(\code{S}), or vector of eigenvalues (\code{L}).  These
+arguments take precedence over one another in this order;
 if more than one of them are provided, the one with less precedence is
 ignored with warning.
 
 \code{X} must be a 2D numeric matrix, with rows representing
-observations and columns variables. When relevant, \code{S} must be a valid
-covariance/correlation matrix. With \code{check = TRUE} (default),
+observations and columns variables.  When relevant, \code{S} must be a valid
+covariance/correlation matrix.  With \code{check = TRUE} (default),
 basic structure checks are done on \code{X}, \code{S}, or \code{L}:
 \itemize{
 \item{If \code{X} or \code{S} (when relevant) is a non-2D matrix/array,
@@ -95,13 +96,12 @@ When \code{X} is given, the default divisor is \eqn{N - 1} where \eqn{N}
 is the sample size.
 
 Sometimes it might be desirable to evaluate eigenvalue dispersion
-in a selected subspace, rather than in the full space.
-For this, provide the argument \code{sub} to restrict calculations to
-the subspace corresponding to the specified eigenvalues/vectors.
-Alternatively, set \code{drop_0 = TRUE} to drop
-zero eigenvalues from calculation.
-The former way would be more useful when the subspace of interest is known
-a priori. The latter is ad hoc, automatically dropping zero eigenvalues
+in a selected subspace, rather than in the full space.  For this,
+provide the argument \code{sub} to restrict calculations to the subspace
+corresponding to the specified eigenvalues/vectors.  Alternatively,
+set \code{drop_0 = TRUE} to drop zero eigenvalues from calculation.  The
+former way would be more useful when the subspace of interest is known
+a priori.  The latter is ad hoc, automatically dropping zero eigenvalues
 whose magnitudes are below the specified tolerance.
 }
 \examples{
@@ -172,32 +172,32 @@ tcrossprod(crossprod(Popul_null, Sample_null))
 
 }
 \references{
-Cheverud, J. M., Rutledge, J. J., & Atchley, W. R. (1983). Quantitative
+Cheverud, J. M., Rutledge, J. J. and Atchley, W. R. (1983) Quantitative
 genetics of development: genetic correlations among age-specific trait
 values and the evolution of ontogeny. \emph{Evolution} \strong{37}, 5--42.
-doi:\href{https://doi.org/10.1111/j.1558-5646.1983.tb05619.x}{10.1111/j.1558-5646.1983.tb05619.x}.
+\doi{10.1111/j.1558-5646.1983.tb05619.x}.
 
-Haber, A. (2011). A comparative analysis of integration indices.
+Haber, A. (2011) A comparative analysis of integration indices.
 \emph{Evolutionary Biology} \strong{38}, 476--488.
-doi:\href{https://doi.org/10.1007/s11692-011-9137-4}{10.1007/s11692-011-9137-4}.
+\doi{10.1007/s11692-011-9137-4}.
 
-Pavlicev, M., Cheverud, J. M., & Wagner, G. P. (2009). Measuring
+Pavlicev, M., Cheverud, J. M. and Wagner, G. P. (2009) Measuring
 morphological integration using eigenvalue variance. \emph{Evolutionary Biology}
 \strong{36}, 157--170.
-doi:\href{https://doi.org/10.1007/s11692-008-9042-7}{10.1007/s11692-008-9042-7}.
+\doi{10.1007/s11692-008-9042-7}.
 
-Van Valen, L. (1974). Multivariate structural statistics in natural history.
+Van Valen, L. (1974) Multivariate structural statistics in natural history.
 \emph{Journal of Theoretical Biology} \strong{45}, 235--247.
-doi:\href{https://doi.org/10.1016/0022-5193(74)90053-8}{10.1016/0022-5193(74)90053-8}.
+\doi{10.1016/0022-5193(74)90053-8}.
 
-Wagner, G. P. (1984). On the eigenvalue distribution of genetic and
+Wagner, G. P. (1984) On the eigenvalue distribution of genetic and
 phenotypic dispersion matrices: evidence for a nonrandom organization
 of quantitative character variation. \emph{Journal of Mathematical Biology}
-\strong{7}, 77--95. doi:\href{https://doi.org/10.1007/BF00275224}{10.1007/BF00275224}.
+\strong{7}, 77--95. \doi{10.1007/BF00275224}.
 
-Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. \doi{10.1111/evo.14382}.
 }
 \seealso{
 \code{\link{Exv.VXX}} for moments of sample

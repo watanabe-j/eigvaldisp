@@ -17,57 +17,55 @@ chol_qr(A, method = c("svd", "eigen"))
 chol_qrsvd(A)
 }
 \arguments{
-\item{A}{Numeric matrix, assumed to be symmetric.}
+\item{A}{Numeric matrix, assumed to be symmetric}
 
 \item{method}{Either \code{"svd"} (default) or \code{"eigen"} to specify
-the function to be used for eigendecomposition. Results should be
+the function to be used for eigendecomposition.  Results should be
 identical, but svd would be faster in most environments.}
 }
 \value{
-\code{matsqrt(A)}: Symmetric matrix which is a square root of \code{A}.
+\code{matsqrt(A)}: Symmetric matrix which is a square root of \code{A}
 
 \code{chol_piv(A)}/\code{chol_qr(A)}: Upper triangular matrix
-which is a Cholesky factor of \code{A}.
+which is a Cholesky factor of \code{A}
 }
 \description{
 Assuming \code{A} is a symmetric, non-negative definite matrix:
 
 \code{matsqrt(A)} returns a matrix square root of \code{A}
-with spectral or singular value decomposition.
+with spectral or singular value decomposition
 
 \code{chol_piv(A)} conducts Cholesky factorization of \code{A}
-with "pivoting".
-\code{crossprod(chol_piv(A))} will be equal to \code{A},
-unless multiple zero eigenvalues exist
+with \dQuote{pivoting}.   \code{crossprod(chol_piv(A))} will be equal to
+\code{A}, unless multiple zero eigenvalues exist
 (in which case the results can be spurious; a warning results).
 
 \code{chol_qr(A)} conducts Cholesky factorization of \code{A}
-with QR factorization.
-\code{crossprod(chol_qr(A))} is equal to \code{A},
-even with multiple zero eigenvalues.
-This is more reliable, but slower than \code{chol_piv()}.
-\code{matsqrt()}, which is called internally, usually suffices.
+with QR factorization.  \code{crossprod(chol_qr(A))} is equal to \code{A},
+even with multiple zero eigenvalues.  This is more reliable, but slower
+than \code{chol_piv()}.  \code{matsqrt()}, which is called internally,
+usually suffices.
 
-\code{chol_qrsvd(A)} is essentially \code{chol_qr(A, method = "svd")}.
+\code{chol_qrsvd(A)} is essentially \code{chol_qr(A, method = "svd")}
 }
 \details{
 Cholesky factors are useful in simulating multivariate normal variates,
 but \code{chol(A)} by default returns an error unless \code{A} is strictly
-positive definite (i.e., singular matrices are not allowed).
-One way to avoid this is to use \code{chol(A, pivot = TRUE)} and arrange
-the columns appropriately (see the documentation of \link[base]{chol}).
-\code{chol_piv(A)} is a utility to conduct this.
+positive definite (i.e., singular matrices are not allowed).  One
+way to avoid this is to use \code{chol(A, pivot = TRUE)} and arrange
+the columns appropriately (see the documentation of
+\link[base]{chol}).  \code{chol_piv(A)} is a utility to conduct this.
 
 Unexpectedly, however, this can still fail in certain situations,
-e.g., when more than one eigenvalues are 0.
-This is despite that a Cholesky factorization can be defined for any
+e.g., when more than one eigenvalues are 0.  This is despite that a
+Cholesky factorization can be defined for any
 nonnegative definite matrix, as can be confirmed via QR factorization,
-(e.g., Schott, 2017; although this factor may not be unique).
-\code{chol_piv()} returns a warning in this case.
-\code{chol_qr()} handles this factorization via a naive implementation;
+(e.g., Schott, 2017; although this factor may not be
+unique).  \code{chol_piv()} returns a warning in this case.  \code{chol_qr()}
+handles this factorization via a naive implementation;
 first taking a matrix square root via eigendecomposition (\code{matsqrt(A)})
-and then conducting QR factorization of this (with pivoting).
-This allows for a correct Cholesky factorization of
+and then conducting QR factorization of this (with pivoting).  This allows
+for a correct Cholesky factorization of
 any positive semidefinite matrix, although for most simulation purposes
 the matrix square root by \code{matsqrt()} usually suffices.
 }
@@ -92,7 +90,7 @@ all.equal(B, crossprod(cB2))
 crossprod(cB2)
 }
 \references{
-Schott, J. R. (2017). \emph{Matrix Analysis for Statistics}, 3rd edition.
+Schott, J. R. (2017) \emph{Matrix Analysis for Statistics}, 3rd edition.
 John Wiley & Sons, Hoboken, New Jersey.
 }
 \seealso{

@@ -99,11 +99,11 @@ By default equals \eqn{n}.}
 \item{drop_0}{Logical, when \code{TRUE}, eigenvalues smaller than \code{tol} are dropped.}
 
 \item{tol}{For covariance-related functions, this is the tolerance/threshold
-to be used with drop_0. For correlation-related functions,
+to be used with drop_0.  For correlation-related functions,
 this is passed to \code{Exv.r2()} along with other arguments.}
 
 \item{...}{In \code{Var.VRR()}, additional arguments are passed to an internal
-function which it in turn calls. Otherwise ignored.}
+function which it in turn calls.  Otherwise ignored.}
 
 \item{Rho}{Population correlation matrix; assumed to be validly constructed
 (although simple checks are done).}
@@ -111,13 +111,14 @@ function which it in turn calls. Otherwise ignored.}
 \item{tol.hg, maxiter.hg}{Passed to \code{Exv.r2()}; see description of that function.}
 
 \item{method}{For \code{Var.VRR()} (and \code{Var.VER()}), determines the method
-to obtain approximate variance in non-null conditions.
-Either \code{"Pan-Frank"} (default) or \code{"Konishi"}. See Details.}
+to obtain approximate variance in non-null conditions.  Either
+\code{"Pan-Frank"} (default) or \code{"Konishi"}.  See \dQuote{Details}.}
 
 \item{fun}{For \code{Var.VRR()} (and \code{Var.VER()}), determines the function
-to be used to evaluate approximate variance. See Details.
-Options allowed are: \code{"pfd"}, \code{"pfv"}, \code{"pfc"}, \code{"pf"},
-\code{"klv"}, \code{"kl"}, \code{"krv"}, and \code{"kr"}.}
+to be used to evaluate approximate variance.  See
+\dQuote{Details}.  Options allowed are: \code{"pfd"}, \code{"pfv"},
+\code{"pfc"}, \code{"pf"}, \code{"klv"}, \code{"kl"}, \code{"krv"},
+and \code{"kr"}.}
 }
 \value{
 A numeric vector of the desired moment, corresponding to \code{n}.
@@ -125,79 +126,85 @@ A numeric vector of the desired moment, corresponding to \code{n}.
 \description{
 Functions to calculate expectation/variance of (relative) eigenvalue variance
 of sample covariance/correlation matrices for a given population
-covariance/correlation matrix and degrees of freedom \eqn{n}.
+covariance/correlation matrix and degrees of freedom \eqn{n}
 
 \code{Exv.VES()}: expectation of eigenvalue variance of covariance matrix
-\eqn{E[V(S)]}.
+\eqn{\mathrm{E}[V(\mathbf{S})]}{E[V(S)]}
 
 \code{Exv.VRS()}: expectation of relative eigenvalue variance of
-covariance matrix \eqn{E[Vrel(S)]}.
+covariance matrix \eqn{\mathrm{E}[V_{\mathrm{rel}}(\mathbf{S})]}{E[Vrel(S)]}
 
 \code{Exv.VER()}: expectation of eigenvalue variance of correlation
-matrix \eqn{E[V(R)]}.
+matrix \eqn{\mathrm{E}[V(\mathbf{R})]}{E[V(R)]}
 
 \code{Exv.VRR()}: expectation of relative eigenvalue variance of
-correlation matrix \eqn{E[Vrel(R)]}.
+correlation matrix
+\eqn{\mathrm{E}[V_{\mathrm{rel}}(\mathbf{R})]}{E[Vrel(R)]}
 
 \code{Var.VES()}: variance of eigenvalue variance of
-covariance matrix \eqn{Var[V(S)]}.
+covariance matrix \eqn{\mathrm{Var}[V(\mathbf{S})]}{Var[V(S)]}
 
 \code{Var.VRS()}: variance of relative eigenvalue variance of
-covariance matrix \eqn{Var[Vrel(S)]}.
+covariance matrix
+\eqn{\mathrm{Var}[V_{\mathrm{rel}}(\mathbf{S})]}{Var[Vrel(S)]}
 
 \code{Var.VER()}: variance of eigenvalue variance of
-correlation matrix \eqn{Var[V(R)]}.
+correlation matrix \eqn{\mathrm{Var}[V(\mathbf{R})]}{Var[V(R)]}
 
 \code{Var.VRR()}: variance of relative eigenvalue variance of
-correlation matrix \eqn{Var[Vrel(R)]}.
+correlation matrix
+\eqn{\mathrm{Var}[V_{\mathrm{rel}}(\mathbf{R})]}{Var[Vrel(R)]}
 }
 \details{
 \code{Exv.VES()}, \code{Var.VES()}, and \code{Exv.VRR()} return exact
-moments.
-\code{Exv.VRS()} and \code{Var.VRS()} return approximations based
+moments.  \code{Exv.VRS()} and \code{Var.VRS()} return approximations based
 on the delta method, except under the null condition
-(\eqn{\Sigma} proportional to the identity matrix)
+(\eqn{\mathbf{\Sigma}}{\Sigma} proportional to the identity matrix)
 where exact moments are returned.
 
 \code{Var.VRR()} returns the exact variance when \eqn{p = 2} or
-under the null condition (\eqn{\Rho} is the identity matrix).
-Otherwise, asymptotic variance is calculated with the \code{method} of
-choice: either \code{"Pan-Frank"} (default) or \code{"Konishi"}.
-They correspond to Pan & Frank's heuristic approximation and Konishi's
+under the null condition (\eqn{\mathbf{P}}{\Rho} is the identity
+matrix).  Otherwise, asymptotic variance is calculated with the \code{method}
+of choice: either \code{"Pan-Frank"} (default) or \code{"Konishi"}.  They
+correspond to Pan and Frank's heuristic approximation and Konishi's
 asymptotic theory, respectively (see Watanabe, 2022).
 
 In this case, calculations are handled by one of the internal functions
-\code{AVar.VRR_xx()} (\code{xx} is a suffix to specify R implementation).
-For completeness, it is possible to directly specify the function
-to be used with the argument \code{fun}: for the Pan--Frank method,
-\code{pfd} (default), \code{pfv}, and \code{pf}; and for the
-Konishi method, \code{klv} (default), \code{kl}, \code{krv}, and \code{kr}.
-Within each group, these function yield identical results but differ
-in speed (the defaults are the fastest).
-See \code{\link{AVar.VRR_xx}} for details of these functions.
+\code{AVar.VRR_xx()} (\code{xx} is a suffix to specify \R
+implementation).  For completeness, it is possible to directly specify the
+function to be used with the argument \code{fun}: for the Pan--Frank method,
+\code{"pfd"} (default), \code{"pfv"}, and \code{"pf"}; and for the
+Konishi method, \code{"klv"} (default), \code{"kl"}, \code{"krv"}, and
+\code{"kr"}.  Within each group, these function yield identical results but
+differ in speed (the defaults are the fastest).  See
+\code{\link{AVar.VRR_xx}} for details of these functions.
 
 The Pan--Frank method takes a substantial amount of time to be executed
-when p is large. Several C++ functions are provided in the extension package
-\href{https://github.com/watanabe-j/eigvaldispRcpp}{\code{eigvaldispRcpp}} to
-speed-up the calculation. When this package is available, the default
-\code{fun} for the Pan--Frank method is set to \code{"pfc"}.
-The option for \code{C++} function is controlled by the argument
+when \eqn{p} is large.  Several \proglang{C++} functions are provided in
+the extension package
+\href{https://github.com/watanabe-j/eigvaldispRcpp}{\pkg{eigvaldispRcpp}} to
+speed-up the calculation.  When this package is available, the default
+\code{fun} for the Pan--Frank method is set to \code{"pfc"}.  The
+option for \proglang{C++} function is controlled by the argument
 \code{cppfun} which in turn is passed to \code{AVar.VRR_pfc()}
-(see \code{\link{AVar.VRR_xx}}). When this argument is provided, the argument
-\code{fun} is ignored with a warning, unless one of the Konishi methods
-is used (in which case \code{cppfun} is ignored with a warning).
+(see \code{\link{AVar.VRR_xx}}).  When this argument is provided, the
+argument \code{fun} is ignored with a warning, unless one of the Konishi
+methods is used (in which case \code{cppfun} is ignored with a warning).
 
-Since the eigenvalue variance of a correlation matrix \eqn{V(R)} is simply
-\eqn{(p - 1)} times the relative eigenvalue variance \eqn{Vrel(R)} of
-the same matrix, their distributions are identical up to this scaling.
-Hence, \code{Exv.VER()} and \code{Var.VER()} calls \code{Exv.VRR()} and
-\code{Var.VRR()} (respectively), whose outputs are scaled and returned.
-These functions are provided for completeness, although there will be little
-practical demand for these functions (and \eqn{V(R)} itself).
+Since the eigenvalue variance of a correlation matrix
+\eqn{V(\mathbf{R})}{V(R)} is simply \eqn{(p - 1)} times the
+relative eigenvalue variance \eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} of
+the same matrix, their distributions are identical up to this
+scaling.  Hence, \code{Exv.VER()} and \code{Var.VER()} calls \code{Exv.VRR()}
+and \code{Var.VRR()} (respectively), whose outputs are scaled and
+returned.  These functions are provided for completeness, although
+there will be little practical demand for these functions (and
+\eqn{V(\mathbf{R})}{V(R)} itself).
 
-As detailed in Watanabe (2022), the distribution of \eqn{Vrel(R)} cannot be
-uniquely specified by eigenvalues alone. Hence, a full correlation
-matrix \code{Rho} should preferably be provided. Otherwise, a correlation
+As detailed in Watanabe (2022), the distribution of
+\eqn{V_{\mathrm{rel}}(\mathbf{R})}{Vrel(R)} cannot be
+uniquely specified by eigenvalues alone.  Hence, a full correlation
+matrix \code{Rho} should preferably be provided.  Otherwise, a correlation
 matrix is constructed from the eigenvalues \code{Lambda} provided using
 the function \code{GenCov()} with randomly picked eigenvectors.
 
@@ -255,7 +262,7 @@ Var.VRR(Rho, N - 1, fun = "pf")  # Slow for large p
 Var.VRR(Rho, N - 1, fun = "pfv") # Requires too much RAM for large p
 \dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc")} # Requires eigvaldispRcpp
 \dontrun{Var.VRR(Rho, n = N - 1, fun = "pfc", cppfun = "Cov_r2P")}
-# The last two use C++ functions provided by extension package eigvaldispRcpp
+# The last two use \proglang{C++} functions provided by extension package eigvaldispRcpp
 # fun = "pfc"' can be omitted in the last call.
 # The above results are identical (up to rounding error)
 
@@ -270,9 +277,9 @@ Var.VRR(Rho, N - 1, fun = "kr")
 
 }
 \references{
-Watanabe, J. (2022). Statistics of eigenvalue dispersion indices:
+Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
 quantifying the magnitude of phenotypic integration. \emph{Evolution},
-\strong{76}, 4--28. doi:\href{https://doi.org/10.1111/evo.14382}{10.1111/evo.14382}.
+\strong{76}, 4--28. \doi{10.1111/evo.14382}.
 }
 \seealso{
 \code{\link{VE}} for estimation
@@ -282,5 +289,5 @@ quantifying the magnitude of phenotypic integration. \emph{Evolution},
 \code{\link{Exv.rx}} for internal functions for moments of
 correlation coefficients
 
-\code{\link{Exv.VXXa}} for moments of ``bias-corrected'' versions
+\code{\link{Exv.VXXa}} for moments of \dQuote{bias-corrected} versions
 }

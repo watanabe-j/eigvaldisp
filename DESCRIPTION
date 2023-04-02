@@ -3,18 +3,21 @@ Title: Statistics of Eigenvalue Dispersion Indices
 Version: 0.0.0.9405
 Date: 2023-04-02
 Authors@R: c(
-    person("Junya", "Watanabe", email = "jw2098@cam.ac.uk", role = c("aut", "cre"),
+    person("Junya", "Watanabe", email = "jw2098@cam.ac.uk",
+           role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-9810-5286")),
-    person("Niels G.", "Waller", role = c("ctb"),
+    person("Niels G.", "Waller", role = c("ctb", "cph"),
            comment = "Original author of the MAP algorithm of GenCov()")
            )
 Description: Statistics of eigenvalue dispersion indices of
-    covariance and correlation matrices---common measures of
-    phenotypic integration in biometrics.
+    covariance and correlation matrices, common measures of
+    phenotypic integration in biometrics, based on
+    Watanabe (2022) <doi:10.1111/evo.14382>.
     The primary feature is to calculate expectation and variance
     (i.e., sampling bias and error) of eigenvalue dispersion indices
     for arbitrary population covariance structures under multivariate normality.
 License: GPL (>= 3)
+URL: https://github.com/watanabe-j/eigvaldisp
 BugReports: https://github.com/watanabe-j/eigvaldisp/issues
 Imports:
     stats,
@@ -29,4 +32,4 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Config/testthat/edition: 3
-VignetteBuilder: knitr
+VignetteBuilder: knitr, rmarkdown

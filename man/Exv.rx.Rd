@@ -112,12 +112,12 @@ ACov.r1(
 \arguments{
 \item{n}{Degrees of freedom (not sample size), numeric of length 1.}
 
-\item{x}{Population correlation coefficient, numeric of length 1 or more.
-For some functions, squared correlation coefficients can be passed
+\item{x}{Population correlation coefficient, numeric of length 1 or more.  For
+some functions, squared correlation coefficients can be passed
 via this argument when \code{do.square = FALSE}.}
 
-\item{tol}{Tolerance used to judge wheter x is sufficiently close to 0 or +/- 1
-(where numerical instability can happen).}
+\item{tol}{Tolerance used to judge wheter \code{x} is sufficiently close to \eqn{0}
+or \eqn{\pm 1} (where numerical instability can happen).}
 
 \item{tol.hg, maxiter}{Passed to \code{hgf()} as tol and maxiter there.}
 
@@ -131,50 +131,50 @@ when \code{x} is already squared.}
 for asymptotic expressions only).}
 
 \item{return_terms}{When TRUE, returns individual terms of different orders
-(for asymptotic expressions only).
-Retained mainly for debugging purposes, but could be used to
+(for asymptotic expressions only).  Related
+mainly for debugging purposes, but could be used to
 track the order in derived statistics.}
 
 \item{Rho}{Correlation matrix; assumed to be validly constructed.}
 
-\item{ind1, ind2}{Indices for the two focal coefficients (vectors of length 2).
-Superseded by \code{i, j, k, l}.}
+\item{ind1, ind2}{Indices for the two focal coefficients (vectors of length 2).  Superseded
+by \code{i, j, k, l}.}
 
-\item{i, j, k, l}{Alternative indices to specify the focal coefficients.
-Superseded by \code{rij, rik, ril, rjk, rjl, rkl}.}
+\item{i, j, k, l}{Alternative indices to specify the focal coefficients.  Superseded
+by \code{rij, rik, ril, rjk, rjl, rkl}.}
 
 \item{rij, rik, ril, rjk, rjl, rkl}{The relevant population correlation coefficients.}
 }
 \description{
 Internal functions to calculate exact and asymptotic moments of
 sample correlation coefficients \eqn{r} from
-population correlation coefficients.
+population correlation coefficients
 
-\code{Exv.r1()}: exact expectation of \eqn{r}.
+\code{Exv.r1()}: exact expectation of \eqn{r}
 
-\code{Exv.r2()}: exact expectation of \eqn{r^2}.
+\code{Exv.r2()}: exact expectation of \eqn{r^2}
 
-\code{Exv.r3()}: exact expectation of \eqn{r^3}.
+\code{Exv.r3()}: exact expectation of \eqn{r^3}
 
-\code{Exv.r3d()}: alternative to \code{Exv.r3()}.
+\code{Exv.r3d()}: alternative to \code{Exv.r3()}
 
-\code{Exv.r4()}: exact expectation of \eqn{r^4}.
+\code{Exv.r4()}: exact expectation of \eqn{r^4}
 
-\code{Exv.r4d()}: alternative to \code{Exv.r4()}.
+\code{Exv.r4d()}: alternative to \code{Exv.r4()}
 
-\code{Var.r1()}: exact variance of \eqn{r}.
+\code{Var.r1()}: exact variance of \eqn{r}
 
-\code{Var.r2()}: exact variance of \eqn{r^2}.
+\code{Var.r2()}: exact variance of \eqn{r^2}
 
-\code{Cm3.r1()}: exact central third moment of \eqn{r}.
+\code{Cm3.r1()}: exact central third moment of \eqn{r}
 
-\code{Cm4.r1()}: exact central fourth moment of \eqn{r}.
+\code{Cm4.r1()}: exact central fourth moment of \eqn{r}
 
-\code{AExv.r1()}: asymptotic expectation of \eqn{r}.
+\code{AExv.r1()}: asymptotic expectation of \eqn{r}
 
-\code{AVar.r1()}: asymptotic variance of \eqn{r}.
+\code{AVar.r1()}: asymptotic variance of \eqn{r}
 
-\code{ACm3.r1()}: asymptotic central third moment of \eqn{r}.
+\code{ACm3.r1()}: asymptotic central third moment of \eqn{r}
 
 \code{ACm4.r1()}: asymptotic central fourth moment of \eqn{r}
 
@@ -186,20 +186,20 @@ population correlation coefficients.
 
 \code{AVar.r2()}: asymptotic variance of \eqn{r^2}
 
-\code{ACov.r1()}: asymptotic covariance between two \eqn{r}'s.
+\code{ACov.r1()}: asymptotic covariance between two \eqn{r}'s
 }
 \details{
 All these functions except \code{ACov.r1()} requires the arguments
-\code{n} and \code{x}. It can be \code{length(x) > 1}
-(at least supeficially vectorized), but it is assumed \code{length(n) = 1}.
-This is because these functions are often called in the form
-\code{sapply(n, ...)} in other functions (\code{\link{Exv.VXX}}).
+\code{n} and \code{x}.  It can be \code{length(x) > 1}
+(at least supeficially vectorized), but it is assumed
+\code{length(n) = 1}.  This is because these functions are often called in
+the form \code{sapply(n, ...)} in other functions (\code{\link{Exv.VXX}}).
 
 Covariance between two \eqn{r}'s is a function of
-at least six population correlation coefficients.
-\code{ACov.r1()} takes as an argument the entire population correlation
+at least six population correlation coefficients.  \code{ACov.r1()} takes
+as an argument the entire population correlation
 matrix \code{R} instead of individual correlation coefficients, and indices
-for the focal correlation coefficients. Alternatively, the all six relevant
+for the focal correlation coefficients.  Alternatively, the all six relevant
 population correlation coefficients can be directly specified.
 
 The exact expressions are from Soper et al. (1917) or Ghosh (1966).
@@ -208,49 +208,50 @@ In particular:
 \item \code{Exv.r3()}: From Soper et al. (1917, eq. xxviii);
 that of Ghosh (1966) seems inaccurate for this moment.
 \item \code{Exv.r3d()}: Alternative to \code{Exv.r3()} from
-Soper et al. (1917, eq. xxvi). Equivalent but slightly slower.
+Soper et al. (1917, eq. xxvi).  Equivalent but slightly slower.
 \item \code{Exv.r4()}: From Ghosh (1966, eq. 1).
 \item \code{Exv.r4d()}: Alternative to \code{Exv.r4()} from
-Soper et al. (1917, eq. xxi). Equivalent but slightly slower.
+Soper et al. (1917, eq. xxi).  Equivalent but slightly slower.
 }
 
 Some of the exact expressions might be instable when the \code{x} is small.
 
 The asymptotic moments are from Ghosh (1966)
-(note that the symbol \eqn{n} is used for sample size there).
-\emph{Note}: The validity of \code{ACm3.r1()} may need critical evaluation,
+(note that the symbol \eqn{n} is used for sample size there).  \emph{Note}:
+The validity of \code{ACm3.r1()} may need critical evaluation,
 as Ghosh's (1966) equation 1 (from which the result is supposedly drawn)
-seems inaccurate (see Soper et al. [1917: eq. xxviii]).
-The following functions depending on this might be inaccurate:
+seems inaccurate (see Soper et al. [1917: eq. xxviii]).  The
+following functions depending on this might be inaccurate:
 \code{AExv.r3()}, \code{AExv.r4()}, and \code{AVar.r2()}.
 
-The asymptotic moment functions takes the argument \code{order.}.
-This is the exponent in \eqn{O(n^k)}.
+The asymptotic moment functions takes the argument \code{order.}.  This
+is the exponent in \eqn{O(n^k)}.
 Higher orders do not always yield better approximations for ordinary
-values of \eqn{n}. The allowed ranges and "good" choices
+values of \eqn{n}.  The allowed ranges and \dQuote{good} choices
 (empirically confirmed by comparison to exact expressions) are as follows:
 \itemize{
-\item \code{AExv.r1()},  \code{AExv.r2()}: 1--7. 2 is good
+\item \code{AExv.r1()},  \code{AExv.r2()}: 1--7.  2 is good
 except when \eqn{n < 6} where 3 is better.
-\item \code{AVar.r1()}: 1--7. 2 is good for \eqn{n} <100 or so;
+\item \code{AVar.r1()}: 1--7.  2 is good for \eqn{n} <100 or so;
 for larger \eqn{n}, the difference tends to be negligible.
-\item \code{ACm3.r1()}: 2--5. 3 is best for \eqn{n} > 15,
+\item \code{ACm3.r1()}: 2--5.  3 is best for \eqn{n} > 15,
 while 4 may work better for smaller \eqn{n}.
-\item \code{ACm4.r1()}: 2--5. 3 is good for \eqn{n} > 20 especially when
+\item \code{ACm4.r1()}: 2--5.  3 is good for \eqn{n} > 20 especially when
 \eqn{x} is small; 4 is better for small \eqn{n} and \eqn{x > 0.5}.
-\item \code{AExv.r3()}: 1--5. 2 is good.
-\item \code{AExv.r4()}: 1--5. 3 or 4 is good for small \eqn{x},
+\item \code{AExv.r3()}: 1--5.  2 is good.
+\item \code{AExv.r4()}: 1--5.  3 or 4 is good for small \eqn{x},
 while 2 is better for \eqn{x > 0.4}.
-\item \code{AVar.r2()}: 1--5. For \eqn{n < 100}, 3 or 4 is good for
-very small \eqn{x}, while 2 is better for \eqn{x > 0.2}.
-Slight overestimation seems to be common.
+\item \code{AVar.r2()}: 1--5.  For \eqn{n < 100}, 3 or 4 is good for
+very small \eqn{x}, while 2 is better for \eqn{x > 0.2}.  Slight
+overestimation seems to be common.
 }
 
-\code{ACov.r1()} is as in, e.g., Olkin & Siotani (1976), Olkin & Finn (1990).
-When \code{ind1 == ind2}, it calculates the variance for the coefficient.
+\code{ACov.r1()} is as in, e.g., Olkin and Siotani (1976),
+Olkin and Finn (1990).  When \code{ind1 == ind2}, it calculates
+the variance for the coefficient.
 
-Multivariate normality is assumed for all moments.
-Nevertheless, the distribution of \eqn{r} remains the same in many other
+Multivariate normality is assumed for all moments.  Nevertheless,
+the distribution of \eqn{r} remains the same in many other
 conditions (e.g., in all elliptically contoured distributions;
 Anderson, 2003).
 }
@@ -292,27 +293,27 @@ legend("topleft", title = "Order", legend = c(1:7, "Exact"),
 
 }
 \references{
-Anderson, T. W. (2003). \emph{An Introduction to Multivariate Statistical
+Anderson, T. W. (2003) \emph{An Introduction to Multivariate Statistical
 Analysis}, 3rd edition. John Wiley & Sons, Hoboken, New Jersey.
 
-Ghosh, B. K. (1966). Expansions for the moments of the distribution
+Ghosh, B. K. (1966) Expansions for the moments of the distribution
 of correlation coefficients. \emph{Biometrika} \strong{53}, 258--262.
-doi:\href{https://doi.org/10.2307/2334076}{10.2307/2334076}.
+\doi{10.2307/2334076}.
 
-Olkin, I. & Finn, J. D. (1990). Testing correlated correlations.
+Olkin, I. and Finn, J. D. (1990) Testing correlated correlations.
 \emph{Psychological Bulletin} \strong{108}, 330--333.
-doi:\href{https://doi.org/10.1037/0033-2909.108.2.330}{10.1037/0033-2909.108.2.330}.
+\doi{10.1037/0033-2909.108.2.330}.
 
-Olkin, I. & Siotani, M. (1976). Asymptotic distribution of functions of
+Olkin, I. and Siotani, M. (1976) Asymptotic distribution of functions of
 a correlation matrix. Pp. 235--251 \emph{in} Editorial Committee for Publication
 of Essays in Probability and Statistics, eds. \emph{Essays in Probability and
 Statistics in Honor of Professor Junjiro Ogawa}. Shinko Tsusho, Tokyo.
 
-Soper, H. E., Young, A. W., Cave, B. M., Lee, A. & Pearson, K. (1917).
+Soper, H. E., Young, A. W., Cave, B. M., Lee, A. and Pearson, K. (1917)
 On the distribution of the correlation coefficients in small samples.
-Appendix II to the papers of ``Student'' and R. A. Fisher.
+Appendix II to the papers of \dQuote{Student} and R. A. Fisher.
 \emph{Biometrika} \strong{11}, 328--413.
-doi:\href{https://doi.org/10.1093/biomet/11.4.328}{10.1093/biomet/11.4.328}.
+\doi{10.1093/biomet/11.4.328}.
 }
 \seealso{
 \code{\link{Exv.VXX}} and \code{\link{AVar.VRR_xx}} for outer functions
