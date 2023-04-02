@@ -3,6 +3,8 @@ title: "eigvaldisp: R package for statistics of eigenvalue dispersion indices"
 author: "Junya Watanabe"
 date: "November 2021"
 bibliography: ref_integ.bib
+link-citations: TRUE
+csl: cran_style.csl
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{eigvaldisp}
@@ -29,7 +31,7 @@ $$
 \DeclareMathOperator{\F}{{}_2\mathit{F}_1}
 \newcommand{\m}[1]{\mathbf{#1}}
 $$
-This document is to describe the R package `eigvaldisp`, which is at present available on GitHub [watanabe-j/eigvaldisp](https://github.com/watanabe-j/eigvaldisp). The package is to facilitate statistical analyses of eigenvalue dispersion indices, which are common measures of phenotypic integration (covariation) in biometrics.
+This document is to describe the R package `eigvaldisp`, which is at present available on [GitHub](https://github.com/watanabe-j/eigvaldisp){target="_blank"}. The package is to facilitate statistical analyses of eigenvalue dispersion indices, which are common measures of phenotypic integration (covariation) in biometrics.
 
 ```{r setup, include = FALSE}
 library(stats)
