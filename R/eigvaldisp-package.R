@@ -11,7 +11,7 @@
 #' Run \code{vignettes("eigvaldisp")} for detailed descriptions and examples.
 #'
 #' @section Author/Maintainer:
-#' Junya Watanabe <jw2098@cam.ac.uk>
+#' Junya Watanabe <Junya.Watanabe@uab.cat>
 #'
 #' @references
 #' Watanabe, J. (2022) Statistics of eigenvalue dispersion indices:
